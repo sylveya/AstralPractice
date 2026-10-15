@@ -46,6 +46,9 @@ public abstract class FightPlayer {
       spectatable.sendMessage(deathMessage.replace("%player%", this.player.getName()), true);
     }
 
-    statistic.setDeaths(statistic.getDeaths() + 1);
+    if (statistic != null) {
+      statistic.setDeaths(statistic.getDeaths() + 1);
+      statistic.resetKillStreak();
+    }
   }
 }

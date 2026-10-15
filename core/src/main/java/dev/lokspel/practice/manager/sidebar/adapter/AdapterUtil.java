@@ -341,7 +341,9 @@ public enum AdapterUtil {
         .replaceText(
             replace("%arena%", Common.deserializeMiniMessage(ffa.getArena().getDisplayName())))
         .replaceText(replace("%kills%", String.valueOf(statistic.getKills())))
-        .replaceText(replace("%deaths%", String.valueOf(statistic.getDeaths())));
+        .replaceText(replace("%deaths%", String.valueOf(statistic.getDeaths())))
+        .replaceText(replace("%killStreak%", String.valueOf(statistic.getKillStreak())))
+        .replaceText(replace("%bestKillStreak%", String.valueOf(statistic.getBestKillStreak())));
   }
 
   public static Component replaceFfaSpecPlaceholders(Component line, Ffa ffa) {

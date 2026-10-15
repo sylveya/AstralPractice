@@ -547,10 +547,6 @@ public class FfaListener implements Listener {
         player,
         killer,
         cause.getMessage().replace("%killer%", killer != null ? killer.getName() : "Unknown"));
-
-    if (killer != null && !killer.equals(player)) {
-      ffa.increaseFfaSessionKills(killer);
-    }
   }
 
   private Player resolveKiller(Player victim, Ffa ffa, DamageSource damageSource) {

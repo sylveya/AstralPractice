@@ -4,12 +4,14 @@ import dev.lokspel.practice.AstralPractice;
 import dev.lokspel.practice.manager.arena.ArenaManager;
 import dev.lokspel.practice.manager.arena.arenas.FfaArena;
 import dev.lokspel.practice.manager.division.DivisionManager;
+import dev.lokspel.practice.manager.fight.ffa.FfaManager;
 import dev.lokspel.practice.manager.fight.ffa.game.Ffa;
 import dev.lokspel.practice.manager.fight.match.Match;
 import dev.lokspel.practice.manager.fight.match.MatchManager;
 import dev.lokspel.practice.manager.fight.match.enums.TeamEnum;
 import dev.lokspel.practice.manager.fight.match.interfaces.Team;
 import dev.lokspel.practice.manager.fight.util.PlayerUtil;
+import dev.lokspel.practice.manager.fight.util.stats.Statistic;
 import dev.lokspel.practice.manager.inventory.InventoryUtil;
 import dev.lokspel.practice.manager.ladder.LadderManager;
 import dev.lokspel.practice.manager.ladder.abstraction.normal.NormalLadder;
@@ -516,9 +518,34 @@ public class PlayerExpansion extends PlaceholderExpansion implements Relational 
           default:
             break;
         }
-      // fall through
+        break;
       case "ffa":
-        if (input.length == 2) {
+        if (input.length == 1) {
+          return null;
+        }
+
+        Statistic statistic = getFfaStatistic(player);
+        if (statistic != null) {
+          switch (input[1]) {
+            // ffa_killstreak
+            case "killstreak":
+              if (input.length == 2) {
+                return String.valueOf(statistic.getKillStreak());
+              }
+              break;
+            // ffa_best_killstreak
+            case "best":
+              if (input.length == 3 && input[2].equals("killstreak")) {
+                return String.valueOf(statistic.getBestKillStreak());
+              }
+              break;
+
+            default:
+              break;
+          }
+        }
+
+        if (input.length != 3) {
           return null;
         }
 
@@ -529,10 +556,6 @@ public class PlayerExpansion extends PlaceholderExpansion implements Relational 
 
         Ffa ffa = ffaArena.getFfa();
         if (ffa != null && ffa.isOpen()) {
-          if (input.length != 3) {
-            return null;
-          }
-
           switch (input[2]) {
             case "players":
               return String.valueOf(ffa.getPlayers().size());
@@ -585,5 +608,20 @@ public class PlayerExpansion extends PlaceholderExpansion implements Relational 
     NamedTextColor lobbyColor =
         InventoryUtil.getLobbyNametag(profile, playerName, onlinePlayer).getScoreboardNameColor();
     return "<" + lobbyColor.toString().toLowerCase() + ">";
+  }
+
+  private Statistic getFfaStatistic(OfflinePlayer offlinePlayer) {
+    if (offlinePlayer == null) {
+      return null;
+    }
+    Player player = offlinePlayer.getPlayer();
+    if (player == null) {
+      return null;
+    }
+    Ffa ffa = FfaManager.getInstance().getFfaByPlayer(player);
+    if (ffa == null) {
+      return null;
+    }
+    return ffa.getStatistics().get(player);
   }
 }
