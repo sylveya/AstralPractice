@@ -344,9 +344,8 @@ public class Guis {
       private int rows = 3;
 
       @Comment({
-        "Fixed slot per arena: <arena name>: <slot> (0-based, 0 = top-left). Arenas not listed,",
-        "or listed with a slot outside the GUI or already used, fill the first free slots."
-            + " Example:",
+        "Arena slots (0-based, 0 = top-left), for example:",
+        "ARENA-SLOTS:",
         "  plains: 11"
       })
       @JsonProperty("ARENA-SLOTS")
@@ -403,9 +402,8 @@ public class Guis {
       private int rows = 3;
 
       @Comment({
-        "Fixed slot per ladder: <ladder name>: <slot> (0-based, 0 = top-left). Ladders not listed,",
-        "or listed with a slot outside the GUI or already used, fill the first free slots."
-            + " Example:",
+        "Ladder slots (0-based, 0 = top-left), for example:",
+        "LADDER-SLOTS:",
         "  NoDebuff: 11"
       })
       @JsonProperty("LADDER-SLOTS")
