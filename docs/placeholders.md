@@ -73,10 +73,12 @@ Ladder placeholders use the ladder name instead of the type:
 
 ## FFA Arena
 
-| PlaceholderAPI                     | Description                  |
-|------------------------------------|------------------------------|
-| %ap_ffa_<arena>_players%          | Players in the FFA arena     |
-| %ap_ffa_<arena>_spectators%       | Spectators in the FFA arena  |
+| PlaceholderAPI               | Description                                  |
+|------------------------------|----------------------------------------------|
+| %ap_ffa_<arena>_players%    | Players in the FFA arena                     |
+| %ap_ffa_<arena>_spectators% | Spectators in the FFA arena                  |
+| %ap_ffa_killstreak%         | Player's current FFA kill streak             |
+| %ap_ffa_best_killstreak%    | Player's best FFA kill streak in the session |
 
 ## Leaderboards
 

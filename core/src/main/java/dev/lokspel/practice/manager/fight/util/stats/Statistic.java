@@ -32,6 +32,8 @@ public class Statistic {
 
   private int kills = 0;
   private int deaths = 0;
+  private int killStreak = 0;
+  private int bestKillStreak = 0;
 
   private double endHeart = 0;
   private double endHunger = 0;
@@ -45,6 +47,17 @@ public class Statistic {
 
   public Player getPlayer() {
     return Bukkit.getPlayer(uuid);
+  }
+
+  public void increaseKillStreak() {
+    killStreak++;
+    if (killStreak > bestKillStreak) {
+      bestKillStreak = killStreak;
+    }
+  }
+
+  public void resetKillStreak() {
+    killStreak = 0;
   }
 
   public int getPotionAccuracy() {

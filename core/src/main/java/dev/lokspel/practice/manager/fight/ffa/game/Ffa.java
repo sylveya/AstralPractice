@@ -297,6 +297,8 @@ public class Ffa implements Spectatable, dev.lokspel.api.interfaces.Ffa {
       Profile killerProfile = fightPlayers.get(killer).getProfile();
       killerProfile.getStats().getLadderStat(players.get(killer)).increaseKills();
 
+      increaseFfaSessionKills(killer);
+
       playDeathEffect(killer, player);
 
       if (arena.isReKitAfterKill()) {
@@ -475,6 +477,7 @@ public class Ffa implements Spectatable, dev.lokspel.api.interfaces.Ffa {
         statistics.computeIfAbsent(
             killer, p -> new Statistic(ProfileManager.getInstance().getUuids().get(p)));
     statistic.setKills(statistic.getKills() + 1);
+    statistic.increaseKillStreak();
   }
 
   public void teleportPlayer(Player player) {
