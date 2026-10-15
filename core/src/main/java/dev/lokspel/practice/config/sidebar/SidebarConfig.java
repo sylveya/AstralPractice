@@ -392,8 +392,8 @@ public class SidebarConfig {
               "  <white>Next Reset: <yellow>%nextReset%",
               "",
               "  <white>K<gray>/<white>D: <green>%kills%<gray>/<red>%deaths%",
-              "  <white>Streak: <green>%killStreak%",
-              "  <white>Best Streak: <yellow>%bestKillStreak%",
+              "  <white>Streak: <green>%killStreak% <dark_gray>• <white>Best:"
+                  + " <yellow>%bestKillStreak%",
               "",
               "  <white>Ladder: <green>%ladder%",
               "  <white>Arena: <green>%arena%",
@@ -410,8 +410,8 @@ public class SidebarConfig {
               "  <white>Spectators: <yellow>%spectators%",
               "",
               "  <white>K<gray>/<white>D: <green>%kills%<gray>/<red>%deaths%",
-              "  <white>Streak: <green>%killStreak%",
-              "  <white>Best Streak: <yellow>%bestKillStreak%",
+              "  <white>Streak: <green>%killStreak% <dark_gray>• <white>Best:"
+                  + " <yellow>%bestKillStreak%",
               "",
               "  <white>Ladder: <green>%ladder%",
               "  <white>Arena: <green>%arena%",
