@@ -9,6 +9,8 @@ import dev.lokspel.practice.manager.gui.Gui;
 import dev.lokspel.practice.manager.gui.GuiItem;
 import dev.lokspel.practice.manager.gui.GuiType;
 import dev.lokspel.practice.util.InventoryUtil;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,7 +59,8 @@ public class FfaArenaSelectorGui extends Gui {
   public FfaArenaSelectorGui() {
     super(GuiType.FFA_Arena_Selector);
 
-    int rows = Math.max(1, PracticeConfig.guis().getGuis().getFfa().getArenaSelector().getRows());
+    int rows =
+        Math.clamp(PracticeConfig.guis().getGuis().getFfa().getArenaSelector().getRows(), 1, 6);
     this.gui.put(
         1,
         InventoryUtil.createInventory(
@@ -75,10 +78,18 @@ public class FfaArenaSelectorGui extends Gui {
     inventory.clear();
     arenaSlots.clear();
 
+    Map<String, Integer> customSlots =
+        PracticeConfig.guis().getGuis().getFfa().getArenaSelector().getArenaSlots();
+
     List<FfaArena> openArenas =
-        ArenaManager.getInstance().getFfaArenas().stream()
-            .filter(arena -> arena.isEnabled() && arena.getFfa() != null && arena.getFfa().isOpen())
-            .toList();
+        new ArrayList<>(
+            ArenaManager.getInstance().getFfaArenas().stream()
+                .filter(
+                    arena -> arena.isEnabled() && arena.getFfa() != null && arena.getFfa().isOpen())
+                .toList());
+    if (customSlots != null) {
+      openArenas.sort(Comparator.comparing(arena -> !customSlots.containsKey(arena.getName())));
+    }
 
     for (FfaArena arena : openArenas) {
       Ffa ffa = arena.getFfa();
@@ -99,9 +110,17 @@ public class FfaArenaSelectorGui extends Gui {
         guiItem.setBaseItem(arena.getIcon());
       }
 
-      int slot = inventory.firstEmpty();
+      Integer customSlot = customSlots != null ? customSlots.get(arena.getName()) : null;
+      int slot =
+          (customSlot != null
+                  && customSlot >= 0
+                  && customSlot < inventory.getSize()
+                  && inventory.getItem(customSlot) == null)
+              ? customSlot
+              : inventory.firstEmpty();
+
       if (slot == -1) {
-        break;
+        continue;
       }
 
       inventory.setItem(slot, guiItem.get());
