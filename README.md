@@ -61,6 +61,10 @@ Join our [Discord server](https://discord.gg/tRq4JJnRc2) for help, bug reports, 
 
 ---
 
-## 👤 Maintainer
+## 📄 License
 
-Project by [sylveya-com](https://github.com/sylveya-com)
+AstralPractice is distributed under [GPL-3.0](./LICENSE).
+
+This project includes code from ZonePractice Pro.
+Its original MIT license and copyright notice are preserved in
+[LICENSE-MIT-ZonePractice](./LICENSE-MIT-ZonePractice).
