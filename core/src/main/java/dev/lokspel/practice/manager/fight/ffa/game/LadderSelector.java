@@ -10,7 +10,10 @@ import dev.lokspel.practice.manager.ladder.abstraction.Ladder;
 import dev.lokspel.practice.manager.ladder.abstraction.normal.NormalLadder;
 import dev.lokspel.practice.util.Common;
 import dev.lokspel.practice.util.InventoryUtil;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -40,14 +43,17 @@ public class LadderSelector extends Gui {
     this.ffa = ffa;
     this.ffaArena = ffa.getArena();
 
-    this.gui.put(
-        1,
-        InventoryUtil.createInventory(
-            PracticeConfig.guis().getGuis().getFfa().getLadderSelector().getTitle(), 3));
+    build();
   }
 
   @Override
   public void build() {
+    int rows =
+        Math.clamp(PracticeConfig.guis().getGuis().getFfa().getLadderSelector().getRows(), 1, 6);
+    this.gui.put(
+        1,
+        InventoryUtil.createInventory(
+            PracticeConfig.guis().getGuis().getFfa().getLadderSelector().getTitle(), rows));
     update();
   }
 
@@ -57,7 +63,15 @@ public class LadderSelector extends Gui {
     inventory.clear();
     ladderSlots.clear();
 
-    for (NormalLadder ladder : ffaArena.getAssignedLadders()) {
+    Map<String, Integer> customSlots =
+        PracticeConfig.guis().getGuis().getFfa().getLadderSelector().getLadderSlots();
+
+    List<NormalLadder> ladders = new ArrayList<>(ffaArena.getAssignedLadders());
+    if (customSlots != null) {
+      ladders.sort(Comparator.comparing(ladder -> !customSlots.containsKey(ladder.getName())));
+    }
+
+    for (NormalLadder ladder : ladders) {
       GuiItem guiItem = ladderItem().cloneItem().replace("%ladder%", ladder.getDisplayName());
 
       if (ladder.getIcon() != null) {
@@ -66,9 +80,19 @@ public class LadderSelector extends Gui {
 
       ItemStack ladderItem = guiItem.get();
 
-      int slot = inventory.firstEmpty();
-      inventory.setItem(slot, ladderItem);
-      ladderSlots.put(slot, ladder);
+      Integer customSlot = customSlots != null ? customSlots.get(ladder.getName()) : null;
+      int slot =
+          (customSlot != null
+                  && customSlot >= 0
+                  && customSlot < inventory.getSize()
+                  && inventory.getItem(customSlot) == null)
+              ? customSlot
+              : inventory.firstEmpty();
+
+      if (slot != -1) {
+        inventory.setItem(slot, ladderItem);
+        ladderSlots.put(slot, ladder);
+      }
     }
 
     for (int i = 0; i < inventory.getSize(); i++) {

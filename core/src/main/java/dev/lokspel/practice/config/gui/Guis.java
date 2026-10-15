@@ -2,7 +2,9 @@ package dev.lokspel.practice.config.gui;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.lokspel.practice.config.ItemConfig;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.Getter;
 import me.whereareiam.configura.feature.comment.api.annotation.Comment;
 
@@ -341,6 +343,15 @@ public class Guis {
       @JsonProperty("ROWS")
       private int rows = 3;
 
+      @Comment({
+        "Fixed slot per arena: <arena name>: <slot> (0-based, 0 = top-left). Arenas not listed,",
+        "or listed with a slot outside the GUI or already used, fill the first free slots."
+            + " Example:",
+        "  plains: 11"
+      })
+      @JsonProperty("ARENA-SLOTS")
+      private Map<String, Integer> arenaSlots = new LinkedHashMap<>();
+
       @JsonProperty("ICONS")
       private Icons icons = new Icons();
 
@@ -387,6 +398,18 @@ public class Guis {
     public static class LadderSelector {
       @JsonProperty("TITLE")
       private String title = "<dark_gray>Select a <gold>ladder <dark_gray>to join";
+
+      @JsonProperty("ROWS")
+      private int rows = 3;
+
+      @Comment({
+        "Fixed slot per ladder: <ladder name>: <slot> (0-based, 0 = top-left). Ladders not listed,",
+        "or listed with a slot outside the GUI or already used, fill the first free slots."
+            + " Example:",
+        "  NoDebuff: 11"
+      })
+      @JsonProperty("LADDER-SLOTS")
+      private Map<String, Integer> ladderSlots = new LinkedHashMap<>();
 
       @JsonProperty("ICONS")
       private Icons icons = new Icons();
