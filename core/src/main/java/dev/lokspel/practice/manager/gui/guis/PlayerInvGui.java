@@ -48,7 +48,7 @@ public class PlayerInvGui extends Gui {
       return;
     }
 
-    InventoryUtil.populatePlayerInventoryLayout(inventory, target.getInventory().getContents());
+    InventoryUtil.mapPlayerInventoryToGui(inventory, target.getInventory().getContents());
 
     ItemStack[] armorContent = target.getInventory().getArmorContents();
     for (int i = 36; i < 40 && (i - 36) < armorContent.length; i++) {

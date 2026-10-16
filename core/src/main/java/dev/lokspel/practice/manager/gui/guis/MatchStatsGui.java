@@ -91,7 +91,7 @@ public class MatchStatsGui extends Gui {
       ItemStack[] endInv = roundStatistic.getEndInventory();
       int healthPotionsLeft = 0;
       if (endInv != null) {
-        InventoryUtil.populatePlayerInventoryLayout(inventory, endInv);
+        InventoryUtil.mapPlayerInventoryToGui(inventory, endInv);
         for (int i = 0; i < 36 && i < endInv.length; i++) {
           if (isHealingPotion(endInv[i])) {
             healthPotionsLeft++;

@@ -88,7 +88,7 @@ public class InventoryGui extends Gui {
     if (kitData.isSet()) {
       // Inventory content
       if (kitData.getStorage() != null) {
-        InventoryUtil.populatePlayerInventoryLayout(inventory, kitData.getStorage());
+        InventoryUtil.mapPlayerInventoryToGui(inventory, kitData.getStorage());
       }
 
       // Armor content

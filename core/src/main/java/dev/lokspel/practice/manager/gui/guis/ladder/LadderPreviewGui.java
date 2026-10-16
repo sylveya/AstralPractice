@@ -63,7 +63,7 @@ public class LadderPreviewGui extends Gui {
 
     // Inventory Content
     if (kitData.getStorage() != null) {
-      InventoryUtil.populatePlayerInventoryLayout(inventory, kitData.getStorage());
+      InventoryUtil.mapPlayerInventoryToGui(inventory, kitData.getStorage());
     }
 
     if (kitData.getArmor() != null) {

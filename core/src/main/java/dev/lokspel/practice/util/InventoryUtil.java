@@ -54,19 +54,23 @@ public final class InventoryUtil {
   }
 
   /**
-   * Places player inventory contents into the standard 4-row GUI layout: main storage (slots 9-35)
-   * into GUI slots 0-26, and hotbar (slots 0-8) into GUI slots 27-35.
+   * Maps the player's inventory slots to a 4-row GUI layout.
    *
-   * @param inventory the destination inventory
-   * @param contents the player's inventory contents array (typically 36 slots)
+   * <p>The main inventory (slots 9-35) is placed in GUI slots 0-26, and the hotbar (slots 0-8) in
+   * GUI slots 27-35.
+   *
+   * @param inventory the destination GUI inventory (36 slots)
+   * @param contents the player's inventory contents
    */
-  public static void populatePlayerInventoryLayout(Inventory inventory, ItemStack[] contents) {
+  public static void mapPlayerInventoryToGui(Inventory inventory, ItemStack[] contents) {
     if (inventory == null || contents == null) {
       return;
     }
+
     for (int i = 0; i < 27 && i + 9 < contents.length; i++) {
       inventory.setItem(i, contents[i + 9]);
     }
+
     for (int i = 0; i < 9 && i < contents.length; i++) {
       inventory.setItem(27 + i, contents[i]);
     }
