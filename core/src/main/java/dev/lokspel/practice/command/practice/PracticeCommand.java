@@ -9,6 +9,7 @@ import dev.lokspel.practice.command.practice.arguments.HologramArg;
 import dev.lokspel.practice.command.practice.arguments.InfoArg;
 import dev.lokspel.practice.command.practice.arguments.LobbyArg;
 import dev.lokspel.practice.command.practice.arguments.NametagArg;
+import dev.lokspel.practice.command.practice.arguments.PresetArg;
 import dev.lokspel.practice.command.practice.arguments.RankedArg;
 import dev.lokspel.practice.command.practice.arguments.ReloadArg;
 import dev.lokspel.practice.command.practice.arguments.RenameArg;
@@ -42,6 +43,9 @@ public class PracticeCommand implements CommandExecutor, TabCompleter {
             break;
           case "rename":
             RenameArg.run(player, label, args);
+            break;
+          case "preset":
+            PresetArg.run(player, label, args);
             break;
           case "info":
             InfoArg.run(player, label, args);
@@ -153,6 +157,9 @@ public class PracticeCommand implements CommandExecutor, TabCompleter {
       if (player.hasPermission("ap.practice.rename")) {
         arguments.add("rename");
       }
+      if (player.hasPermission("ap.practice.preset")) {
+        arguments.add("preset");
+      }
       if (player.hasPermission("ap.practice.info")) {
         arguments.add("info");
       }
@@ -196,6 +203,7 @@ public class PracticeCommand implements CommandExecutor, TabCompleter {
       completion =
           switch (args[0]) {
             case "lobby" -> LobbyArg.tabComplete(player, args);
+            case "preset" -> PresetArg.tabComplete(player, args);
             case "info" -> InfoArg.tabComplete(player, args);
             case "elo" -> EloArg.tabComplete(player, args);
             case "ranked" -> RankedArg.tabComplete(player, args);

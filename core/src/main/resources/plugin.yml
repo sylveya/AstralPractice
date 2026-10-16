@@ -103,6 +103,7 @@ permissions:
       ap.practice.unranked: true
       ap.practice.exp: true
       ap.practice.rename: true
+      ap.practice.preset: true
       ap.practice.reload: true
       ap.practice.stop: true
   ap.practice.lobby:
@@ -125,6 +126,8 @@ permissions:
 
   ap.practice.rename:
     description: Usage for the /prac rename command.
+  ap.practice.preset:
+    description: Usage for the /prac preset add command.
   ap.practice.reset:
     description: Reset a player fully.
   ap.practice.reload:

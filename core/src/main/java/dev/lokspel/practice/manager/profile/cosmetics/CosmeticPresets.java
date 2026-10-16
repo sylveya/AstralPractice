@@ -106,6 +106,14 @@ public final class CosmeticPresets {
     }
   }
 
+  public static boolean hasTrimPreset(String id) {
+    return getTrimPreset(id) != null;
+  }
+
+  public static boolean hasShieldPreset(String id) {
+    return getShieldPreset(id) != null;
+  }
+
   public static ItemStack createOpenButtonItem(ArmorTrimPreset activePreset) {
     return createOpenButtonItem(activePreset != null ? activePreset.name() : null);
   }
@@ -139,10 +147,8 @@ public final class CosmeticPresets {
     if (player == null || data == null || data.getActiveTrimPreset() == null) {
       return null;
     }
-    ArmorTrimPreset preset = TRIM_PRESETS.get(data.getActiveTrimPreset());
-    return (preset != null && CosmeticsPermissionManager.hasTrimPresetPermission(player, preset))
-        ? preset
-        : null;
+    ArmorTrimPreset preset = getTrimPreset(data.getActiveTrimPreset());
+    return CosmeticsPermissionManager.hasTrimPresetPermission(player, preset) ? preset : null;
   }
 
   public static List<ShieldPreset> getShieldPresets() {
@@ -157,9 +163,7 @@ public final class CosmeticPresets {
     if (player == null || data == null || data.getActiveShieldPreset() == null) {
       return null;
     }
-    ShieldPreset preset = SHIELD_PRESETS.get(data.getActiveShieldPreset());
-    return (preset != null && CosmeticsPermissionManager.hasShieldPresetPermission(player, preset))
-        ? preset
-        : null;
+    ShieldPreset preset = getShieldPreset(data.getActiveShieldPreset());
+    return CosmeticsPermissionManager.hasShieldPresetPermission(player, preset) ? preset : null;
   }
 }
