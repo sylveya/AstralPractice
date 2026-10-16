@@ -3,9 +3,7 @@ package dev.lokspel.practice.command.singlecommands;
 import dev.lokspel.practice.config.PracticeConfig;
 import dev.lokspel.practice.manager.fight.match.Match;
 import dev.lokspel.practice.manager.fight.match.MatchManager;
-import dev.lokspel.practice.manager.profile.Profile;
-import dev.lokspel.practice.manager.profile.ProfileManager;
-import dev.lokspel.practice.manager.profile.enums.ProfileStatus;
+import dev.lokspel.practice.manager.fight.match.enums.MatchStatus;
 import dev.lokspel.practice.util.Common;
 import java.util.UUID;
 import org.bukkit.command.Command;
@@ -22,9 +20,10 @@ public class MatchStatsCommand implements CommandExecutor {
       return false;
     }
 
-    Profile profile = ProfileManager.getInstance().getProfile(player);
-
-    if (profile.getStatus().equals(ProfileStatus.MATCH)) {
+    Match playerMatch = MatchManager.getInstance().getLiveMatchByPlayer(player);
+    if (playerMatch != null
+        && playerMatch.getStatus() != MatchStatus.END
+        && playerMatch.getStatus() != MatchStatus.OVER) {
       return false;
     }
 

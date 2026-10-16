@@ -129,6 +129,7 @@ public abstract class Round extends BukkitRunnable {
           this.roundEndRunnable = new RoundEndRunnable(this, true).begin();
         }
       }
+      this.match.initMatchStatsGuis();
     } else if (needsReset) {
       // Non-ending round that requires an arena rollback.
       // Delay rollback until after ROUND_END_DELAY so death effects/titles stay visible.

@@ -360,13 +360,22 @@ public abstract class Match extends BukkitRunnable
 
     this.cancel();
 
-    if (AstralPractice.getInstance().isEnabled()) {
-      for (UUID uuid : rounds.get(1).getStatistics().keySet()) {
-        matchStatsGuis.put(uuid, new MatchStatsGui(this, uuid));
-      }
-    }
+    initMatchStatsGuis();
 
     // Availability is flipped in the reset callback above.
+  }
+
+  public void initMatchStatsGuis() {
+    if (AstralPractice.getInstance().isEnabled() && !rounds.isEmpty() && rounds.get(1) != null) {
+      for (UUID uuid : rounds.get(1).getStatistics().keySet()) {
+        matchStatsGuis.computeIfAbsent(uuid, id -> new MatchStatsGui(this, id));
+      }
+    }
+  }
+
+  public Map<UUID, MatchStatsGui> getMatchStatsGuis() {
+    initMatchStatsGuis();
+    return this.matchStatsGuis;
   }
 
   /*
