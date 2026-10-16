@@ -2,7 +2,6 @@ package dev.lokspel.practice.command.practice.arguments;
 
 import dev.lokspel.practice.config.PracticeConfig;
 import dev.lokspel.practice.util.Common;
-import dev.lokspel.practice.util.StringUtil;
 import java.util.Arrays;
 import java.util.List;
 import org.bukkit.Material;
@@ -59,7 +58,7 @@ public final class RenameArg {
 
     ItemStack item = player.getInventory().getItemInMainHand();
     ItemMeta itemMeta = item.getItemMeta();
-    itemMeta.displayName(Common.legacyToComponent(StringUtil.cc(builder.toString())));
+    itemMeta.displayName(Common.toComponent(builder.toString()));
     item.setItemMeta(itemMeta);
     player.getInventory().setItemInMainHand(item);
   }

@@ -1,6 +1,5 @@
 package dev.lokspel.practice.manager.gui.guis.leaderboard;
 
-import dev.lokspel.practice.AstralPractice;
 import dev.lokspel.practice.config.PracticeConfig;
 import dev.lokspel.practice.manager.backend.BackendUtil;
 import dev.lokspel.practice.manager.division.Division;
@@ -15,7 +14,6 @@ import dev.lokspel.practice.util.Common;
 import dev.lokspel.practice.util.InventoryUtil;
 import dev.lokspel.practice.util.StatisticUtil;
 import lombok.Getter;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
@@ -83,37 +81,35 @@ public class LbSelectorGui extends Gui {
 
   @Override
   public void update() {
-    Bukkit.getScheduler()
-        .runTaskAsynchronously(
-            AstralPractice.getInstance(),
-            () -> {
-              Inventory inventory = gui.get(1);
+    Inventory inventory = gui.get(1);
+    if (inventory == null) {
+      return;
+    }
 
-              inventory.setItem(13, LbGuiUtil.createProfileStatItem(profile, opener));
-              inventory.setItem(
-                  20,
-                  BackendUtil.getGuiItem(
-                          PracticeConfig.guis()
-                              .getGuis()
-                              .getStatistics()
-                              .getSelector()
-                              .getIcons()
-                              .getEloLeaderboard())
-                      .get());
-              inventory.setItem(22, getDivisionItem(profile));
-              inventory.setItem(
-                  24,
-                  BackendUtil.getGuiItem(
-                          PracticeConfig.guis()
-                              .getGuis()
-                              .getStatistics()
-                              .getSelector()
-                              .getIcons()
-                              .getTopWinLeaderboard())
-                      .get());
+    inventory.setItem(13, LbGuiUtil.createProfileStatItem(profile, opener));
+    inventory.setItem(
+        20,
+        BackendUtil.getGuiItem(
+                PracticeConfig.guis()
+                    .getGuis()
+                    .getStatistics()
+                    .getSelector()
+                    .getIcons()
+                    .getEloLeaderboard())
+            .get());
+    inventory.setItem(22, getDivisionItem(profile));
+    inventory.setItem(
+        24,
+        BackendUtil.getGuiItem(
+                PracticeConfig.guis()
+                    .getGuis()
+                    .getStatistics()
+                    .getSelector()
+                    .getIcons()
+                    .getTopWinLeaderboard())
+            .get());
 
-              updatePlayers();
-            });
+    updatePlayers();
   }
 
   @Override

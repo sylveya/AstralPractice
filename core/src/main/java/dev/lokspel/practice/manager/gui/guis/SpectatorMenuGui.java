@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.Getter;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -26,8 +25,9 @@ import org.bukkit.inventory.ItemStack;
 @Getter
 public class SpectatorMenuGui extends Gui {
 
-  private static final int spaces = 27;
-  private final Map<ItemStack, Spectatable> icons = new HashMap<>();
+  private static final int SPACES = 27;
+  private final Map<Integer, Map<Integer, Spectatable>> pageSlots = new HashMap<>();
+  private int totalSpectatables = 0;
 
   public SpectatorMenuGui() {
     super(GuiType.Spectator_Menu);
@@ -37,96 +37,7 @@ public class SpectatorMenuGui extends Gui {
 
   @Override
   public void build() {
-    icons.clear();
-
-    for (Spectatable spectatable : FightUtil.getSpectatables()) {
-      if (spectatable.canDisplay()) {
-        icons.put(spectatable.getSpectatorMenuItem().get(), spectatable);
-      }
-    }
-
-    List<ItemStack> iconsList = new ArrayList<>(icons.keySet());
-    ItemStack fillerItem =
-        BackendUtil.getGuiItem(
-                PracticeConfig.guis().getGuis().getSpectatorMenu().getIcons().getFillerItem())
-            .get();
-
-    for (int page = 1; page < 20; page++) {
-      if (PageUtil.isPageValid(iconsList, page, spaces) || page == 1) {
-        if (!gui.containsKey(page)) {
-          gui.put(
-              page,
-              InventoryUtil.createInventory(
-                  PracticeConfig.guis()
-                      .getGuis()
-                      .getSpectatorMenu()
-                      .getTitle()
-                      .replace("%page%", String.valueOf(page)),
-                  5));
-        }
-
-        Inventory inventory = gui.get(page);
-        inventory.clear();
-
-        // Frame
-        for (int i : new int[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 36, 37, 38, 39, 40, 41, 42, 43, 44}) {
-          inventory.setItem(i, fillerItem);
-        }
-
-        // Match icons
-        for (ItemStack icon : PageUtil.getPageItems(iconsList, page, spaces)) {
-          int slot = inventory.firstEmpty();
-          if (slot != -1 && slot < inventory.getSize()) {
-            inventory.setItem(slot, icon);
-          }
-        }
-
-        // Left navigation
-        ItemStack left;
-        if (PageUtil.isPageValid(iconsList, page - 1, spaces)) {
-          left =
-              BackendUtil.getGuiItem(
-                      PracticeConfig.guis().getGuis().getSpectatorMenu().getIcons().getPageLeft())
-                  .replace("%page%", String.valueOf(page - 1))
-                  .get();
-        } else {
-          left =
-              BackendUtil.getGuiItem(
-                      PracticeConfig.guis().getGuis().getSpectatorMenu().getIcons().getClose())
-                  .get();
-        }
-        inventory.setItem(36, left);
-
-        // Right navigation
-        ItemStack right;
-        if (PageUtil.isPageValid(iconsList, page + 1, spaces)) {
-          right =
-              BackendUtil.getGuiItem(
-                      PracticeConfig.guis().getGuis().getSpectatorMenu().getIcons().getPageRight())
-                  .replace("%page%", String.valueOf(page + 1))
-                  .get();
-        } else {
-          right = fillerItem;
-        }
-        inventory.setItem(44, right);
-      } else {
-        if (gui.containsKey(page)) {
-          int finalPage = page;
-          Bukkit.getScheduler()
-              .runTask(
-                  AstralPractice.getInstance(),
-                  () -> {
-                    gui.remove(finalPage);
-
-                    for (Player player : inGuiPlayers.keySet()) {
-                      if (inGuiPlayers.get(player) == finalPage) {
-                        open(player, finalPage - 1);
-                      }
-                    }
-                  });
-        }
-      }
-    }
+    update();
   }
 
   @Override
@@ -135,13 +46,81 @@ public class SpectatorMenuGui extends Gui {
       return;
     }
 
-    Bukkit.getScheduler()
-        .runTaskAsynchronously(
-            AstralPractice.getInstance(),
-            () -> {
-              build();
-              updatePlayers();
-            });
+    List<Spectatable> spectatables = new ArrayList<>();
+    for (Spectatable spectatable : FightUtil.getSpectatables()) {
+      if (spectatable.canDisplay()) {
+        spectatables.add(spectatable);
+      }
+    }
+    this.totalSpectatables = spectatables.size();
+
+    Map<Integer, Inventory> newGui = new HashMap<>();
+    Map<Integer, Map<Integer, Spectatable>> newPageSlots = new HashMap<>();
+
+    ItemStack fillerItem =
+        BackendUtil.getGuiItem(
+                PracticeConfig.guis().getGuis().getSpectatorMenu().getIcons().getFillerItem())
+            .get();
+
+    int maxPage = PageUtil.getMaxPage(spectatables.size(), SPACES);
+    for (int page = 1; page <= maxPage; page++) {
+      Inventory inventory = gui.get(page);
+      if (inventory == null || inventory.getSize() != 5 * 9) {
+        inventory =
+            InventoryUtil.createInventory(
+                PracticeConfig.guis()
+                    .getGuis()
+                    .getSpectatorMenu()
+                    .getTitle()
+                    .replace("%page%", String.valueOf(page)),
+                5);
+      } else {
+        inventory.clear();
+      }
+      newGui.put(page, inventory);
+
+      // Frame
+      for (int i : new int[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 36, 37, 38, 39, 40, 41, 42, 43, 44}) {
+        inventory.setItem(i, fillerItem);
+      }
+
+      Map<Integer, Spectatable> currentSlots = new HashMap<>();
+      int startIndex = (page - 1) * SPACES;
+      int endIndex = Math.min(startIndex + SPACES, spectatables.size());
+      for (int i = startIndex; i < endIndex; i++) {
+        Spectatable spectatable = spectatables.get(i);
+        int slot = inventory.firstEmpty();
+        if (slot != -1 && slot < inventory.getSize()) {
+          inventory.setItem(slot, spectatable.getSpectatorMenuItem().get());
+          currentSlots.put(slot, spectatable);
+        }
+      }
+      newPageSlots.put(page, currentSlots);
+
+      // Left navigation
+      ItemStack left =
+          page > 1
+              ? BackendUtil.getGuiItem(
+                      PracticeConfig.guis().getGuis().getSpectatorMenu().getIcons().getPageLeft())
+                  .replace("%page%", String.valueOf(page - 1))
+                  .get()
+              : BackendUtil.getGuiItem(
+                      PracticeConfig.guis().getGuis().getSpectatorMenu().getIcons().getClose())
+                  .get();
+      inventory.setItem(36, left);
+
+      // Right navigation
+      ItemStack right =
+          page < maxPage
+              ? BackendUtil.getGuiItem(
+                      PracticeConfig.guis().getGuis().getSpectatorMenu().getIcons().getPageRight())
+                  .replace("%page%", String.valueOf(page + 1))
+                  .get()
+              : fillerItem;
+      inventory.setItem(44, right);
+    }
+
+    updatePages(newGui, pageSlots, newPageSlots);
   }
 
   @Override
@@ -155,15 +134,12 @@ public class SpectatorMenuGui extends Gui {
 
     e.setCancelled(true);
 
-    if (item == null) {
-      return;
-    }
-    if (item.getType().equals(Material.AIR)) {
+    if (item == null || item.getType() == Material.AIR) {
       return;
     }
 
     if (inventory.getSize() > slot) {
-      int page = inGuiPlayers.get(player);
+      int page = inGuiPlayers.getOrDefault(player, 1);
 
       switch (slot) {
         case 36:
@@ -174,15 +150,16 @@ public class SpectatorMenuGui extends Gui {
           }
           break;
         case 44:
-          if (PageUtil.isPageValid(new ArrayList<>(icons.keySet()), page + 1, spaces)) {
+          if (PageUtil.isPageValid(totalSpectatables, page + 1, SPACES)) {
             open(player, page + 1);
           }
           break;
         default:
-          if (!icons.containsKey(item)) {
+          Map<Integer, Spectatable> currentSlots = pageSlots.get(page);
+          if (currentSlots == null || !currentSlots.containsKey(slot)) {
             return;
           }
-          Spectatable spectatable = icons.get(item);
+          Spectatable spectatable = currentSlots.get(slot);
           if (spectatable == null) {
             return;
           }

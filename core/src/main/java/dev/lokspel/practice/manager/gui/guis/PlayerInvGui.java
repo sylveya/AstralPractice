@@ -1,6 +1,5 @@
 package dev.lokspel.practice.manager.gui.guis;
 
-import dev.lokspel.practice.AstralPractice;
 import dev.lokspel.practice.config.PracticeConfig;
 import dev.lokspel.practice.manager.backend.BackendUtil;
 import dev.lokspel.practice.manager.gui.Gui;
@@ -9,10 +8,8 @@ import dev.lokspel.practice.manager.gui.GuiType;
 import dev.lokspel.practice.util.InventoryUtil;
 import dev.lokspel.practice.util.TimeUtil;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
@@ -46,52 +43,33 @@ public class PlayerInvGui extends Gui {
 
   @Override
   public void update() {
-    Bukkit.getScheduler()
-        .runTaskAsynchronously(
-            AstralPractice.getInstance(),
-            () -> {
-              Inventory inventory = gui.get(1);
+    Inventory inventory = gui.get(1);
+    if (inventory == null) {
+      return;
+    }
 
-              List<ItemStack> inventoryContent = Arrays.asList(target.getInventory().getContents());
-              List<ItemStack> firstLine = new ArrayList<>();
-              for (int i = 0; i < 36; i++) {
-                if (i < 9) {
-                  firstLine.add(inventoryContent.get(i));
-                }
+    InventoryUtil.populatePlayerInventoryLayout(inventory, target.getInventory().getContents());
 
-                if (i < 27) {
-                  inventory.setItem(i, inventoryContent.get(i + 9));
-                } else {
-                  inventory.setItem(i, firstLine.get(i - 27));
-                }
-              }
+    ItemStack[] armorContent = target.getInventory().getArmorContents();
+    for (int i = 36; i < 40 && (i - 36) < armorContent.length; i++) {
+      inventory.setItem(i, armorContent[i - 36]);
+    }
 
-              List<ItemStack> armorContent =
-                  Arrays.asList(target.getInventory().getArmorContents());
-              for (int i = 36; i < 40; i++) {
-                inventory.setItem(i, armorContent.get(i - 36));
-              }
+    if (!target.getActivePotionEffects().isEmpty()) {
+      inventory.setItem(42, getEffectItem());
+    }
+    inventory.setItem(43, getHealthItem());
+    inventory.setItem(44, getHungerItem());
 
-              if (!target.getActivePotionEffects().isEmpty()) {
-                inventory.setItem(42, getEffectItem());
-              }
-              inventory.setItem(43, getHealthItem());
-              inventory.setItem(44, getHungerItem());
-
-              for (int i = 0; i < inventory.getSize(); i++) {
-                if (inventory.getItem(i) == null) {
-                  inventory.setItem(
-                      i,
-                      BackendUtil.getGuiItem(
-                              PracticeConfig.guis()
-                                  .getGuis()
-                                  .getPlayerInventory()
-                                  .getIcons()
-                                  .getFillerItem())
-                          .get());
-                }
-              }
-            });
+    ItemStack filler =
+        BackendUtil.getGuiItem(
+                PracticeConfig.guis().getGuis().getPlayerInventory().getIcons().getFillerItem())
+            .get();
+    for (int i = 0; i < inventory.getSize(); i++) {
+      if (inventory.getItem(i) == null) {
+        inventory.setItem(i, filler);
+      }
+    }
   }
 
   @Override

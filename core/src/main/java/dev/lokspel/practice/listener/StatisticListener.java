@@ -15,6 +15,7 @@ import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.manager.profile.enums.ProfileStatus;
 import dev.lokspel.practice.manager.sidebar.SidebarManager;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.Getter;
 import org.bukkit.Bukkit;
@@ -41,9 +42,39 @@ public class StatisticListener implements Listener {
   private double customCooldownValue;
 
   @Getter protected final AstralPractice practice = AstralPractice.getInstance();
-  @Getter protected static final Map<Player, Integer> CURRENT_CPS = new ConcurrentHashMap<>();
-  @Getter protected static final Map<Player, Integer> CPS = new ConcurrentHashMap<>();
-  @Getter protected static final Map<Player, Integer> CURRENT_COMBO = new ConcurrentHashMap<>();
+  private static final Map<UUID, Integer> currentCps = new ConcurrentHashMap<>();
+  private static final Map<UUID, Integer> cps = new ConcurrentHashMap<>();
+  private static final Map<UUID, Integer> currentCombo = new ConcurrentHashMap<>();
+
+  public static int getCurrentCombo(Player player) {
+    if (player == null) {
+      return 0;
+    }
+    return currentCombo.getOrDefault(player.getUniqueId(), 0);
+  }
+
+  public static int getCps(Player player) {
+    if (player == null) {
+      return 0;
+    }
+    return cps.getOrDefault(player.getUniqueId(), 0);
+  }
+
+  public static void clearPlayer(Player player) {
+    if (player == null) {
+      return;
+    }
+    clearPlayer(player.getUniqueId());
+  }
+
+  public static void clearPlayer(UUID uuid) {
+    if (uuid == null) {
+      return;
+    }
+    currentCps.remove(uuid);
+    cps.remove(uuid);
+    currentCombo.remove(uuid);
+  }
 
   public StatisticListener() {
     Bukkit.getScheduler()
@@ -113,23 +144,24 @@ public class StatisticListener implements Listener {
       return;
     }
 
-    CURRENT_CPS.putIfAbsent(player, 1);
-    CURRENT_CPS.computeIfPresent(player, (key, val) -> val + 1);
+    UUID uuid = player.getUniqueId();
+    currentCps.putIfAbsent(uuid, 1);
+    currentCps.computeIfPresent(uuid, (key, val) -> val + 1);
 
-    BukkitRunnable task = cpsRunnable(statistic, player);
+    BukkitRunnable task = cpsRunnable(statistic, uuid);
     task.runTaskLaterAsynchronously(AstralPractice.getInstance(), 20L);
   }
 
-  protected static @NotNull BukkitRunnable cpsRunnable(final Statistic statistic, Player player) {
+  protected static @NotNull BukkitRunnable cpsRunnable(final Statistic statistic, UUID uuid) {
     return new BukkitRunnable() {
       @Override
       public void run() {
         // Remove atomically — avoids the TOCTOU race between containsKey and get
         // that can return null and cause an NPE when unboxing to int.
-        Integer current = CURRENT_CPS.remove(player);
+        Integer current = currentCps.remove(uuid);
         if (current != null && current > 2) {
           statistic.getCps().put(System.currentTimeMillis(), current);
-          CPS.put(player, current);
+          cps.put(uuid, current);
         }
       }
     };
@@ -140,24 +172,26 @@ public class StatisticListener implements Listener {
       final Statistic attackerStats,
       final Player defender,
       final Statistic defenderStats) {
+    UUID attackerUuid = attacker.getUniqueId();
+    UUID defenderUuid = defender.getUniqueId();
     return new BukkitRunnable() {
       @Override
       public void run() {
         if (attackerStats != null) {
           attackerStats.setHit(attackerStats.getHit() + 1);
 
-          CURRENT_COMBO.putIfAbsent(attacker, 1);
-          CURRENT_COMBO.computeIfPresent(attacker, (key, val) -> val + 1);
+          currentCombo.putIfAbsent(attackerUuid, 1);
+          currentCombo.computeIfPresent(attackerUuid, (key, val) -> val + 1);
         }
 
         if (defenderStats != null) {
           defenderStats.setGetHit(defenderStats.getGetHit() + 1);
 
-          if (CURRENT_COMBO.containsKey(defender)
-              && defenderStats.getLongestCombo() < CURRENT_COMBO.get(defender)) {
-            defenderStats.setLongestCombo(CURRENT_COMBO.get(defender));
+          Integer defenderCombo = currentCombo.get(defenderUuid);
+          if (defenderCombo != null && defenderStats.getLongestCombo() < defenderCombo) {
+            defenderStats.setLongestCombo(defenderCombo);
           }
-          CURRENT_COMBO.put(defender, 0);
+          currentCombo.put(defenderUuid, 0);
         }
 
         // Immediately update scoreboards for real-time hit counter display

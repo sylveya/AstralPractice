@@ -1,6 +1,5 @@
 package dev.lokspel.practice.manager.gui.guis.ladder;
 
-import dev.lokspel.practice.AstralPractice;
 import dev.lokspel.practice.config.PracticeConfig;
 import dev.lokspel.practice.manager.backend.BackendUtil;
 import dev.lokspel.practice.manager.gui.Gui;
@@ -11,10 +10,8 @@ import dev.lokspel.practice.util.InventoryUtil;
 import dev.lokspel.practice.util.KitData;
 import dev.lokspel.practice.util.TimeUtil;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -50,47 +47,33 @@ public class LadderPreviewGui extends Gui {
 
   @Override
   public void update() {
-    Bukkit.getScheduler()
-        .runTaskAsynchronously(
-            AstralPractice.getInstance(),
-            () -> {
-              Inventory inventory = gui.get(1);
-              inventory.clear();
+    Inventory inventory = gui.get(1);
+    if (inventory == null) {
+      return;
+    }
+    inventory.clear();
 
-              // Set filler items
-              for (int i : new int[] {36, 37, 38, 39, 40, 41, 42, 43, 44, 46, 47, 48, 49}) {
-                gui.get(1).setItem(i, GuiManager.fillerItem());
-              }
+    // Set filler items
+    ItemStack filler = GuiManager.fillerItem();
+    for (int i : new int[] {36, 37, 38, 39, 40, 41, 42, 43, 44, 46, 47, 48, 49}) {
+      inventory.setItem(i, filler);
+    }
 
-              gui.get(1).setItem(45, getEffectItem());
+    inventory.setItem(45, getEffectItem());
 
-              // Inventory Content
-              if (kitData.getStorage() != null) {
-                List<ItemStack> inventoryContent = Arrays.asList(kitData.getStorage());
-                List<ItemStack> firstLine = new ArrayList<>();
-                for (int i = 0; i < 36; i++) {
-                  if (i < 9) {
-                    firstLine.add(inventoryContent.get(i));
-                  }
+    // Inventory Content
+    if (kitData.getStorage() != null) {
+      InventoryUtil.populatePlayerInventoryLayout(inventory, kitData.getStorage());
+    }
 
-                  if (i < 27) {
-                    inventory.setItem(i, inventoryContent.get(i + 9));
-                  } else {
-                    inventory.setItem(i, firstLine.get(i - 27));
-                  }
-                }
-              }
+    if (kitData.getArmor() != null) {
+      ItemStack[] armor = kitData.getArmor();
+      for (int i = 50; i < 54 && (i - 50) < armor.length; i++) {
+        inventory.setItem(i, armor[i - 50]);
+      }
+    }
 
-              if (kitData.getArmor() != null) {
-                // Armor content
-                List<ItemStack> armorContent = new ArrayList<>(Arrays.asList(kitData.getArmor()));
-                for (int i = 50; i < 54; i++) {
-                  gui.get(1).setItem(i, armorContent.get(i - 50));
-                }
-              }
-
-              updatePlayers();
-            });
+    updatePlayers();
   }
 
   @Override

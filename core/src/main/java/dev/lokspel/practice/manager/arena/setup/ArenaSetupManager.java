@@ -10,9 +10,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -191,30 +191,29 @@ public class ArenaSetupManager {
     SetupMode mode = session.getCurrentMode();
 
     meta.displayName(
-        Common.legacyToComponent(
-            Common.colorize(
-                "<gold>Arena Wand <gray>(<yellow>" + mode.getDisplayName() + "<gray>)")));
+        Common.toComponent("<gold>Arena Wand <gray>(<yellow>" + mode.getDisplayName() + "<gray>)"));
 
-    List<String> lore = new ArrayList<>();
-    lore.add(Common.colorize("<gray>Editing: <green>" + arena.getName()));
+    List<Component> lore = new ArrayList<>();
+    lore.add(Common.toComponent("<gray>Editing: <green>" + arena.getName()));
     lore.add(
-        Common.colorize("<gray>Type: <aqua>" + (arena instanceof FfaArena ? "FFA" : "Standard")));
-    lore.add("");
-    lore.add(Common.colorize("<yellow>Current Mode: <white>" + mode.getDisplayName()));
-    lore.add("");
-    lore.add(Common.colorize("<gray>Controls:"));
+        Common.toComponent(
+            "<gray>Type: <aqua>" + (arena instanceof FfaArena ? "FFA" : "Standard")));
+    lore.add(Component.empty());
+    lore.add(Common.toComponent("<yellow>Current Mode: <white>" + mode.getDisplayName()));
+    lore.add(Component.empty());
+    lore.add(Common.toComponent("<gray>Controls:"));
 
     for (String line : mode.getDescription()) {
-      lore.add(Common.colorize(line));
+      lore.add(Common.toComponent(line));
     }
 
-    lore.add("");
-    lore.add(Common.colorize("<light_purple>Shift + Left: <gray>Next Mode"));
-    lore.add(Common.colorize("<light_purple>Shift + Right: <gray>Prev Mode"));
-    lore.add("");
-    lore.add(Common.colorize("<red>Drop (Q): <gray>Exit Setup"));
+    lore.add(Component.empty());
+    lore.add(Common.toComponent("<light_purple>Shift + Left: <gray>Next Mode"));
+    lore.add(Common.toComponent("<light_purple>Shift + Right: <gray>Prev Mode"));
+    lore.add(Component.empty());
+    lore.add(Common.toComponent("<red>Drop (Q): <gray>Exit Setup"));
 
-    meta.lore(lore.stream().map(Common::legacyToComponent).collect(Collectors.toList()));
+    meta.lore(lore);
     wand.setItemMeta(meta);
 
     player.getInventory().setItemInMainHand(wand);

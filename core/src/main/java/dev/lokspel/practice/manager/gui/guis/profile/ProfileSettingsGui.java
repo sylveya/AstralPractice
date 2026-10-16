@@ -1,6 +1,5 @@
 package dev.lokspel.practice.manager.gui.guis.profile;
 
-import dev.lokspel.practice.AstralPractice;
 import dev.lokspel.practice.config.PracticeConfig;
 import dev.lokspel.practice.manager.backend.BackendUtil;
 import dev.lokspel.practice.manager.gui.Gui;
@@ -19,7 +18,6 @@ import dev.lokspel.practice.util.cooldown.PlayerCooldown;
 import dev.lokspel.practice.util.entityhider.PlayerHider;
 import dev.lokspel.practice.util.playerutil.PlayerUtil;
 import lombok.Getter;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
@@ -48,26 +46,20 @@ public class ProfileSettingsGui extends Gui {
 
   @Override
   public void build() {
-    Bukkit.getScheduler()
-        .runTaskAsynchronously(
-            AstralPractice.getInstance(),
-            () -> {
-              Inventory inventory = gui.get(1);
-              ItemStack fillerItem =
-                  BackendUtil.getGuiItem(
-                          PracticeConfig.guis()
-                              .getGuis()
-                              .getPlayerSettings()
-                              .getIcons()
-                              .getFillerItem())
-                      .get();
+    Inventory inventory = gui.get(1);
+    if (inventory == null) {
+      return;
+    }
+    ItemStack fillerItem =
+        BackendUtil.getGuiItem(
+                PracticeConfig.guis().getGuis().getPlayerSettings().getIcons().getFillerItem())
+            .get();
 
-              for (int i = 0; i < inventory.getSize(); i++) {
-                inventory.setItem(i, fillerItem);
-              }
+    for (int i = 0; i < inventory.getSize(); i++) {
+      inventory.setItem(i, fillerItem);
+    }
 
-              update();
-            });
+    update();
   }
 
   @Override

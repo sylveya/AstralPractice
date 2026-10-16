@@ -33,7 +33,7 @@ public class ReplyCommand extends PrivateMessageCommand {
       return;
     }
 
-    if (!MessageCommand.getLatestMessage().containsKey(player)) {
+    if (!MessageCommand.hasLatestMessage(player)) {
       Common.sendMmMessage(
           player,
           PracticeConfig.language().getCommand().getPrivateMessage().getReply().getNoMessage());
@@ -48,8 +48,8 @@ public class ReplyCommand extends PrivateMessageCommand {
       return;
     }
 
-    Player target = MessageCommand.getLatestMessage().get(player);
-    if (!target.isOnline()) {
+    Player target = MessageCommand.getLatestMessageTarget(player);
+    if (target == null || !target.isOnline()) {
       Common.sendMmMessage(
           player,
           PracticeConfig.language()
@@ -57,7 +57,7 @@ public class ReplyCommand extends PrivateMessageCommand {
               .getPrivateMessage()
               .getReply()
               .getPlayerLeft()
-              .replace("%target%", target.getName()));
+              .replace("%target%", target != null ? target.getName() : ""));
       return;
     }
 
@@ -100,8 +100,7 @@ public class ReplyCommand extends PrivateMessageCommand {
             .replace("%receiver%", target.getName())
             .replace("%message%", message.toString()));
 
-    MessageCommand.getLatestMessage().put(target, player);
-    MessageCommand.getLatestMessage().put(player, target);
+    MessageCommand.setLatestMessage(target, player);
   }
 
   @Override

@@ -2,7 +2,6 @@ package dev.lokspel.practice.manager.playerkit.items;
 
 import dev.lokspel.practice.manager.ladder.util.LadderUtil;
 import dev.lokspel.practice.util.Common;
-import dev.lokspel.practice.util.StringUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -89,7 +88,7 @@ public class KitItem {
   // Setters
   public KitItem setName(String name) {
     ItemMeta itemMeta = itemStack.getItemMeta();
-    itemMeta.displayName(Common.legacyToComponent(StringUtil.cc(name)));
+    itemMeta.displayName(Common.toComponent(name));
     itemStack.setItemMeta(itemMeta);
     return this;
   }

@@ -1,6 +1,5 @@
 package dev.lokspel.practice.manager.gui.guis.leaderboard;
 
-import dev.lokspel.practice.AstralPractice;
 import dev.lokspel.practice.config.ItemConfig;
 import dev.lokspel.practice.manager.backend.BackendUtil;
 import dev.lokspel.practice.manager.fight.match.enums.MatchType;
@@ -15,7 +14,6 @@ import dev.lokspel.practice.util.InventoryUtil;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -42,50 +40,44 @@ public abstract class LeaderboardGui extends Gui {
 
   @Override
   public void update() {
-    Bukkit.getScheduler()
-        .runTaskAsynchronously(
-            AstralPractice.getInstance(),
-            () -> {
-              Inventory inventory = gui.get(1);
-              inventory.clear();
+    Inventory inventory = gui.get(1);
+    if (inventory == null) {
+      return;
+    }
+    inventory.clear();
 
-              for (int i = 45; i < 54; i++) {
-                inventory.setItem(i, GuiManager.fillerItem());
-              }
+    ItemStack filler = GuiManager.fillerItem();
+    for (int i = 45; i < 54; i++) {
+      inventory.setItem(i, filler);
+    }
 
-              for (NormalLadder ladder : LadderManager.getInstance().getLadders()) {
-                if (!isLadderVisible(ladder)) {
-                  continue;
-                }
+    for (NormalLadder ladder : LadderManager.getInstance().getLadders()) {
+      if (!isLadderVisible(ladder)) {
+        continue;
+      }
 
-                int slot = inventory.firstEmpty();
-                if (slot == -1) {
-                  break;
-                }
-                inventory.setItem(slot, createLadderItem(ladder));
-              }
+      int slot = inventory.firstEmpty();
+      if (slot == -1) {
+        break;
+      }
+      inventory.setItem(slot, createLadderItem(ladder));
+    }
 
-              ItemStack fillerItem =
-                  icon(dev.lokspel.practice.config.gui.LeaderboardGui.Icons::getFillerItem).get();
-              for (int i = 0; i < 45; i++) {
-                ItemStack current = inventory.getItem(i);
-                if (current == null || current.getType().equals(Material.AIR)) {
-                  inventory.setItem(i, fillerItem);
-                }
-              }
+    ItemStack fillerItem =
+        icon(dev.lokspel.practice.config.gui.LeaderboardGui.Icons::getFillerItem).get();
+    for (int i = 0; i < 45; i++) {
+      ItemStack current = inventory.getItem(i);
+      if (current == null || current.getType() == Material.AIR) {
+        inventory.setItem(i, fillerItem);
+      }
+    }
 
-              inventory.setItem(
-                  45,
-                  icon(dev.lokspel.practice.config.gui.LeaderboardGui.Icons::getBackToHub).get());
-              inventory.setItem(49, createGlobalItem());
-              inventory.setItem(53, LbGuiUtil.getCacheInfoItem());
+    inventory.setItem(
+        45, icon(dev.lokspel.practice.config.gui.LeaderboardGui.Icons::getBackToHub).get());
+    inventory.setItem(49, createGlobalItem());
+    inventory.setItem(53, LbGuiUtil.getCacheInfoItem());
 
-              updatePlayers();
-
-              if (GuiCache.shouldCache(type)) {
-                GuiCache.putCache(type, gui);
-              }
-            });
+    updatePlayers();
   }
 
   /** Builds the GUI item of an icon, or an empty item when the icon is not configured. */

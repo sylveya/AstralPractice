@@ -31,12 +31,8 @@ public class PlayerQuit implements Listener {
     ServerManager.getInstance().onPlayerQuit(player);
     PlayerCooldown.clearPlayer(player);
 
-    StatisticListener.getCURRENT_CPS().remove(player);
-    StatisticListener.getCPS().remove(player);
-    StatisticListener.getCURRENT_COMBO().remove(player);
-
-    MessageCommand.latestMessage.remove(player);
-    MessageCommand.latestMessage.values().removeIf(target -> target.equals(player));
+    StatisticListener.clearPlayer(player);
+    MessageCommand.clearPlayer(player);
 
     final Profile profile = ProfileManager.getInstance().getProfile(player);
     final Party party = PartyManager.getInstance().getParty(player);
@@ -86,12 +82,8 @@ public class PlayerQuit implements Listener {
     ServerManager.getInstance().onPlayerQuit(player);
     PlayerCooldown.clearPlayer(player);
 
-    StatisticListener.getCURRENT_CPS().remove(player);
-    StatisticListener.getCPS().remove(player);
-    StatisticListener.getCURRENT_COMBO().remove(player);
-
-    MessageCommand.latestMessage.remove(player);
-    MessageCommand.latestMessage.values().removeIf(target -> target.equals(player));
+    StatisticListener.clearPlayer(player);
+    MessageCommand.clearPlayer(player);
 
     MatchManager.getInstance().invalidateRematchByPlayer(player);
 

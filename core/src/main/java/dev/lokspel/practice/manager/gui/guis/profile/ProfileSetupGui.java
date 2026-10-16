@@ -1,6 +1,5 @@
 package dev.lokspel.practice.manager.gui.guis.profile;
 
-import dev.lokspel.practice.AstralPractice;
 import dev.lokspel.practice.config.PracticeConfig;
 import dev.lokspel.practice.manager.backend.BackendUtil;
 import dev.lokspel.practice.manager.fight.event.EventManager;
@@ -24,7 +23,6 @@ import dev.lokspel.practice.util.ItemCreateUtil;
 import dev.lokspel.practice.util.TimeUtil;
 import dev.lokspel.practice.util.interfaces.Spectatable;
 import java.util.Objects;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -62,44 +60,43 @@ public class ProfileSetupGui extends Gui {
 
   @Override
   public void update() {
-    Bukkit.getScheduler()
-        .runTaskAsynchronously(
-            AstralPractice.getInstance(),
-            () -> {
-              Inventory inventory = gui.get(1);
+    Inventory inventory = gui.get(1);
+    if (inventory == null) {
+      return;
+    }
 
-              for (int i : new int[] {27, 28, 29, 30, 31, 32, 33, 34, 35}) {
-                inventory.setItem(i, GuiManager.fillerItem());
-              }
+    ItemStack filler = GuiManager.fillerItem();
+    for (int i : new int[] {27, 28, 29, 30, 31, 32, 33, 34, 35}) {
+      inventory.setItem(i, filler);
+    }
 
-              inventory.setItem(10, getBasicInfoItem(profile));
-              inventory.setItem(11, getOnlineItem(profile));
-              inventory.setItem(13, getPartyItem(profile));
-              inventory.setItem(14, getGameItem(profile));
-              inventory.setItem(
-                  16,
-                  BackendUtil.getGuiItem(
-                          PracticeConfig.guis()
-                              .getGuis()
-                              .getPlayerInformation()
-                              .getMainPage()
-                              .getIcons()
-                              .getStatistics())
-                      .get());
-              inventory.setItem(19, getRankedBanItem(profile));
-              inventory.setItem(
-                  31,
-                  BackendUtil.getGuiItem(
-                          PracticeConfig.guis()
-                              .getGuis()
-                              .getPlayerInformation()
-                              .getMainPage()
-                              .getIcons()
-                              .getRefresh())
-                      .get());
+    inventory.setItem(10, getBasicInfoItem(profile));
+    inventory.setItem(11, getOnlineItem(profile));
+    inventory.setItem(13, getPartyItem(profile));
+    inventory.setItem(14, getGameItem(profile));
+    inventory.setItem(
+        16,
+        BackendUtil.getGuiItem(
+                PracticeConfig.guis()
+                    .getGuis()
+                    .getPlayerInformation()
+                    .getMainPage()
+                    .getIcons()
+                    .getStatistics())
+            .get());
+    inventory.setItem(19, getRankedBanItem(profile));
+    inventory.setItem(
+        31,
+        BackendUtil.getGuiItem(
+                PracticeConfig.guis()
+                    .getGuis()
+                    .getPlayerInformation()
+                    .getMainPage()
+                    .getIcons()
+                    .getRefresh())
+            .get());
 
-              updatePlayers();
-            });
+    updatePlayers();
   }
 
   @Override
