@@ -2,10 +2,9 @@ package dev.lokspel.practice.util.actionbar;
 
 import dev.lokspel.practice.AstralPractice;
 import dev.lokspel.practice.manager.profile.Profile;
-import dev.lokspel.practice.util.StringUtil;
+import dev.lokspel.practice.util.Common;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -57,7 +56,7 @@ public class ActionBar {
       return;
     }
 
-    Component component = deserializeOrFallback(text);
+    Component component = Common.toComponent(text);
     String plainText = PLAIN_TEXT.serialize(component);
     if (plainText.isBlank()) {
       removeMessage(id);
@@ -256,15 +255,6 @@ public class ActionBar {
   private void resetLastSentState() {
     lastSentSignature = "";
     lastSendAtMillis = 0L;
-  }
-
-  private Component deserializeOrFallback(String text) {
-    String safeText = text == null ? "" : text;
-    try {
-      return AstralPractice.getMiniMessage().deserialize(StringUtil.legacyToMiniMessage(safeText));
-    } catch (Exception ignored) {
-      return Component.text(Objects.toString(text, ""));
-    }
   }
 
   /** Represents a single action bar message. */
