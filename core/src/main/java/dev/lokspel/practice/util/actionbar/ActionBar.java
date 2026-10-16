@@ -3,10 +3,9 @@ package dev.lokspel.practice.util.actionbar;
 import dev.lokspel.practice.AstralPractice;
 import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.util.StringUtil;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -21,21 +20,16 @@ public class ActionBar {
   private static final int TICK_PERIOD = 2;
   private static final long INFINITE_EXPIRY = Long.MAX_VALUE;
   private static final long KEEPALIVE_INTERVAL_MILLIS = 1200L;
-  private static final long MESSAGE_FALLBACK_WINDOW_MILLIS = 6000L;
   private static final PlainTextComponentSerializer PLAIN_TEXT =
       PlainTextComponentSerializer.plainText();
 
   /** Stores active messages using an ID (e.g., "golden_head", "queue"). */
-  private final Map<String, ActionMessage> activeMessages = new ConcurrentHashMap<>();
+  private final Map<String, ActionMessage> activeMessages = new HashMap<>();
 
-  private final AtomicLong sequence = new AtomicLong();
+  private long sequenceCounter = 0L;
 
-  private volatile String lastWinnerId = "-";
-  private volatile String lastWinnerPlainText = "";
-  private volatile String lastSentSignature = "";
-  private volatile boolean lastSentWasEmpty = true;
-  private volatile long lastSendAtMillis = 0L;
-  private volatile long fallbackUntilMillis = 0L;
+  private String lastSentSignature = "";
+  private long lastSendAtMillis = 0L;
 
   /** Internal runnable to update the action bar periodically. */
   private BukkitRunnable actionBarRunnable;
@@ -65,16 +59,8 @@ public class ActionBar {
 
     Component component = deserializeOrFallback(text);
     String plainText = PLAIN_TEXT.serialize(component);
-    if (plainText.trim().isEmpty()) {
-      return;
-    }
-
-    ActionMessage previous = activeMessages.get(id);
-    boolean infiniteDuration = duration < 0;
-    if (previous != null
-        && previous.priority == priority
-        && previous.plainText.equals(plainText)
-        && previous.isInfinite() == infiniteDuration) {
+    if (plainText.isBlank()) {
+      removeMessage(id);
       return;
     }
 
@@ -84,13 +70,10 @@ public class ActionBar {
             : (System.currentTimeMillis() + (Math.max(1, duration) * 1000L));
 
     activeMessages.put(
-        id,
-        new ActionMessage(
-            component, plainText, expiresAtMillis, priority, sequence.incrementAndGet()));
-    fallbackUntilMillis = System.currentTimeMillis() + MESSAGE_FALLBACK_WINDOW_MILLIS;
+        id, new ActionMessage(component, plainText, expiresAtMillis, priority, ++sequenceCounter));
 
     startRunnable();
-    sendHighestPriority(resolveLivePlayer(), true); // immediate update without runnable overlap
+    sendHighestPriority(resolveLivePlayer(), true);
   }
 
   public void resetForReconnect() {
@@ -101,7 +84,13 @@ public class ActionBar {
 
     activeMessages.clear();
     stopRunnable();
-    resetLastSentState();
+
+    Player player = resolveLivePlayer();
+    if (player != null && player.isOnline()) {
+      clearActionBarIfNeeded(player);
+    } else {
+      resetLastSentState();
+    }
   }
 
   /**
@@ -119,7 +108,10 @@ public class ActionBar {
       return;
     }
 
-    activeMessages.remove(id);
+    if (activeMessages.remove(id) == null) {
+      return;
+    }
+
     Player player = resolveLivePlayer();
     if (player != null && player.isOnline()) {
       if (activeMessages.isEmpty()) {
@@ -146,20 +138,19 @@ public class ActionBar {
           public void run() {
             try {
               tick();
-            } catch (Throwable throwable) {
+            } catch (Exception exception) {
               AstralPractice.getInstance()
                   .getLogger()
                   .warning(
                       "ActionBar tick failed for "
                           + profile.getUuid()
                           + ": "
-                          + throwable.getMessage());
+                          + exception.getMessage());
               stopRunnable();
             }
           }
         };
 
-    // Start on next period because setMessage() already performs the immediate send path.
     actionBarRunnable.runTaskTimer(AstralPractice.getInstance(), TICK_PERIOD, TICK_PERIOD);
   }
 
@@ -178,7 +169,6 @@ public class ActionBar {
   private void tick() {
     Player player = resolveLivePlayer();
     if (player == null || !player.isOnline()) {
-      // Do not keep stale state/runnables around for offline players.
       activeMessages.clear();
       resetLastSentState();
       stopRunnable();
@@ -212,83 +202,50 @@ public class ActionBar {
     String highestId = null;
     ActionMessage highest = null;
     for (Map.Entry<String, ActionMessage> entry : activeMessages.entrySet()) {
-      ActionMessage msg = entry.getValue();
-      if (highest == null) {
-        highest = msg;
-        highestId = entry.getKey();
-        continue;
-      }
-
-      if (msg.priority.getWeight() > highest.priority.getWeight()
-          || (msg.priority.getWeight() == highest.priority.getWeight()
-              && msg.updatedAtSequence > highest.updatedAtSequence)) {
-        highest = msg;
+      if (highest == null || isHigherPriority(entry.getValue(), highest)) {
+        highest = entry.getValue();
         highestId = entry.getKey();
       }
     }
 
-    if (highest != null) {
-      long now = System.currentTimeMillis();
-      String signature = buildSignature(highestId, highest);
-      boolean winnerChanged = !signature.equals(lastSentSignature);
-      boolean keepAliveDue = (now - lastSendAtMillis) >= KEEPALIVE_INTERVAL_MILLIS;
+    if (highest == null) {
+      return;
+    }
 
-      if (!force && !winnerChanged && !keepAliveDue) {
-        return;
-      }
+    long now = System.currentTimeMillis();
+    String signature = highestId + "|" + highest.priority + "|" + highest.plainText;
+    boolean winnerChanged = !signature.equals(lastSentSignature);
+    boolean keepAliveDue = (now - lastSendAtMillis) >= KEEPALIVE_INTERVAL_MILLIS;
 
-      try {
-        Component outbound = highest.component;
-        if (!winnerChanged) {
-          outbound = withResendNonce(outbound, now);
-        }
+    if (!force && !winnerChanged && !keepAliveDue) {
+      return;
+    }
 
-        player.sendActionBar(outbound);
-        maybeSendRejoinFallback(player, outbound, now);
-        lastWinnerId = highestId == null ? "-" : highestId;
-        lastWinnerPlainText = highest.plainText;
-        lastSentSignature = signature;
-        lastSentWasEmpty = false;
-        lastSendAtMillis = now;
-      } catch (Throwable throwable) {
-        AstralPractice.getInstance()
-            .getLogger()
-            .warning(
-                "ActionBar send failed for " + profile.getUuid() + ": " + throwable.getMessage());
-      }
+    try {
+      player.sendActionBar(highest.component);
+      lastSentSignature = signature;
+      lastSendAtMillis = now;
+    } catch (Exception exception) {
+      AstralPractice.getInstance()
+          .getLogger()
+          .warning(
+              "ActionBar send failed for " + profile.getUuid() + ": " + exception.getMessage());
     }
   }
 
-  private String buildSignature(String id, ActionMessage message) {
-    return Objects.toString(id, "-") + "|" + message.priority + "|" + message.plainText;
+  private boolean isHigherPriority(ActionMessage candidate, ActionMessage current) {
+    if (candidate.priority.getWeight() != current.priority.getWeight()) {
+      return candidate.priority.getWeight() > current.priority.getWeight();
+    }
+    return candidate.updatedAtSequence > current.updatedAtSequence;
   }
 
   private Player resolveLivePlayer() {
     return profile.getOnlinePlayer();
   }
 
-  private Component withResendNonce(Component source, long now) {
-    // Keep visual content identical while producing a non-identical payload for resend packets.
-    String nonce = (now & 1L) == 0L ? "a" : "b";
-    return source.append(Component.text("").insertion(nonce));
-  }
-
-  private void maybeSendRejoinFallback(Player player, Component outbound, long now) {
-    if (now > fallbackUntilMillis) {
-      return;
-    }
-
-    try {
-      // Fallback transport for the first seconds after join where some clients/proxies can drop
-      // action-bar packets.
-      player.sendActionBar(outbound);
-    } catch (Throwable ignored) {
-      // Keep action-bar pipeline resilient: primary send already succeeded.
-    }
-  }
-
   private void clearActionBarIfNeeded(Player player) {
-    if (lastSentWasEmpty) {
+    if (lastSentSignature.isEmpty()) {
       return;
     }
 
@@ -298,11 +255,7 @@ public class ActionBar {
 
   private void resetLastSentState() {
     lastSentSignature = "";
-    lastSentWasEmpty = true;
-    lastWinnerId = "-";
-    lastWinnerPlainText = "";
     lastSendAtMillis = 0L;
-    fallbackUntilMillis = 0L;
   }
 
   private Component deserializeOrFallback(String text) {
@@ -321,10 +274,6 @@ public class ActionBar {
       long expiresAtMillis,
       ActionBarPriority priority,
       long updatedAtSequence) {
-
-    private boolean isInfinite() {
-      return expiresAtMillis == INFINITE_EXPIRY;
-    }
 
     private boolean isExpired(long now) {
       return expiresAtMillis != INFINITE_EXPIRY && now >= expiresAtMillis;
