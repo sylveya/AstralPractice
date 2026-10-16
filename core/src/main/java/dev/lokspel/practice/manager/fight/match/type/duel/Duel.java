@@ -236,7 +236,7 @@ public class Duel extends Match implements Team {
 
     players.remove(player);
     matchPlayers.remove(player);
-    MatchManager.getInstance().getPlayerMatches().remove(player, this);
+    MatchManager.getInstance().getPlayerMatches().remove(player.getUniqueId(), this);
 
     // Only process quit logic if the match hasn't ended yet
     // When match status is END or OVER, players are being removed as part of cleanup

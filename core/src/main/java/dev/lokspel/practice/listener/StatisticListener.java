@@ -14,9 +14,11 @@ import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.manager.profile.enums.ProfileStatus;
 import dev.lokspel.practice.manager.sidebar.SidebarManager;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -32,8 +34,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.jetbrains.annotations.NotNull;
 
 public class StatisticListener implements Listener {
 
@@ -42,22 +42,14 @@ public class StatisticListener implements Listener {
   private double customCooldownValue;
 
   @Getter protected final AstralPractice practice = AstralPractice.getInstance();
-  private static final Map<UUID, Integer> currentCps = new ConcurrentHashMap<>();
-  private static final Map<UUID, Integer> cps = new ConcurrentHashMap<>();
-  private static final Map<UUID, Integer> currentCombo = new ConcurrentHashMap<>();
+  private static final Map<UUID, List<Long>> clickTimestamps = new HashMap<>();
+  private static final Map<UUID, Integer> currentCombo = new HashMap<>();
 
   public static int getCurrentCombo(Player player) {
     if (player == null) {
       return 0;
     }
     return currentCombo.getOrDefault(player.getUniqueId(), 0);
-  }
-
-  public static int getCps(Player player) {
-    if (player == null) {
-      return 0;
-    }
-    return cps.getOrDefault(player.getUniqueId(), 0);
   }
 
   public static void clearPlayer(Player player) {
@@ -71,8 +63,7 @@ public class StatisticListener implements Listener {
     if (uuid == null) {
       return;
     }
-    currentCps.remove(uuid);
-    cps.remove(uuid);
+    clickTimestamps.remove(uuid);
     currentCombo.remove(uuid);
   }
 
@@ -145,67 +136,44 @@ public class StatisticListener implements Listener {
     }
 
     UUID uuid = player.getUniqueId();
-    currentCps.putIfAbsent(uuid, 1);
-    currentCps.computeIfPresent(uuid, (key, val) -> val + 1);
+    long now = System.currentTimeMillis();
+    List<Long> timestamps = clickTimestamps.computeIfAbsent(uuid, _ -> new ArrayList<>());
+    timestamps.add(now);
+    long windowStart = now - 1000L;
+    timestamps.removeIf(time -> time < windowStart);
 
-    BukkitRunnable task = cpsRunnable(statistic, uuid);
-    task.runTaskLaterAsynchronously(AstralPractice.getInstance(), 20L);
+    int count = timestamps.size();
+    if (count > 2) {
+      statistic.getCps().put(now, count);
+    }
   }
 
-  protected static @NotNull BukkitRunnable cpsRunnable(final Statistic statistic, UUID uuid) {
-    return new BukkitRunnable() {
-      @Override
-      public void run() {
-        // Remove atomically — avoids the TOCTOU race between containsKey and get
-        // that can return null and cause an NPE when unboxing to int.
-        Integer current = currentCps.remove(uuid);
-        if (current != null && current > 2) {
-          statistic.getCps().put(System.currentTimeMillis(), current);
-          cps.put(uuid, current);
-        }
-      }
-    };
-  }
-
-  protected static @NotNull BukkitRunnable hitRunnable(
+  protected static void processHit(
       final Player attacker,
       final Statistic attackerStats,
       final Player defender,
       final Statistic defenderStats) {
     UUID attackerUuid = attacker.getUniqueId();
     UUID defenderUuid = defender.getUniqueId();
-    return new BukkitRunnable() {
-      @Override
-      public void run() {
-        if (attackerStats != null) {
-          attackerStats.setHit(attackerStats.getHit() + 1);
 
-          currentCombo.putIfAbsent(attackerUuid, 1);
-          currentCombo.computeIfPresent(attackerUuid, (key, val) -> val + 1);
-        }
+    if (attackerStats != null) {
+      attackerStats.setHit(attackerStats.getHit() + 1);
 
-        if (defenderStats != null) {
-          defenderStats.setGetHit(defenderStats.getGetHit() + 1);
+      int attackerCombo = currentCombo.getOrDefault(attackerUuid, 0) + 1;
+      currentCombo.put(attackerUuid, attackerCombo);
+    }
 
-          Integer defenderCombo = currentCombo.get(defenderUuid);
-          if (defenderCombo != null && defenderStats.getLongestCombo() < defenderCombo) {
-            defenderStats.setLongestCombo(defenderCombo);
-          }
-          currentCombo.put(defenderUuid, 0);
-        }
+    if (defenderStats != null) {
+      defenderStats.setGetHit(defenderStats.getGetHit() + 1);
 
-        // Immediately update scoreboards for real-time hit counter display
-        // Schedule on main thread since scoreboard updates must be on main thread
-        if (attacker != null && defender != null) {
-          AstralPractice.getInstance()
-              .getServer()
-              .getScheduler()
-              .runTask(
-                  AstralPractice.getInstance(),
-                  () -> SidebarManager.getInstance().updatePlayersSidebar(attacker, defender));
-        }
+      int defenderCombo = currentCombo.getOrDefault(defenderUuid, 0);
+      if (defenderStats.getLongestCombo() < defenderCombo) {
+        defenderStats.setLongestCombo(defenderCombo);
       }
-    };
+      currentCombo.put(defenderUuid, 0);
+    }
+
+    SidebarManager.getInstance().updatePlayersSidebar(attacker, defender);
   }
 
   @EventHandler(priority = EventPriority.LOWEST)
@@ -275,8 +243,7 @@ public class StatisticListener implements Listener {
       return;
     }
 
-    BukkitRunnable task = hitRunnable(attacker, attackerStats, defender, defenderStats);
-    task.runTaskAsynchronously(AstralPractice.getInstance());
+    processHit(attacker, attackerStats, defender, defenderStats);
   }
 
   @EventHandler(priority = EventPriority.LOWEST)

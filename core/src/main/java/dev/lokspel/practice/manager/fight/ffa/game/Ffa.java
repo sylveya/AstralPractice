@@ -150,7 +150,7 @@ public class Ffa implements Spectatable, dev.lokspel.api.interfaces.Ffa {
     // Use FFAFightPlayer to handle custom kit selection
     FfaFightPlayer ffaFightPlayer = new FfaFightPlayer(player, this, ladder);
     fightPlayers.put(player, ffaFightPlayer);
-    statistics.put(player, new Statistic(ProfileManager.getInstance().getUuids().get(player)));
+    statistics.put(player, new Statistic(player.getUniqueId()));
 
     // Hide the spectators
     for (Player spectator : this.spectators) {
@@ -473,9 +473,7 @@ public class Ffa implements Spectatable, dev.lokspel.api.interfaces.Ffa {
    * FFA sidebar ({@code %kills%}).
    */
   public void increaseFfaSessionKills(Player killer) {
-    Statistic statistic =
-        statistics.computeIfAbsent(
-            killer, p -> new Statistic(ProfileManager.getInstance().getUuids().get(p)));
+    Statistic statistic = statistics.computeIfAbsent(killer, p -> new Statistic(p.getUniqueId()));
     statistic.setKills(statistic.getKills() + 1);
     statistic.increaseKillStreak();
   }

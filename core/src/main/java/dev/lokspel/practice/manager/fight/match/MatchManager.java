@@ -41,7 +41,7 @@ public class MatchManager {
 
   private final Map<String, Match> matches = new ConcurrentHashMap<>();
   private final List<Match> liveMatches = new CopyOnWriteArrayList<>();
-  private final Map<Player, Match> playerMatches = new ConcurrentHashMap<>();
+  private final Map<UUID, Match> playerMatches = new ConcurrentHashMap<>();
   private final Set<RematchRequest> rematches = new HashSet<>();
 
   private MatchManager() {
@@ -67,24 +67,17 @@ public class MatchManager {
   }
 
   public Match getLiveMatchByPlayer(Player player) {
-    Match match = this.playerMatches.get(player);
-    if (match != null) {
-      return match;
+    if (player == null) {
+      return null;
     }
+    return getLiveMatchByPlayer(player.getUniqueId());
+  }
 
-    // Recover from stale Player-object keys by resolving via UUID.
-    UUID playerUuid = player.getUniqueId();
-    for (Match liveMatch : this.liveMatches) {
-      // Snapshot players to avoid CME if match player lists mutate during packet-thread checks.
-      for (Player livePlayer : new ArrayList<>(liveMatch.getPlayers())) {
-        if (playerUuid.equals(livePlayer.getUniqueId())) {
-          this.playerMatches.put(player, liveMatch);
-          return liveMatch;
-        }
-      }
+  public Match getLiveMatchByPlayer(UUID uuid) {
+    if (uuid == null) {
+      return null;
     }
-
-    return null;
+    return this.playerMatches.get(uuid);
   }
 
   public Match getLiveMatchBySpectator(Player spectator) {

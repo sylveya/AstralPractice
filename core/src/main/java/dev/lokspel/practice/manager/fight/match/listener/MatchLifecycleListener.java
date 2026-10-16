@@ -34,7 +34,7 @@ public class MatchLifecycleListener implements Listener {
 
     // Register match in manager
     for (Player player : match.getPlayers()) {
-      MatchManager.getInstance().getPlayerMatches().put(player, match);
+      MatchManager.getInstance().getPlayerMatches().put(player.getUniqueId(), match);
     }
 
     MatchManager.getInstance().getMatches().put(match.getId(), match);
@@ -54,7 +54,7 @@ public class MatchLifecycleListener implements Listener {
 
     // If the player already joined a new match, keep that mapping.
     for (Player player : match.getPlayers()) {
-      MatchManager.getInstance().getPlayerMatches().remove(player, match);
+      MatchManager.getInstance().getPlayerMatches().remove(player.getUniqueId(), match);
     }
 
     // A party-vs-party match belongs to both parties, so the ended match

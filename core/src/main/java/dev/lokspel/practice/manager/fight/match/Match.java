@@ -383,12 +383,10 @@ public abstract class Match extends BukkitRunnable
    */
   public Statistic getCurrentStat(Player player) {
     Round currentRound = this.getCurrentRound();
-    if (currentRound == null) {
+    if (currentRound == null || player == null) {
       return null;
     }
-    return currentRound
-        .getStatistics()
-        .getOrDefault(ProfileManager.getInstance().getUuids().get(player), null);
+    return currentRound.getStatistics().getOrDefault(player.getUniqueId(), null);
   }
 
   @Override
