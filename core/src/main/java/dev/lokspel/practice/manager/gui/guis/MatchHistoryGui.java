@@ -1,51 +1,33 @@
 package dev.lokspel.practice.manager.gui.guis;
 
 import dev.lokspel.practice.config.PracticeConfig;
+import dev.lokspel.practice.config.gui.Guis;
 import dev.lokspel.practice.manager.backend.BackendUtil;
 import dev.lokspel.practice.manager.gui.Gui;
 import dev.lokspel.practice.manager.gui.GuiItem;
 import dev.lokspel.practice.manager.gui.GuiType;
 import dev.lokspel.practice.manager.matchhistory.MatchHistoryEntry;
-import dev.lokspel.practice.util.Common;
 import dev.lokspel.practice.util.InventoryUtil;
 import dev.lokspel.practice.util.ItemCreateUtil;
-import dev.lokspel.practice.util.StringUtil;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
+import dev.lokspel.practice.util.TimeUtil;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.Collectors;
-import net.kyori.adventure.text.Component;
-import org.bukkit.Material;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
-/**
- * Match History GUI — fully configurable through guis.yml.
- *
- * <p>guis.yml path: GUIS.MATCH-HISTORY.*
- *
- * <p>Layout strategy ───────────────────────────────────────────────────────────────── The GUI is
- * filled with a configurable filler item. Match items are placed in the CENTER of the inventory: •
- * For a 3-row (27-slot) GUI with 5 matches the items land in the middle row (slots 9-17), centred
- * within that row. • If CENTER-ITEMS is false the items start at slot 0. Every slot is
- * configurable: START-SLOT overrides the automatic centering when set to a non-negative value.
- */
 public class MatchHistoryGui extends Gui {
 
-  private static final SimpleDateFormat DATE_FMT = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-
-  private final UUID viewerUuid;
+  private final UUID targetUuid;
   private final String targetName;
   private final List<MatchHistoryEntry> entries;
 
-  public MatchHistoryGui(UUID viewerUuid, String targetName, List<MatchHistoryEntry> entries) {
+  public MatchHistoryGui(UUID targetUuid, String targetName, List<MatchHistoryEntry> entries) {
     super(GuiType.MatchHistory_Gui);
-    this.viewerUuid = viewerUuid;
+    this.targetUuid = targetUuid;
     this.targetName = targetName;
     this.entries = entries;
     build();
@@ -58,272 +40,92 @@ public class MatchHistoryGui extends Gui {
 
   @Override
   public void update() {
-    // Read config
-    String rawTitle = PracticeConfig.guis().getGuis().getMatchHistory().getTitle();
-    if (rawTitle == null || rawTitle.isEmpty()) {
-      rawTitle = "<dark_gray>Match History <gray>- <gold>%player%";
-    }
-    rawTitle = rawTitle.replace("%player%", targetName);
+    Guis.MatchHistory config = PracticeConfig.guis().getGuis().getMatchHistory();
+    String title =
+        Objects.requireNonNullElse(
+                config.getTitle(), "<dark_gray>Match History <gray>- <gold>%player%")
+            .replace("%player%", targetName);
 
-    int size = PracticeConfig.guis().getGuis().getMatchHistory().getSize();
+    int size = config.getSize();
     if (size < 9 || size > 54 || size % 9 != 0) {
       size = 27;
     }
 
-    boolean centerItems = PracticeConfig.guis().getGuis().getMatchHistory().isCenterItems();
-    int configuredStart =
-        PracticeConfig.guis().getGuis().getMatchHistory().getStartSlot(); // -1 means auto
+    Inventory inventory = InventoryUtil.createInventory(title, size / 9);
 
-    // Build inventory
-    Inventory inventory = InventoryUtil.createInventory(rawTitle, size / 9);
-
-    // Fill with configurable glass pane
-    ItemStack filler = buildFillerItem();
-    for (int i = 0; i < size; i++) {
-      inventory.setItem(i, filler);
-    }
-
-    // Determine where to place the match items
-    int startSlot;
-    if (configuredStart >= 0) {
-      startSlot = configuredStart;
-    } else if (centerItems) {
-      startSlot = computeCenterStart(size, entries.size());
-    } else {
-      startSlot = 0;
-    }
-
-    // Place match items
-    String materialStr =
-        PracticeConfig.guis().getGuis().getMatchHistory().getMatchItem().getMaterial();
-    Material material = Material.PAPER;
-    if (materialStr != null && !materialStr.isBlank()) {
-      try {
-        material = Material.valueOf(materialStr.toUpperCase());
-      } catch (IllegalArgumentException ignored) {
-        // This best-effort operation may fail without interrupting its caller.
-
+    GuiItem fillerItem = BackendUtil.getGuiItem(config.getFillerItem());
+    ItemStack filler = fillerItem.get();
+    if (filler != null) {
+      for (int i = 0; i < size; i++) {
+        inventory.setItem(i, filler);
       }
     }
 
-    boolean usePlayerHead =
-        PracticeConfig.guis().getGuis().getMatchHistory().getMatchItem().isUsePlayerHead();
+    int startSlot =
+        config.getStartSlot() >= 0
+            ? config.getStartSlot()
+            : (config.isCenterItems()
+                ? InventoryUtil.getCenteredStartSlot(size, entries.size())
+                : 0);
 
     for (int i = 0; i < entries.size(); i++) {
       int slot = startSlot + i;
       if (slot >= size) {
         break;
       }
-      inventory.setItem(slot, buildMatchItem(entries.get(i), material, usePlayerHead));
+      inventory.setItem(slot, buildMatchItem(entries.get(i), config));
     }
 
     gui.put(1, inventory);
   }
 
-  // Item builders
-  private ItemStack buildMatchItem(
-      MatchHistoryEntry entry, Material fallbackMaterial, boolean usePlayerHead) {
+  private ItemStack buildMatchItem(MatchHistoryEntry entry, Guis.MatchHistory config) {
+    boolean isTarget = entry.getPlayerUuid().equals(targetUuid);
+    String opponentName = isTarget ? entry.getOpponentName() : entry.getPlayerName();
+    UUID opponentUuid = isTarget ? entry.getOpponentUuid() : entry.getPlayerUuid();
 
-    boolean won = entry.isWinner(viewerUuid);
+    double myHealth = isTarget ? entry.getPlayerFinalHealth() : entry.getOpponentFinalHealth();
+    double oppHealth = isTarget ? entry.getOpponentFinalHealth() : entry.getPlayerFinalHealth();
+    int myScore = isTarget ? entry.getPlayerScore() : entry.getOpponentScore();
+    int oppScore = isTarget ? entry.getOpponentScore() : entry.getPlayerScore();
+
+    boolean won = entry.isWinner(targetUuid);
     boolean draw = entry.getWinnerUuid() == null;
 
-    String oppName = getOpponentName(entry);
-    UUID oppUuid = getOpponentUuid(entry);
-
-    // Resolve result label — must be effectively final for lambda capture
-    String rawResult =
+    Guis.MatchHistory.Messages messages = config.getMessages();
+    String result =
         won
-            ? StringUtil.cc(
-                PracticeConfig.guis().getGuis().getMatchHistory().getMessages().getWin())
+            ? Objects.requireNonNullElse(messages.getWin(), "<green>Win")
             : draw
-                ? StringUtil.cc(
-                    PracticeConfig.guis().getGuis().getMatchHistory().getMessages().getDraw())
-                : StringUtil.cc(
-                    PracticeConfig.guis().getGuis().getMatchHistory().getMessages().getLoss());
-    final String result =
-        (rawResult == null || rawResult.isBlank())
-            ? (won ? "<green>Win" : draw ? "<yellow>Equality" : "<red>Loss")
-            : rawResult;
+                ? Objects.requireNonNullElse(messages.getDraw(), "<yellow>Equality")
+                : Objects.requireNonNullElse(messages.getLoss(), "<red>Loss");
 
-    double myHealth = getMyHealth(entry);
-    double oppHealth = getOpponentHealth(entry);
-    int myScore = getMyScore(entry);
-    int oppScore = getOpponentScore(entry);
-
-    // Name
-    String rawName = PracticeConfig.guis().getGuis().getMatchHistory().getMatchItem().getName();
-    if (rawName == null || rawName.isBlank()) {
-      rawName = "<yellow>Match vs <white>%opponent%";
-    }
-    String displayName =
-        applyPlaceholders(
-            rawName, entry, oppName, result, myScore, oppScore, myHealth, oppHealth, won, draw);
-
-    // Lore
-    List<String> loreCfg =
-        PracticeConfig.guis().getGuis().getMatchHistory().getMatchItem().getLore();
-    if (loreCfg == null || loreCfg.isEmpty()) {
-      loreCfg = defaultLore();
-    }
-    List<Component> lore =
-        loreCfg.stream()
-            .map(
-                line ->
-                    applyPlaceholders(
-                        line, entry, oppName, result, myScore, oppScore, myHealth, oppHealth, won,
-                        draw))
-            .map(line -> Common.legacyToComponent(StringUtil.cc(line)))
-            .collect(Collectors.toList());
-
-    // ItemStack
-    ItemStack item;
-    if (usePlayerHead) {
-      item = buildSkull(oppUuid, oppName);
+    Guis.MatchHistory.MatchItem matchItemConfig = config.getMatchItem();
+    GuiItem guiItem;
+    if (matchItemConfig.isUsePlayerHead()) {
+      OfflinePlayer opponent = Bukkit.getOfflinePlayer(opponentUuid);
+      guiItem = new GuiItem(ItemCreateUtil.getPlayerHead(opponent));
+      guiItem.setName(matchItemConfig.getName());
+      guiItem.setLore(matchItemConfig.getLore());
     } else {
-      item = new ItemStack(fallbackMaterial);
+      guiItem = BackendUtil.getGuiItem(matchItemConfig).cloneItem();
     }
 
-    // Apply win/loss enchant glow if configured
-    boolean glowOnWin =
-        PracticeConfig.guis().getGuis().getMatchHistory().getMatchItem().isGlowOnWin();
-
-    ItemMeta meta = item.getItemMeta();
-    if (meta != null) {
-      meta.displayName(Common.legacyToComponent(StringUtil.cc(displayName)));
-      meta.lore(lore);
-      if (glowOnWin && won) {
-        org.bukkit.NamespacedKey glowKey = org.bukkit.NamespacedKey.minecraft("unbreaking");
-        org.bukkit.enchantments.Enchantment glowEnchant =
-            org.bukkit.Registry.ENCHANTMENT.get(glowKey);
-        if (glowEnchant != null) {
-          meta.addEnchant(glowEnchant, 1, true);
-        }
-        meta.addItemFlags(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS);
-      }
-      meta.addItemFlags(
-          org.bukkit.inventory.ItemFlag.HIDE_ATTRIBUTES,
-          org.bukkit.inventory.ItemFlag.HIDE_UNBREAKABLE);
-      meta.setUnbreakable(true);
-      item.setItemMeta(meta);
+    if (matchItemConfig.isGlowOnWin() && won) {
+      guiItem.setGlowing(true);
     }
-    return item;
-  }
 
-  private ItemStack buildSkull(UUID uuid, String name) {
-    OfflinePlayer op = org.bukkit.Bukkit.getOfflinePlayer(uuid);
-    return ItemCreateUtil.getPlayerHead(op);
-  }
-
-  private ItemStack buildFillerItem() {
-    GuiItem fillerCfg =
-        BackendUtil.getGuiItem(PracticeConfig.guis().getGuis().getMatchHistory().getFillerItem());
-    if (fillerCfg != null) {
-      ItemStack built = fillerCfg.get();
-      if (built != null) {
-        return built;
-      }
-    }
-    // Fallback
-    ItemStack item = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
-    ItemMeta meta = item.getItemMeta();
-    if (meta != null) {
-      meta.displayName(Component.text(" "));
-      item.setItemMeta(meta);
-    }
-    return item;
-  }
-
-  // Centering logic
-  /**
-   * Computes the first slot so that {@code count} items are centred inside the inventory. Works
-   * row-by-row: 1. Pick the middle row (or slightly above centre for even row counts). 2. Within
-   * that row, centre the items horizontally. If there are more items than fit in one row the items
-   * span multiple rows, still centred vertically within the whole GUI.
-   */
-  private int computeCenterStart(int size, int count) {
-    int rows = size / 9;
-    int itemRows = (int) Math.ceil(count / 9.0);
-
-    // Vertical: start on the row that centres itemRows within rows
-    int startRow = Math.max(0, (rows - itemRows) / 2);
-
-    // Horizontal: for the first (possibly partial) row
-    int itemsInFirstRow = Math.min(count, 9);
-    int startCol = Math.max(0, (9 - itemsInFirstRow) / 2);
-
-    return startRow * 9 + startCol;
-  }
-
-  // Placeholder helpers
-  private String applyPlaceholders(
-      String text,
-      MatchHistoryEntry entry,
-      String oppName,
-      String result,
-      int myScore,
-      int oppScore,
-      double myHealth,
-      double oppHealth,
-      boolean won,
-      boolean draw) {
-    return text.replace("%opponent%", oppName)
+    return guiItem
+        .replace("%opponent%", opponentName)
         .replace("%result%", result)
         .replace("%score%", myScore + " - " + oppScore)
         .replace("%kit%", entry.getKitName())
         .replace("%arena%", entry.getArenaName())
-        .replace("%player_health%", formatHealth(myHealth))
-        .replace("%opponent_health%", formatHealth(oppHealth))
+        .replace("%player_health%", String.format("%.1f❤", myHealth / 2.0))
+        .replace("%opponent_health%", String.format("%.1f❤", oppHealth / 2.0))
         .replace("%duration%", entry.getFormattedDuration())
-        .replace("%date%", DATE_FMT.format(new Date(entry.getPlayedAt())));
-  }
-
-  private String formatHealth(double raw) {
-    return String.format("%.1f❤", raw / 2.0);
-  }
-
-  // Perspective helpers
-  private boolean isViewer(MatchHistoryEntry e) {
-    return viewerUuid != null && e.getPlayerUuid().equals(viewerUuid);
-  }
-
-  private String getOpponentName(MatchHistoryEntry e) {
-    return isViewer(e) ? e.getOpponentName() : e.getPlayerName();
-  }
-
-  private UUID getOpponentUuid(MatchHistoryEntry e) {
-    return isViewer(e) ? e.getOpponentUuid() : e.getPlayerUuid();
-  }
-
-  private double getMyHealth(MatchHistoryEntry e) {
-    return isViewer(e) ? e.getPlayerFinalHealth() : e.getOpponentFinalHealth();
-  }
-
-  private double getOpponentHealth(MatchHistoryEntry e) {
-    return isViewer(e) ? e.getOpponentFinalHealth() : e.getPlayerFinalHealth();
-  }
-
-  private int getMyScore(MatchHistoryEntry e) {
-    return isViewer(e) ? e.getPlayerScore() : e.getOpponentScore();
-  }
-
-  private int getOpponentScore(MatchHistoryEntry e) {
-    return isViewer(e) ? e.getOpponentScore() : e.getPlayerScore();
-  }
-
-  // Default lore
-  private List<String> defaultLore() {
-    List<String> lore = new ArrayList<>();
-    lore.add("<dark_gray><st>--------------------");
-    lore.add("<gray>Result: %result%");
-    lore.add("<gray>Score: %score%");
-    lore.add("<gray>Kit: <white>%kit%");
-    lore.add("<gray>Arena: <white>%arena%");
-    lore.add("<gray>Your Health: %player_health%");
-    lore.add("<gray>Opponent Health: %opponent_health%");
-    lore.add("<gray>Duration: <white>%duration%");
-    lore.add("<gray>Played: <white>%date%");
-    lore.add("<dark_gray><st>--------------------");
-    return lore;
+        .replace("%date%", TimeUtil.formatDate(entry.getPlayedAt()))
+        .get();
   }
 
   @Override

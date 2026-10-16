@@ -21,7 +21,7 @@ import dev.lokspel.practice.manager.profile.group.GroupManager;
 import dev.lokspel.practice.util.Common;
 import dev.lokspel.practice.util.ItemSerializationUtil;
 import dev.lokspel.practice.util.NameFormatUtil;
-import io.papermc.paper.registry.RegistryAccess;
+import dev.lokspel.practice.util.NamespacedKeyUtil;
 import io.papermc.paper.registry.RegistryKey;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import lombok.Getter;
-import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.trim.TrimMaterial;
 import org.bukkit.inventory.meta.trim.TrimPattern;
@@ -195,12 +194,18 @@ public class ProfileFile {
 
         TrimPattern pattern = cosmeticsData.getPattern(tier, slot);
         trim.setPattern(
-            pattern != null ? "minecraft:" + CosmeticsPermissionManager.getTrimId(pattern) : null);
+            pattern != null
+                ? NamespacedKeyUtil.MINECRAFT_NAMESPACE
+                    + ":"
+                    + CosmeticsPermissionManager.getTrimId(pattern)
+                : null);
 
         TrimMaterial material = cosmeticsData.getMaterial(tier, slot);
         trim.setMaterial(
             material != null
-                ? "minecraft:" + CosmeticsPermissionManager.getTrimId(material)
+                ? NamespacedKeyUtil.MINECRAFT_NAMESPACE
+                    + ":"
+                    + CosmeticsPermissionManager.getTrimId(material)
                 : null);
 
         if (trim.getPattern() == null && trim.getMaterial() == null) {
@@ -616,31 +621,10 @@ public class ProfileFile {
   }
 
   private TrimPattern getTrimPatternByName(String name) {
-    NamespacedKey key = parseNamespacedKey(name);
-    if (key == null) {
-      return null;
-    }
-    return RegistryAccess.registryAccess().getRegistry(RegistryKey.TRIM_PATTERN).get(key);
+    return NamespacedKeyUtil.resolve(RegistryKey.TRIM_PATTERN, name);
   }
 
   private TrimMaterial getTrimMaterialByName(String name) {
-    NamespacedKey key = parseNamespacedKey(name);
-    if (key == null) {
-      return null;
-    }
-    return RegistryAccess.registryAccess().getRegistry(RegistryKey.TRIM_MATERIAL).get(key);
-  }
-
-  private NamespacedKey parseNamespacedKey(String raw) {
-    if (raw == null || raw.isBlank()) {
-      return null;
-    }
-
-    String normalized = raw.trim().toLowerCase(Locale.ROOT);
-    if (!normalized.contains(":")) {
-      normalized = "minecraft:" + normalized;
-    }
-
-    return NamespacedKey.fromString(normalized);
+    return NamespacedKeyUtil.resolve(RegistryKey.TRIM_MATERIAL, name);
   }
 }

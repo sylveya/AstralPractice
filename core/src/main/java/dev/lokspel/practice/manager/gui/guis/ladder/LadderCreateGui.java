@@ -13,7 +13,6 @@ import dev.lokspel.practice.manager.ladder.enums.LadderType;
 import dev.lokspel.practice.util.Common;
 import dev.lokspel.practice.util.InventoryUtil;
 import dev.lokspel.practice.util.ItemCreateUtil;
-import dev.lokspel.practice.util.StringUtil;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
@@ -82,8 +81,7 @@ public class LadderCreateGui extends Gui {
 
       ItemStack item = ItemCreateUtil.createItem("<yellow>" + type.getName(), type.getIcon());
       ItemMeta itemMeta = item.getItemMeta();
-      itemMeta.lore(
-          StringUtil.cc(type.getDescription()).stream().map(Common::legacyToComponent).toList());
+      itemMeta.lore(Common.toComponent(type.getDescription()));
       item.setItemMeta(itemMeta);
 
       int slot = CONTENT_SLOTS[index++];

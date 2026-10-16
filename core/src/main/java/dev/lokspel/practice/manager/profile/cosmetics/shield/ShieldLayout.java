@@ -1,15 +1,14 @@
 package dev.lokspel.practice.manager.profile.cosmetics.shield;
 
+import dev.lokspel.practice.util.NamespacedKeyUtil;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.DyeColor;
-import org.bukkit.NamespacedKey;
 import org.bukkit.block.banner.PatternType;
 
 /**
@@ -105,21 +104,7 @@ public class ShieldLayout {
   }
 
   private static PatternType parsePatternType(String raw) {
-    if (raw == null || raw.isBlank()) {
-      return null;
-    }
-
-    String normalized = raw.trim().toLowerCase(Locale.ROOT);
-    if (!normalized.contains(":")) {
-      normalized = "minecraft:" + normalized;
-    }
-
-    NamespacedKey key = NamespacedKey.fromString(normalized);
-    if (key == null) {
-      return null;
-    }
-
-    return RegistryAccess.registryAccess().getRegistry(RegistryKey.BANNER_PATTERN).get(key);
+    return NamespacedKeyUtil.resolve(RegistryKey.BANNER_PATTERN, raw);
   }
 
   private static String escapePipe(String s) {

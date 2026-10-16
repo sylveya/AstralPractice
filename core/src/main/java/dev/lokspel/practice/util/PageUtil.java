@@ -34,10 +34,17 @@ public final class PageUtil {
     return size > lowerBound;
   }
 
-  public static int getMaxPage(List<ItemStack> icons, int spaces) {
-    if (icons == null || icons.isEmpty() || spaces <= 0) {
+  public static int getMaxPage(int size, int spaces) {
+    if (size <= 0 || spaces <= 0) {
       return 1;
     }
-    return Math.max(1, (int) Math.ceil((double) icons.size() / spaces));
+    return Math.max(1, (int) Math.ceil((double) size / spaces));
+  }
+
+  public static int getMaxPage(List<ItemStack> icons, int spaces) {
+    if (icons == null) {
+      return 1;
+    }
+    return getMaxPage(icons.size(), spaces);
   }
 }

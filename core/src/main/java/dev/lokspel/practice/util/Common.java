@@ -7,13 +7,11 @@ import io.papermc.paper.registry.RegistryKey;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Location;
-import org.bukkit.NamespacedKey;
 import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -41,13 +39,14 @@ public final class Common {
       line = PlaceholderAPI.setPlaceholders(player, line);
     }
 
-    send(player, AstralPractice.getMiniMessage().deserialize(StringUtil.legacyToMiniMessage(line)));
+    send(player, toComponent(line));
   }
 
   public static void sendConsoleMmMessage(String string) {
-    send(
-        AstralPractice.getInstance().getServer().getConsoleSender(),
-        AstralPractice.getMiniMessage().deserialize(StringUtil.legacyToMiniMessage(string)));
+    if (string == null || string.isEmpty()) {
+      return;
+    }
+    send(AstralPractice.getInstance().getServer().getConsoleSender(), toComponent(string));
   }
 
   public static void playDeathEffect(
@@ -82,46 +81,78 @@ public final class Common {
     }
   }
 
-  public static Component deserializeMiniMessage(String line) {
-    if (line == null || line.isEmpty()) {
+  public static Component toComponent(String text) {
+    if (text == null || text.isEmpty()) {
       return Component.empty();
     }
-    return AstralPractice.getMiniMessage().deserialize(StringUtil.legacyToMiniMessage(line));
+    return AstralPractice.getMiniMessage().deserialize(StringUtil.legacyToMiniMessage(text));
+  }
+
+  public static List<Component> toComponent(List<String> list) {
+    if (list == null) {
+      return new ArrayList<>();
+    }
+    List<Component> components = new ArrayList<>(list.size());
+    for (String line : list) {
+      components.add(toComponent(line));
+    }
+    return components;
+  }
+
+  public static String toLegacy(Component component) {
+    if (component == null) {
+      return "";
+    }
+    return LegacyComponentSerializer.legacySection().serialize(component);
+  }
+
+  public static String toLegacy(String text) {
+    if (text == null || text.isEmpty()) {
+      return "";
+    }
+    return toLegacy(toComponent(text));
+  }
+
+  public static List<String> toLegacy(List<String> list) {
+    if (list == null) {
+      return new ArrayList<>();
+    }
+    List<String> result = new ArrayList<>(list.size());
+    for (String line : list) {
+      result.add(toLegacy(line));
+    }
+    return result;
+  }
+
+  public static Component deserializeMiniMessage(String line) {
+    return toComponent(line);
+  }
+
+  public static Component legacyToComponent(String message) {
+    return toComponent(message);
   }
 
   public static String serializeComponentToLegacyString(Component component) {
-    return LegacyComponentSerializer.legacyAmpersand().serialize(component);
+    return toLegacy(component);
   }
 
   public static String mmToNormal(String line) {
-    return StringUtil.cc(serializeComponentToLegacyString(deserializeMiniMessage(line)));
+    return toLegacy(line);
   }
 
   public static List<String> mmToNormal(List<String> list) {
-    List<String> newList = new ArrayList<>();
-    for (String line : list) {
-      newList.add(mmToNormal(line));
-    }
-    return newList;
+    return toLegacy(list);
   }
 
   public static String serializeNormalToMmString(String normalString) {
     return StringUtil.legacyToMiniMessage(normalString);
   }
 
-  public static String colorize(String message) {
-    return serializeComponentToLegacyString(deserializeMiniMessage(message));
-  }
-
-  public static Component legacyToComponent(String message) {
-    return deserializeMiniMessage(message);
-  }
-
   public static String stripLegacyColor(String message) {
     if (message == null || message.isEmpty()) {
       return "";
     }
-    return PlainTextComponentSerializer.plainText().serialize(deserializeMiniMessage(message));
+    return PlainTextComponentSerializer.plainText().serialize(toComponent(message));
   }
 
   public static String getItemDisplayName(ItemMeta itemMeta) {
@@ -176,13 +207,6 @@ public final class Common {
   }
 
   public static Enchantment resolveEnchantment(String enchantmentName) {
-    if (enchantmentName == null || enchantmentName.isBlank()) {
-      return null;
-    }
-
-    NamespacedKey key = NamespacedKey.fromString(enchantmentName.trim().toLowerCase(Locale.ROOT));
-    return key != null
-        ? RegistryAccess.registryAccess().getRegistry(RegistryKey.ENCHANTMENT).get(key)
-        : null;
+    return NamespacedKeyUtil.resolve(RegistryKey.ENCHANTMENT, enchantmentName);
   }
 }

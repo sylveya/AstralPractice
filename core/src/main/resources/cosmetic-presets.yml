@@ -2,7 +2,8 @@
 # A selected preset overrides the player's own design.
 #
 # This file is created once and never updated by the plugin, so your edits are kept.
-# Add, edit or delete presets freely. Changes apply after a restart.
+# Add, edit or delete presets freely. Manual changes apply after a restart.
+# Admins can also add presets in-game with /prac preset add (applies immediately).
 #
 # Permissions: ap.cosmetics.preset.trim.<id>, ap.cosmetics.preset.shield.<id>, or ap.cosmetics.preset.* (default: op).
 #

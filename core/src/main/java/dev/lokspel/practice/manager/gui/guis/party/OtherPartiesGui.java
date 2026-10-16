@@ -1,6 +1,5 @@
 package dev.lokspel.practice.manager.gui.guis.party;
 
-import dev.lokspel.practice.AstralPractice;
 import dev.lokspel.practice.config.PracticeConfig;
 import dev.lokspel.practice.manager.backend.BackendUtil;
 import dev.lokspel.practice.manager.fight.match.enums.MatchType;
@@ -19,7 +18,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.Getter;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
@@ -54,35 +52,34 @@ public class OtherPartiesGui extends Gui {
 
   @Override
   public void update() {
-    Bukkit.getScheduler()
-        .runTaskAsynchronously(
-            AstralPractice.getInstance(),
-            () -> {
-              Inventory inventory = gui.get(1);
-              inventory.clear();
-              partySlots.clear();
+    Inventory inventory = gui.get(1);
+    if (inventory == null) {
+      return;
+    }
+    inventory.clear();
+    partySlots.clear();
 
-              if (PartyManager.getInstance() == null) {
-                return;
-              }
+    if (PartyManager.getInstance() == null) {
+      return;
+    }
 
-              for (Party party : PartyManager.getInstance().getParties()) {
-                int slot = inventory.firstEmpty();
+    for (Party party : PartyManager.getInstance().getParties()) {
+      int slot = inventory.firstEmpty();
 
-                if (slot < inventory.getSize()) {
-                  inventory.setItem(slot, getPartyItem(party));
-                  partySlots.put(slot, party);
-                }
-              }
+      if (slot < inventory.getSize()) {
+        inventory.setItem(slot, getPartyItem(party));
+        partySlots.put(slot, party);
+      }
+    }
 
-              for (int i = 0; i < inventory.getSize(); i++) {
-                if (inventory.getItem(i) == null) {
-                  inventory.setItem(i, fillerItem());
-                }
-              }
+    ItemStack filler = fillerItem();
+    for (int i = 0; i < inventory.getSize(); i++) {
+      if (inventory.getItem(i) == null) {
+        inventory.setItem(i, filler);
+      }
+    }
 
-              updatePlayers();
-            });
+    updatePlayers();
   }
 
   @Override

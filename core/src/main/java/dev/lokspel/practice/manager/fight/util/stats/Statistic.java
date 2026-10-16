@@ -86,11 +86,9 @@ public class Statistic {
     }
 
     if (player != null) {
-      if (StatisticListener.getCURRENT_COMBO().containsKey(player)) {
-        int combo = StatisticListener.getCURRENT_COMBO().get(player);
-        if (combo > longestCombo) {
-          longestCombo = combo;
-        }
+      int combo = StatisticListener.getCurrentCombo(player);
+      if (combo > longestCombo) {
+        longestCombo = combo;
       }
 
       if (!dead) {
@@ -104,9 +102,7 @@ public class Statistic {
       endArmor = player.getInventory().getArmorContents();
       endInventory = player.getInventory().getContents();
 
-      StatisticListener.getCURRENT_CPS().remove(player);
-      StatisticListener.getCPS().remove(player);
-      StatisticListener.getCURRENT_COMBO().remove(player);
+      StatisticListener.clearPlayer(player);
     }
   }
 }

@@ -5,16 +5,59 @@ import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.util.Common;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import lombok.Getter;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.util.StringUtil;
 
 public class MessageCommand extends PrivateMessageCommand {
 
-  @Getter public static HashMap<Player, Player> latestMessage = new HashMap<>();
+  private static final Map<UUID, UUID> latestMessage = new ConcurrentHashMap<>();
+
+  public static void setLatestMessage(Player p1, Player p2) {
+    if (p1 == null || p2 == null) {
+      return;
+    }
+    latestMessage.put(p1.getUniqueId(), p2.getUniqueId());
+    latestMessage.put(p2.getUniqueId(), p1.getUniqueId());
+  }
+
+  public static Player getLatestMessageTarget(Player player) {
+    if (player == null) {
+      return null;
+    }
+    UUID targetUuid = latestMessage.get(player.getUniqueId());
+    if (targetUuid == null) {
+      return null;
+    }
+    return Bukkit.getPlayer(targetUuid);
+  }
+
+  public static boolean hasLatestMessage(Player player) {
+    if (player == null) {
+      return false;
+    }
+    return latestMessage.containsKey(player.getUniqueId());
+  }
+
+  public static void clearPlayer(Player player) {
+    if (player == null) {
+      return;
+    }
+    clearPlayer(player.getUniqueId());
+  }
+
+  public static void clearPlayer(UUID uuid) {
+    if (uuid == null) {
+      return;
+    }
+    latestMessage.remove(uuid);
+    latestMessage.values().removeIf(targetUuid -> targetUuid.equals(uuid));
+  }
 
   public MessageCommand() {
     super("message", new String[] {"m", "msg", "tell", "whisper", "w"});
@@ -114,8 +157,7 @@ public class MessageCommand extends PrivateMessageCommand {
             .replace("%receiver%", target.getName())
             .replace("%message%", message.toString()));
 
-    latestMessage.put(target, player);
-    latestMessage.put(player, target);
+    setLatestMessage(target, player);
   }
 
   @Override
@@ -138,7 +180,7 @@ public class MessageCommand extends PrivateMessageCommand {
         }
       }
 
-      return org.bukkit.util.StringUtil.copyPartialMatches(args[0], onlineNames, new ArrayList<>());
+      return StringUtil.copyPartialMatches(args[0], onlineNames, new ArrayList<>());
     }
 
     return results;

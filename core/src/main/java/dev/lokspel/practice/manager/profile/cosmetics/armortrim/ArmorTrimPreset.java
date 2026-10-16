@@ -1,13 +1,12 @@
 package dev.lokspel.practice.manager.profile.cosmetics.armortrim;
 
 import dev.lokspel.practice.util.Common;
-import io.papermc.paper.registry.RegistryAccess;
+import dev.lokspel.practice.util.NamespacedKeyUtil;
 import io.papermc.paper.registry.RegistryKey;
 import java.util.EnumMap;
 import java.util.Locale;
 import java.util.Map;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ArmorMeta;
@@ -58,33 +57,12 @@ public record ArmorTrimPreset(
   }
 
   private static ArmorTrim resolveTrim(String patternStr, String materialStr) {
-    NamespacedKey patternKey = parseNamespacedKey(patternStr);
-    NamespacedKey materialKey = parseNamespacedKey(materialStr);
-    if (patternKey == null || materialKey == null) {
-      return null;
-    }
-
-    TrimPattern pattern =
-        RegistryAccess.registryAccess().getRegistry(RegistryKey.TRIM_PATTERN).get(patternKey);
-    TrimMaterial material =
-        RegistryAccess.registryAccess().getRegistry(RegistryKey.TRIM_MATERIAL).get(materialKey);
+    TrimPattern pattern = NamespacedKeyUtil.resolve(RegistryKey.TRIM_PATTERN, patternStr);
+    TrimMaterial material = NamespacedKeyUtil.resolve(RegistryKey.TRIM_MATERIAL, materialStr);
     if (pattern == null || material == null) {
       return null;
     }
 
     return new ArmorTrim(material, pattern);
-  }
-
-  private static NamespacedKey parseNamespacedKey(String raw) {
-    if (raw == null || raw.isBlank()) {
-      return null;
-    }
-
-    String normalized = raw.trim().toLowerCase(Locale.ROOT);
-    if (!normalized.contains(":")) {
-      normalized = "minecraft:" + normalized;
-    }
-
-    return NamespacedKey.fromString(normalized);
   }
 }

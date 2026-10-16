@@ -13,14 +13,17 @@ import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
 import java.util.ArrayList;
 import java.util.List;
+import net.kyori.adventure.text.Component;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
+import org.bukkit.block.banner.Pattern;
 import org.bukkit.block.banner.PatternType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 
 /** Shield editor with a clear layout: preview + controls on top, 6 layer slots centered. */
@@ -280,7 +283,7 @@ public class ShieldEditorGui extends Gui {
     ItemMeta meta = shield.getItemMeta();
     if (meta != null) {
       meta.displayName(tc("<yellow>Shield Preview"));
-      List<net.kyori.adventure.text.Component> lore = new ArrayList<>();
+      List<Component> lore = new ArrayList<>();
       lore.add(
           tc(
               "<gray>Base: <white>"
@@ -337,14 +340,14 @@ public class ShieldEditorGui extends Gui {
 
     // Apply pattern to the banner icon
     ItemStack stack = item.get();
-    if (stack.getItemMeta() instanceof org.bukkit.inventory.meta.BannerMeta bm) {
-      bm.addPattern(new org.bukkit.block.banner.Pattern(layer.color(), layer.pattern()));
+    if (stack.getItemMeta() instanceof BannerMeta bm) {
+      bm.addPattern(new Pattern(layer.color(), layer.pattern()));
       stack.setItemMeta(bm);
     }
 
     ItemMeta meta = stack.getItemMeta();
     if (meta != null) {
-      List<net.kyori.adventure.text.Component> lore = new ArrayList<>();
+      List<Component> lore = new ArrayList<>();
       lore.add(tc("<gray>Color: <white>" + fmt(layer.color().name())));
       lore.add(tc("<gray>Pattern: <white>" + getPatternDisplayName(layer.pattern())));
       lore.add(tc(""));
@@ -366,7 +369,7 @@ public class ShieldEditorGui extends Gui {
     return layouts.get(layoutIndex);
   }
 
-  private static net.kyori.adventure.text.Component tc(String legacy) {
+  private static Component tc(String legacy) {
     return Common.deserializeMiniMessage(legacy);
   }
 

@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -53,7 +54,8 @@ public abstract class QueueSelectorGui extends Gui {
   // page -> slot -> ladder mapping, used for click-handling and live updates
   private final Map<Integer, Map<Integer, NormalLadder>> pageLadderSlots = new HashMap<>();
   private final Map<Integer, Map<Integer, ItemStack>> templateItems = new HashMap<>();
-  private final Map<Integer, Integer> selectorSlotToPage = new HashMap<>();
+  private final List<CategoryConfig> categoriesList = new ArrayList<>();
+  private final Map<Integer, List<CategoryConfig>> slotToCategories = new LinkedHashMap<>();
 
   private long lastUpdateTime = -1L;
   private BukkitTask tickerTask = null;
@@ -130,11 +132,19 @@ public abstract class QueueSelectorGui extends Gui {
     this.gui.clear();
     this.pageLadderSlots.clear();
     this.templateItems.clear();
-    this.selectorSlotToPage.clear();
+    this.categoriesList.clear();
+    this.slotToCategories.clear();
 
     List<CategoryConfig> categories = loadCategories(selectorGui);
     if (categories.isEmpty()) {
       return;
+    }
+    this.categoriesList.addAll(categories);
+
+    for (CategoryConfig category : categories) {
+      slotToCategories
+          .computeIfAbsent(category.selectorSlot(), _ -> new ArrayList<>())
+          .add(category);
     }
 
     int rows = Math.clamp(Objects.requireNonNullElse(selectorGui.getSize(), 0), 1, 6);
@@ -143,12 +153,6 @@ public abstract class QueueSelectorGui extends Gui {
       filler = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
     }
     GuiItem ladderTemplate = icon(guiConfig, QueueGui.Icons::getLadder);
-
-    for (int i = 0; i < categories.size(); i++) {
-      int pageId = i + 1;
-      CategoryConfig category = categories.get(i);
-      selectorSlotToPage.put(category.selectorSlot(), pageId);
-    }
 
     for (int i = 0; i < categories.size(); i++) {
       int pageId = i + 1;
@@ -328,7 +332,7 @@ public abstract class QueueSelectorGui extends Gui {
 
     applyLayoutFillers(inventory, filler, actualSize);
 
-    placeCategorySelectors(inventory, currentCategory, allCategories, actualSize, guiConfig);
+    placeCategorySelectors(inventory, currentCategory, actualSize, guiConfig);
     placeQuickMatchItem(inventory, filler, actualSize, guiConfig);
 
     int ladderAmount =
@@ -519,22 +523,26 @@ public abstract class QueueSelectorGui extends Gui {
   }
 
   private void placeCategorySelectors(
-      Inventory inventory,
-      CategoryConfig currentCategory,
-      List<CategoryConfig> allCategories,
-      int actualSize,
-      QueueGui guiConfig) {
-    for (CategoryConfig category : allCategories) {
-      if (category.iconDisabled()) {
-        continue;
-      }
-
-      int selectorSlot = category.selectorSlot();
+      Inventory inventory, CategoryConfig currentCategory, int actualSize, QueueGui guiConfig) {
+    for (Map.Entry<Integer, List<CategoryConfig>> entry : slotToCategories.entrySet()) {
+      int selectorSlot = entry.getKey();
       if (selectorSlot < 0 || selectorSlot >= actualSize) {
         continue;
       }
 
-      boolean selected = currentCategory.key().equalsIgnoreCase(category.key());
+      List<CategoryConfig> slotCategories = entry.getValue();
+      if (slotCategories == null || slotCategories.isEmpty()) {
+        continue;
+      }
+
+      CategoryConfig targetCategory = getNextCategory(slotCategories, currentCategory);
+      if (targetCategory.iconDisabled()) {
+        continue;
+      }
+
+      boolean selected =
+          slotCategories.size() == 1
+              && currentCategory.key().equalsIgnoreCase(targetCategory.key());
       GuiItem selectorTemplate = getCategorySelectorTemplate(guiConfig, selected);
       if (selectorTemplate == null) {
         continue;
@@ -543,11 +551,11 @@ public abstract class QueueSelectorGui extends Gui {
       GuiItem selectorIcon =
           selectorTemplate
               .cloneItem()
-              .replace("%category%", category.displayName())
-              .replace("%category_ladders%", getCategoryLadderPreview(category))
+              .replace("%category%", targetCategory.displayName())
+              .replace("%category_ladders%", getCategoryLadderPreview(targetCategory))
               .replace("%weight_class%", getWeightClass().getName());
 
-      Material categoryMaterial = getCategorySelectorMaterial(category, selected);
+      Material categoryMaterial = getCategorySelectorMaterial(targetCategory, selected);
       if (categoryMaterial != null) {
         selectorIcon.setMaterial(categoryMaterial);
       }
@@ -557,6 +565,24 @@ public abstract class QueueSelectorGui extends Gui {
         inventory.setItem(selectorSlot, selectorItem);
       }
     }
+  }
+
+  private CategoryConfig getNextCategory(
+      List<CategoryConfig> slotCategories, CategoryConfig currentCategory) {
+    if (slotCategories.size() == 1) {
+      return slotCategories.get(0);
+    }
+    int currentIndex = slotCategories.indexOf(currentCategory);
+    int nextIndex = currentIndex != -1 ? (currentIndex + 1) % slotCategories.size() : 0;
+    return slotCategories.get(nextIndex);
+  }
+
+  private CategoryConfig getCategoryByPage(int page) {
+    return page >= 1 && page <= categoriesList.size() ? categoriesList.get(page - 1) : null;
+  }
+
+  private int getPageByCategory(CategoryConfig category) {
+    return categoriesList.indexOf(category) + 1;
   }
 
   private GuiItem getCategorySelectorTemplate(QueueGui guiConfig, boolean selected) {
@@ -683,10 +709,15 @@ public abstract class QueueSelectorGui extends Gui {
       return;
     }
 
-    if (selectorSlotToPage.containsKey(rawSlot)) {
-      int targetPage = selectorSlotToPage.get(rawSlot);
-      if (this.gui.containsKey(targetPage)) {
-        this.open(player, targetPage);
+    if (slotToCategories.containsKey(rawSlot)) {
+      List<CategoryConfig> slotCategories = slotToCategories.get(rawSlot);
+      if (slotCategories != null && !slotCategories.isEmpty()) {
+        CategoryConfig nextCategory = getNextCategory(slotCategories, getCategoryByPage(page));
+        int targetPage = getPageByCategory(nextCategory);
+
+        if (targetPage != page && this.gui.containsKey(targetPage)) {
+          this.open(player, targetPage);
+        }
       }
       return;
     }

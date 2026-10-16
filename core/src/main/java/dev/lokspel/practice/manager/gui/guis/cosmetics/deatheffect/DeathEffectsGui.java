@@ -19,6 +19,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -206,9 +207,7 @@ public class DeathEffectsGui extends Gui {
 
     if (isActive && stack.hasItemMeta()) {
       ItemMeta meta = stack.getItemMeta();
-      meta.addItemFlags(
-          org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS,
-          org.bukkit.inventory.ItemFlag.HIDE_ATTRIBUTES);
+      meta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES);
       stack.setItemMeta(meta);
     }
 

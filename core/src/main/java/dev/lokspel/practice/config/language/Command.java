@@ -957,6 +957,9 @@ public class Command {
       @JsonProperty("RENAME")
       private Rename rename = new Rename();
 
+      @JsonProperty("PRESET")
+      private Preset preset = new Preset();
+
       @JsonProperty("RESET")
       private Reset reset = new Reset();
 
@@ -1036,6 +1039,7 @@ public class Command {
                 " <red> » /%label% arenas <gray>- <white>Teleport to arenas world.",
                 " <red> » /%label% hologram <gray>- <white>Manage practice holograms.",
                 " <red> » /%label% rename <gray>- <white>Rename the item in your hand.",
+                " <red> » /%label% preset add <gray>- <white>Save a cosmetic preset.",
                 " <red> » /%label% info <player> <gray>- <white>View player's info.",
                 " <red> » /%label% goldenhead <amount> - Get some golden heads.",
                 " <red> » /%label% reset <player> <gray>- <white>Fully reset a player.",
@@ -1250,6 +1254,55 @@ public class Command {
 
         @JsonProperty("ITEM-IN-HAND")
         private String itemInHand = "<red>You must hold an item in your hand.";
+      }
+
+      @Getter
+      public static class Preset {
+        @JsonProperty("COMMAND-HELP")
+        private List<String> commandHelp =
+            List.of(
+                "<red><st>------------------------------------------------",
+                "<red>/%label% preset add <gray>- <white>Save a cosmetic preset.",
+                "<gray>Hold a custom shield or wear trimmed armor.",
+                "<red><st>------------------------------------------------");
+
+        @JsonProperty("NO-NAME")
+        private String noName =
+            "<red>Rename the item in your hand first with <yellow>/%label% rename <name></yellow>,"
+                + " that name becomes the preset name.";
+
+        @JsonProperty("INVALID-NAME")
+        private String invalidName = "<red>The item name must contain letters or numbers.";
+
+        @JsonProperty("SHIELD-NO-DESIGN")
+        private String shieldNoDesign = "<red>This shield has no base color or patterns.";
+
+        @JsonProperty("SHIELD-TOO-MANY-LAYERS")
+        private String shieldTooManyLayers =
+            "<red>Shield presets support at most %max% pattern layers, this shield has %layers%.";
+
+        @JsonProperty("SHIELD-EXISTS")
+        private String shieldExists =
+            "<red>A shield preset with the id <yellow>%id%</yellow> already exists in"
+                + " cosmetic-presets.yml.";
+
+        @JsonProperty("SHIELD-SAVED")
+        private String shieldSaved =
+            "<green>Saved the shield preset <yellow>%id%</yellow>. Players need"
+                + " <yellow>%permission%</yellow> to use it.";
+
+        @JsonProperty("NO-TRIM")
+        private String noTrim = "<red>Wear armor with trims, or hold a trimmed armor piece.";
+
+        @JsonProperty("TRIM-EXISTS")
+        private String trimExists =
+            "<red>An armor trim preset with the id <yellow>%id%</yellow> already exists in"
+                + " cosmetic-presets.yml.";
+
+        @JsonProperty("TRIM-SAVED")
+        private String trimSaved =
+            "<green>Saved the armor trim preset <yellow>%id%</yellow>. Players need"
+                + " <yellow>%permission%</yellow> to use it.";
       }
 
       @Getter

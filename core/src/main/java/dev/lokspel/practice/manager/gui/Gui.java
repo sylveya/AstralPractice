@@ -129,6 +129,7 @@ public abstract class Gui {
 
   public void close(Player player) {
     inGuiPlayers.remove(player);
+    inConfirmationGui.remove(player);
     GuiManager.getInstance().getOpenGui().remove(player);
   }
 

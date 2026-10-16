@@ -1,6 +1,5 @@
 package dev.lokspel.practice.manager.gui.setup.ladder.laddersettings;
 
-import dev.lokspel.practice.AstralPractice;
 import dev.lokspel.practice.config.PracticeConfig;
 import dev.lokspel.practice.manager.backend.BackendUtil;
 import dev.lokspel.practice.manager.gui.Gui;
@@ -15,12 +14,10 @@ import dev.lokspel.practice.util.InventoryUtil;
 import dev.lokspel.practice.util.KitData;
 import dev.lokspel.practice.util.TimeUtil;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -63,60 +60,51 @@ public class InventoryGui extends Gui {
 
   @Override
   public void update() {
-    Bukkit.getScheduler()
-        .runTaskAsynchronously(
-            AstralPractice.getInstance(),
-            () -> {
-              Inventory inventory = gui.get(1);
-              inventory.clear();
+    Inventory inventory = gui.get(1);
+    if (inventory == null) {
+      return;
+    }
+    inventory.clear();
 
-              for (int i : new int[] {36, 37, 38, 39, 40, 41, 42, 43, 44, 46}) {
-                inventory.setItem(i, GuiManager.fillerItem());
-              }
+    ItemStack filler = GuiManager.fillerItem();
+    for (int i : new int[] {36, 37, 38, 39, 40, 41, 42, 43, 44, 46}) {
+      inventory.setItem(i, filler);
+    }
 
-              inventory.setItem(
-                  45,
-                  BackendUtil.getGuiItem(
-                          PracticeConfig.guis()
-                              .getGuis()
-                              .getSetup()
-                              .getLadder()
-                              .getInventory()
-                              .getIcons()
-                              .getBackTo())
-                      .get());
-              inventory.setItem(47, getCustomKitEditorItem(ladder));
-              inventory.setItem(48, getEffectItem(kitData.getEffects()));
+    inventory.setItem(
+        45,
+        BackendUtil.getGuiItem(
+                PracticeConfig.guis()
+                    .getGuis()
+                    .getSetup()
+                    .getLadder()
+                    .getInventory()
+                    .getIcons()
+                    .getBackTo())
+            .get());
+    inventory.setItem(47, getCustomKitEditorItem(ladder));
+    inventory.setItem(48, getEffectItem(kitData.getEffects()));
 
-              if (kitData.isSet()) {
-                // Inventory content
-                List<ItemStack> inventoryContent = Arrays.asList(kitData.getStorage());
-                List<ItemStack> firstLine = new ArrayList<>();
-                for (int i = 0; i < 36; i++) {
-                  if (i < 9) {
-                    firstLine.add(inventoryContent.get(i));
-                  }
+    if (kitData.isSet()) {
+      // Inventory content
+      if (kitData.getStorage() != null) {
+        InventoryUtil.mapPlayerInventoryToGui(inventory, kitData.getStorage());
+      }
 
-                  if (i < 27) {
-                    inventory.setItem(i, inventoryContent.get(i + 9));
-                  } else {
-                    inventory.setItem(i, firstLine.get(i - 27));
-                  }
-                }
+      // Armor content
+      if (kitData.getArmor() != null) {
+        ItemStack[] armorContent = kitData.getArmor();
+        for (int i = 50; i < 54 && (i - 50) < armorContent.length; i++) {
+          inventory.setItem(i, armorContent[i - 50]);
+        }
+      }
 
-                // Armor content
-                List<ItemStack> armorContent = new ArrayList<>(Arrays.asList(kitData.getArmor()));
-                for (int i = 50; i < 54; i++) {
-                  inventory.setItem(i, armorContent.get(i - 50));
-                }
+      if (kitData.getExtra() != null && kitData.getExtra().length > 0) {
+        inventory.setItem(49, kitData.getExtra()[0]);
+      }
+    }
 
-                if (kitData.getExtra() != null) {
-                  inventory.setItem(49, kitData.getExtra()[0]);
-                }
-              }
-
-              updatePlayers();
-            });
+    updatePlayers();
   }
 
   @Override
