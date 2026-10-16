@@ -150,7 +150,8 @@ public class ItemCreateUtil {
         ItemFlag.HIDE_ATTRIBUTES,
         ItemFlag.HIDE_DESTROYS,
         ItemFlag.HIDE_UNBREAKABLE,
-        ItemFlag.HIDE_PLACED_ON);
+        ItemFlag.HIDE_PLACED_ON,
+        ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
   }
 
   public static ItemStack hideItemFlags(ItemStack item) {
