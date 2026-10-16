@@ -1,6 +1,7 @@
 package dev.lokspel.practice.manager.server.sound;
 
 import dev.lokspel.practice.config.settings.SettingsConfig;
+import dev.lokspel.practice.util.NamespacedKeyUtil;
 import java.util.List;
 import java.util.Objects;
 import lombok.Getter;
@@ -37,10 +38,7 @@ public class SoundEffect {
   }
 
   private static Sound resolveSound(String soundName) {
-    NamespacedKey key =
-        soundName.contains(":")
-            ? NamespacedKey.fromString(soundName.toLowerCase())
-            : NamespacedKey.minecraft(soundName.toLowerCase());
+    NamespacedKey key = NamespacedKeyUtil.parse(soundName);
     if (key == null) {
       throw new IllegalArgumentException("Invalid sound key: " + soundName);
     }

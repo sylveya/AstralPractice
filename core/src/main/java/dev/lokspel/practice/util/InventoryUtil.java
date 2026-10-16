@@ -30,4 +30,26 @@ public final class InventoryUtil {
     }
     return copy;
   }
+
+  /**
+   * Calculates the starting slot index to center {@code itemCount} items horizontally and
+   * vertically within an inventory of size {@code inventorySize}.
+   *
+   * @param inventorySize the total number of slots in the inventory (e.g. 27, 54)
+   * @param itemCount the number of items to display
+   * @return the starting slot index, or 0 if inputs are invalid
+   */
+  public static int getCenteredStartSlot(int inventorySize, int itemCount) {
+    if (inventorySize <= 0 || itemCount <= 0) {
+      return 0;
+    }
+
+    int rows = inventorySize / 9;
+    int itemRows = (int) Math.ceil((double) Math.min(itemCount, inventorySize) / 9.0);
+    int startRow = Math.max(0, (rows - itemRows) / 2);
+    int itemsInFirstRow = Math.min(itemCount, 9);
+    int startCol = Math.max(0, (9 - itemsInFirstRow) / 2);
+
+    return startRow * 9 + startCol;
+  }
 }

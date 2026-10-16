@@ -7,13 +7,11 @@ import io.papermc.paper.registry.RegistryKey;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Location;
-import org.bukkit.NamespacedKey;
 import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -176,13 +174,6 @@ public final class Common {
   }
 
   public static Enchantment resolveEnchantment(String enchantmentName) {
-    if (enchantmentName == null || enchantmentName.isBlank()) {
-      return null;
-    }
-
-    NamespacedKey key = NamespacedKey.fromString(enchantmentName.trim().toLowerCase(Locale.ROOT));
-    return key != null
-        ? RegistryAccess.registryAccess().getRegistry(RegistryKey.ENCHANTMENT).get(key)
-        : null;
+    return NamespacedKeyUtil.resolve(RegistryKey.ENCHANTMENT, enchantmentName);
   }
 }

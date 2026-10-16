@@ -6,7 +6,7 @@ import dev.lokspel.practice.config.language.Command;
 import dev.lokspel.practice.manager.profile.cosmetics.armortrim.ArmorSlot;
 import dev.lokspel.practice.manager.profile.cosmetics.shield.ShieldLayout;
 import dev.lokspel.practice.util.Common;
-import io.papermc.paper.registry.RegistryAccess;
+import dev.lokspel.practice.util.NamespacedKeyUtil;
 import io.papermc.paper.registry.RegistryKey;
 import java.io.File;
 import java.io.IOException;
@@ -20,9 +20,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
-import org.bukkit.Keyed;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.block.Banner;
 import org.bukkit.block.banner.Pattern;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -105,14 +103,10 @@ public final class CosmeticPresetUtil {
       return;
     }
 
-    var bannerRegistry = RegistryAccess.registryAccess().getRegistry(RegistryKey.BANNER_PATTERN);
     List<String> layers = new ArrayList<>();
     for (Pattern pattern : patterns) {
-      NamespacedKey patternKey = bannerRegistry.getKeyOrThrow(pattern.getPattern());
       String patternId =
-          "minecraft".equals(patternKey.getNamespace())
-              ? patternKey.getKey()
-              : patternKey.toString();
+          NamespacedKeyUtil.toShortString(RegistryKey.BANNER_PATTERN, pattern.getPattern());
       layers.add(pattern.getColor().name() + ":" + patternId);
     }
 
@@ -157,17 +151,23 @@ public final class CosmeticPresetUtil {
       }
       if (defaultTrim == null) {
         defaultTrim = trim;
-        values.put("PATTERN", getKeyString(RegistryKey.TRIM_PATTERN, trim.getPattern()));
-        values.put("MATERIAL", getKeyString(RegistryKey.TRIM_MATERIAL, trim.getMaterial()));
+        values.put(
+            "PATTERN",
+            NamespacedKeyUtil.toShortString(RegistryKey.TRIM_PATTERN, trim.getPattern()));
+        values.put(
+            "MATERIAL",
+            NamespacedKeyUtil.toShortString(RegistryKey.TRIM_MATERIAL, trim.getMaterial()));
         continue;
       }
       if (defaultTrim.equals(trim)) {
         continue;
       }
       values.put(
-          slot.name() + ".PATTERN", getKeyString(RegistryKey.TRIM_PATTERN, trim.getPattern()));
+          slot.name() + ".PATTERN",
+          NamespacedKeyUtil.toShortString(RegistryKey.TRIM_PATTERN, trim.getPattern()));
       values.put(
-          slot.name() + ".MATERIAL", getKeyString(RegistryKey.TRIM_MATERIAL, trim.getMaterial()));
+          slot.name() + ".MATERIAL",
+          NamespacedKeyUtil.toShortString(RegistryKey.TRIM_MATERIAL, trim.getMaterial()));
     }
 
     savePresetAsync(
@@ -220,12 +220,6 @@ public final class CosmeticPresetUtil {
         .toLowerCase(Locale.ROOT)
         .replaceAll("[^a-z0-9_]+", "_")
         .replaceAll("^_+|_+$", "");
-  }
-
-  private static <T extends Keyed> String getKeyString(RegistryKey<T> registryKey, T value) {
-    NamespacedKey key =
-        RegistryAccess.registryAccess().getRegistry(registryKey).getKeyOrThrow(value);
-    return "minecraft".equals(key.getNamespace()) ? key.getKey() : key.toString();
   }
 
   private static void savePresetAsync(
