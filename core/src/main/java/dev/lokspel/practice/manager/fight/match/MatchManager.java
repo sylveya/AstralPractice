@@ -81,7 +81,11 @@ public class MatchManager {
   }
 
   public Match getLiveMatchBySpectator(Player spectator) {
-    Spectatable spectatable = SpectatorManager.getInstance().getSpectators().get(spectator);
+    if (spectator == null) {
+      return null;
+    }
+    Spectatable spectatable =
+        SpectatorManager.getInstance().getSpectators().get(spectator.getUniqueId());
     if (spectatable instanceof Match) {
       return (Match) spectatable;
     } else {

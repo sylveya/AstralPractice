@@ -218,7 +218,8 @@ public class ProfileSetupGui extends Gui {
               }
               break;
             case SPECTATE:
-              Spectatable spectatable = SpectatorManager.getInstance().getSpectators().get(target);
+              Spectatable spectatable =
+                  SpectatorManager.getInstance().getSpectators().get(target.getUniqueId());
 
               if (click.isLeftClick()) {
                 if (!player.hasPermission("ap.practice.info.teleport")) {

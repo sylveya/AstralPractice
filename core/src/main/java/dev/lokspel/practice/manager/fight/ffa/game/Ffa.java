@@ -564,7 +564,8 @@ public class Ffa implements Spectatable, dev.lokspel.api.interfaces.Ffa {
     }
 
     // If the spectator was spectating another match/FFA, remove them first.
-    Spectatable previousSpectatable = SpectatorManager.getInstance().getSpectators().get(player);
+    Spectatable previousSpectatable =
+        SpectatorManager.getInstance().getSpectators().get(player.getUniqueId());
     if (previousSpectatable != null) {
       previousSpectatable.removeSpectator(player);
     }
@@ -572,7 +573,7 @@ public class Ffa implements Spectatable, dev.lokspel.api.interfaces.Ffa {
     Profile profile = ProfileManager.getInstance().getProfile(player);
 
     this.spectators.add(player);
-    SpectatorManager.getInstance().getSpectators().put(player, this);
+    SpectatorManager.getInstance().getSpectators().put(player.getUniqueId(), this);
     profile.setStatus(ProfileStatus.SPECTATE);
     this.addPlayerToBelowName(player);
 
@@ -627,7 +628,7 @@ public class Ffa implements Spectatable, dev.lokspel.api.interfaces.Ffa {
     }
 
     this.spectators.remove(player);
-    SpectatorManager.getInstance().getSpectators().remove(player);
+    SpectatorManager.getInstance().getSpectators().remove(player.getUniqueId());
     this.removePlayerFromBelowName(player);
 
     if (AstralPractice.getInstance().isEnabled() && player.isOnline()) {

@@ -147,7 +147,8 @@ public final class StopArg {
             true);
         break;
       case SPECTATE:
-        Spectatable spectatable = SpectatorManager.getInstance().getSpectators().get(target);
+        Spectatable spectatable =
+            SpectatorManager.getInstance().getSpectators().get(target.getUniqueId());
         if (spectatable != null) {
           spectatable.removeSpectator(target);
 
@@ -283,7 +284,8 @@ public final class StopArg {
             true);
         break;
       case SPECTATE:
-        Spectatable spectatable = SpectatorManager.getInstance().getSpectators().get(target);
+        Spectatable spectatable =
+            SpectatorManager.getInstance().getSpectators().get(target.getUniqueId());
         if (spectatable != null) {
           spectatable.removeSpectator(target);
 

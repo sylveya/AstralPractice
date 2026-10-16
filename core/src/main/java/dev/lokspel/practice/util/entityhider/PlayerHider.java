@@ -97,7 +97,7 @@ public class PlayerHider implements Listener {
                     && !player.hasPermission("ap.staffmode.see")) {
                   hidePlayer(player, online);
                 } else if (profile.isHidePlayers()
-                    && ServerManager.getInstance().getInWorld().get(online) == WorldEnum.LOBBY) {
+                    && ServerManager.getInstance().isInWorld(online, WorldEnum.LOBBY)) {
                   hidePlayer(player, online);
                 }
               }
@@ -124,7 +124,7 @@ public class PlayerHider implements Listener {
         .runTaskLater(
             AstralPractice.getInstance(),
             () -> {
-              if (ServerManager.getInstance().getInWorld().get(player) != WorldEnum.LOBBY) {
+              if (!ServerManager.getInstance().isInWorld(player, WorldEnum.LOBBY)) {
                 return;
               }
 
@@ -140,7 +140,7 @@ public class PlayerHider implements Listener {
 
                 // Handle the teleported player
                 if (profile.isHidePlayers()
-                    && ServerManager.getInstance().getInWorld().get(online) == WorldEnum.LOBBY) {
+                    && ServerManager.getInstance().isInWorld(online, WorldEnum.LOBBY)) {
                   hidePlayer(player, online);
                 } else if (!onlineProfile.isHideFromPlayers()
                     || player.hasPermission("ap.staffmode.see")) {
@@ -154,7 +154,7 @@ public class PlayerHider implements Listener {
                     || onlineProfile.getStatus().equals(ProfileStatus.EVENT)
                     || onlineProfile.getStatus().equals(ProfileStatus.FFA))) {
                   if (onlineProfile.isHidePlayers()
-                      && ServerManager.getInstance().getInWorld().get(online) == WorldEnum.LOBBY) {
+                      && ServerManager.getInstance().isInWorld(online, WorldEnum.LOBBY)) {
                     hidePlayer(online, player);
                   } else if (!profile.isHideFromPlayers()
                       || online.hasPermission("ap.staffmode.see")) {
@@ -288,15 +288,15 @@ public class PlayerHider implements Listener {
   public void toggleLobbyVisibility(Player player) {
     Profile profile = ProfileManager.getInstance().getProfile(player);
 
-    if (ServerManager.getInstance().getInWorld().get(player) != WorldEnum.LOBBY) {
+    if (!ServerManager.getInstance().isInWorld(player, WorldEnum.LOBBY)) {
       return;
     }
 
-    for (Player online : ServerManager.getInstance().getInWorld().keySet()) {
+    for (Player online : Bukkit.getOnlinePlayers()) {
       if (player.equals(online)) {
         continue;
       }
-      if (ServerManager.getInstance().getInWorld().get(online) != WorldEnum.LOBBY) {
+      if (!ServerManager.getInstance().isInWorld(online, WorldEnum.LOBBY)) {
         continue;
       }
 
@@ -305,7 +305,8 @@ public class PlayerHider implements Listener {
       } else {
         Profile onlineProfile = ProfileManager.getInstance().getProfile(online);
 
-        if (!onlineProfile.isHideFromPlayers() || player.hasPermission("ap.staffmode.see")) {
+        if (onlineProfile != null
+            && (!onlineProfile.isHideFromPlayers() || player.hasPermission("ap.staffmode.see"))) {
           showPlayer(player, online);
         }
       }
@@ -426,7 +427,7 @@ public class PlayerHider implements Listener {
    * spectated is still mapped to the lobby world until their teleport event fired.
    */
   private boolean isLobbyPlayer(Player player) {
-    if (ServerManager.getInstance().getInWorld().get(player) != WorldEnum.LOBBY) {
+    if (!ServerManager.getInstance().isInWorld(player, WorldEnum.LOBBY)) {
       return false;
     }
 

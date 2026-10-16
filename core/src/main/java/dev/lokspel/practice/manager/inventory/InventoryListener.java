@@ -412,8 +412,7 @@ public class InventoryListener implements Listener {
     Profile profile = ProfileManager.getInstance().getProfile(player);
     ProfileStatus profileStatus = profile.getStatus();
 
-    if (ServerManager.getInstance().getInWorld().containsKey(player)
-        && ServerManager.getInstance().getInWorld().get(player).equals(WorldEnum.OTHER)) {
+    if (ServerManager.getInstance().isInWorld(player, WorldEnum.OTHER)) {
       return;
     }
 
@@ -713,7 +712,7 @@ public class InventoryListener implements Listener {
   }
 
   private boolean isInLobbyWorld(Player player) {
-    WorldEnum worldEnum = ServerManager.getInstance().getInWorld().get(player);
+    WorldEnum worldEnum = ServerManager.getInstance().getWorld(player);
     if (worldEnum != null) {
       return worldEnum == WorldEnum.LOBBY;
     }

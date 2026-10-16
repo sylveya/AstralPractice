@@ -12,6 +12,7 @@ import dev.lokspel.practice.manager.profile.enums.ProfileStatus;
 import dev.lokspel.practice.manager.queue.QueueManager;
 import dev.lokspel.practice.manager.spectator.SpectatorManager;
 import dev.lokspel.practice.util.Common;
+import dev.lokspel.practice.util.interfaces.Spectatable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -133,7 +134,11 @@ public class AcceptCommand implements CommandExecutor, TabCompleter {
               QueueManager.getInstance().leaveQueue(target);
             }
             if (profile.getStatus().equals(ProfileStatus.SPECTATE)) {
-              SpectatorManager.getInstance().getSpectators().get(player).removeSpectator(player);
+              Spectatable spectatable =
+                  SpectatorManager.getInstance().getSpectators().get(player.getUniqueId());
+              if (spectatable != null) {
+                spectatable.removeSpectator(player);
+              }
             }
 
             // Update sender reference to the current online Player instance

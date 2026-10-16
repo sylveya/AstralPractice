@@ -483,13 +483,14 @@ public abstract class Match extends BukkitRunnable
     }
 
     // If the spectator was spectating a match, remove.
-    Spectatable spectatable = SpectatorManager.getInstance().getSpectators().get(player);
+    Spectatable spectatable =
+        SpectatorManager.getInstance().getSpectators().get(player.getUniqueId());
     if (spectatable != null) {
       spectatable.removeSpectator(player);
     }
 
     this.spectators.add(player);
-    SpectatorManager.getInstance().getSpectators().put(player, this);
+    SpectatorManager.getInstance().getSpectators().put(player.getUniqueId(), this);
     this.addPlayerToBelowName(player);
 
     if (message) {
@@ -529,7 +530,7 @@ public abstract class Match extends BukkitRunnable
     }
 
     this.spectators.remove(player);
-    SpectatorManager.getInstance().getSpectators().remove(player);
+    SpectatorManager.getInstance().getSpectators().remove(player.getUniqueId());
     this.removePlayerFromBelowName(player);
 
     if (!status.equals(MatchStatus.END) && !status.equals(MatchStatus.OVER)) {

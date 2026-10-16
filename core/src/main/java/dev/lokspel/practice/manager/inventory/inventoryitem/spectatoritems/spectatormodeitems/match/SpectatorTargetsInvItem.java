@@ -21,7 +21,7 @@ public class SpectatorTargetsInvItem extends InvItem {
       return;
     }
 
-    if (SpectatorManager.getInstance().getSpectators().get(player) instanceof Match match) {
+    if (SpectatorManager.getInstance().getSpectatable(player) instanceof Match match) {
       new SpectatorTargetsGui(match).open(player);
     }
   }

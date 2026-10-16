@@ -147,22 +147,9 @@ public class EntityHiderListener implements PacketListener, Listener {
   }
 
   private boolean checkPlayer(Player player) {
-    if (!ServerManager.getInstance().getInWorld().containsKey(player)) {
+    WorldEnum worldEnum = ServerManager.getInstance().getWorld(player);
+    if (worldEnum == null || worldEnum == WorldEnum.LOBBY || worldEnum == WorldEnum.OTHER) {
       return false;
-    }
-
-    WorldEnum worldEnum = ServerManager.getInstance().getInWorld().get(player);
-    if (worldEnum == null) {
-      return false;
-    }
-
-    switch (worldEnum) {
-      case LOBBY:
-      case OTHER:
-        return false;
-
-      default:
-        break;
     }
 
     Profile profile = ProfileManager.getInstance().getProfile(player);

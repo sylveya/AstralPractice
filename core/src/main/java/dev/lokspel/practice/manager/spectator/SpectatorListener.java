@@ -182,7 +182,8 @@ public class SpectatorListener implements Listener {
     Profile profile = ProfileManager.getInstance().getProfile(player);
 
     if (profile != null && profile.getStatus().equals(ProfileStatus.SPECTATE)) {
-      Spectatable spectatable = SpectatorManager.getInstance().getSpectators().get(player);
+      Spectatable spectatable =
+          SpectatorManager.getInstance().getSpectators().get(player.getUniqueId());
       if (spectatable != null) {
         Cuboid cuboid = spectatable.getCuboid();
 
@@ -276,7 +277,8 @@ public class SpectatorListener implements Listener {
     Profile profile = ProfileManager.getInstance().getProfile(player);
 
     if (profile != null && profile.getStatus().equals(ProfileStatus.SPECTATE)) {
-      Spectatable spectatable = SpectatorManager.getInstance().getSpectators().get(player);
+      Spectatable spectatable =
+          SpectatorManager.getInstance().getSpectators().get(player.getUniqueId());
       if (spectatable != null) {
         spectatable.removeSpectator(player);
       }

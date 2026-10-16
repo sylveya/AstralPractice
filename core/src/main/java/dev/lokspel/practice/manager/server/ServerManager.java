@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -61,7 +62,7 @@ public class ServerManager implements Listener {
   }
 
   @Getter private static Location lobby = null;
-  @Getter private final Map<Player, WorldEnum> inWorld = new HashMap<>();
+  @Getter private final Map<UUID, WorldEnum> inWorld = new HashMap<>();
 
   @Getter
   private final Map<String, OfflinePlayer> offlinePlayers =
@@ -204,15 +205,13 @@ public class ServerManager implements Listener {
   @EventHandler(priority = EventPriority.HIGHEST)
   public void onTeleport(PlayerTeleportEvent e) {
     Player player = e.getPlayer();
+    UUID uuid = player.getUniqueId();
     Profile profile = ProfileManager.getInstance().getProfile(player);
 
-    WorldEnum from = null;
-    if (inWorld.containsKey(player)) {
-      from = inWorld.get(player);
-    }
+    WorldEnum from = inWorld.get(uuid);
     World to = e.getTo().getWorld();
 
-    inWorld.remove(player);
+    inWorld.remove(uuid);
 
     if (lobby != null && to.equals(lobby.getWorld())) {
       if (from != null && from.equals(WorldEnum.OTHER)) {
@@ -236,10 +235,10 @@ public class ServerManager implements Listener {
                 10L);
       }
 
-      inWorld.put(player, WorldEnum.LOBBY);
+      inWorld.put(uuid, WorldEnum.LOBBY);
     } else if (to.equals(ArenaWorldUtil.getArenasWorld())
         || to.equals(ArenaWorldUtil.getArenasCopyWorld())) {
-      inWorld.put(player, WorldEnum.ARENA);
+      inWorld.put(uuid, WorldEnum.ARENA);
     } else {
       if (from != null && !from.equals(WorldEnum.OTHER)) {
         if (profile.getStatus().equals(ProfileStatus.LOBBY)) {
@@ -252,7 +251,7 @@ public class ServerManager implements Listener {
         }
       }
 
-      inWorld.put(player, WorldEnum.OTHER);
+      inWorld.put(uuid, WorldEnum.OTHER);
     }
   }
 
@@ -273,9 +272,9 @@ public class ServerManager implements Listener {
     }
 
     if (lobby == null) {
-      inWorld.put(player, WorldEnum.OTHER);
+      inWorld.put(player.getUniqueId(), WorldEnum.OTHER);
     } else {
-      inWorld.put(player, WorldEnum.LOBBY);
+      inWorld.put(player.getUniqueId(), WorldEnum.LOBBY);
     }
   }
 
@@ -343,8 +342,20 @@ public class ServerManager implements Listener {
       return;
     }
 
-    inWorld.remove(player);
+    inWorld.remove(player.getUniqueId());
     onlineStaffs.remove(player);
+  }
+
+  public WorldEnum getWorld(Player player) {
+    return player == null ? null : inWorld.get(player.getUniqueId());
+  }
+
+  public WorldEnum getWorld(UUID uuid) {
+    return uuid == null ? null : inWorld.get(uuid);
+  }
+
+  public boolean isInWorld(Player player, WorldEnum worldEnum) {
+    return getWorld(player) == worldEnum;
   }
 
   public void alertPlayers(String permission, String message) {

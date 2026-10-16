@@ -14,7 +14,11 @@ public class LeaveSpecInvItem extends InvItem {
 
   @Override
   public void handleClickEvent(Player player) {
-    Spectatable spectatable = SpectatorManager.getInstance().getSpectators().get(player);
+    if (player == null) {
+      return;
+    }
+    Spectatable spectatable =
+        SpectatorManager.getInstance().getSpectators().get(player.getUniqueId());
     if (spectatable != null) {
       spectatable.removeSpectator(player);
     }
