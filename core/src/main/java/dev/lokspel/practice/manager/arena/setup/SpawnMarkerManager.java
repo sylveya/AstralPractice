@@ -126,12 +126,10 @@ public class SpawnMarkerManager {
 
     // Set player head (Steve head) for helmet
     ItemStack playerHead = new ItemStack(Material.PLAYER_HEAD);
-    mannequin.getEquipment();
     mannequin.getEquipment().setHelmet(playerHead);
 
     // Set red boots for visibility
     ItemStack boots = ItemCreateUtil.getRedBoots();
-    mannequin.getEquipment();
     mannequin.getEquipment().setBoots(boots);
 
     // Track this mannequin
@@ -281,16 +279,10 @@ public class SpawnMarkerManager {
   }
 
   /**
-   * Removes all orphaned marker mannequins from a world. This is useful for cleaning up mannequins
-   * that persisted after server restart or were not properly removed due to timing issues.
-   *
-   * <p>Orphaned markers are identified by: - Having a custom name starting with "<red><bold>" (our
-   * marker naming pattern) - Being in the arenas world - Not being tracked in our current marker
-   * lists
+   * Removes all orphaned marker mannequins from a world.
    *
    * @param world The world to clean up
    */
-  @SuppressWarnings("unused")
   public void cleanupOrphanedMarkers(World world) {
     if (world == null) {
       return;
@@ -298,17 +290,13 @@ public class SpawnMarkerManager {
 
     List<Entity> toRemove = new ArrayList<>();
 
-    // Find all mannequins in the world
     for (Entity entity : world.getEntities()) {
       if (entity instanceof Mannequin mannequin) {
-        // Check if this looks like one of our markers but isn't tracked
         String customName =
             mannequin.customName() == null
                 ? null
                 : Common.serializeComponentToLegacyString(mannequin.customName());
         if (customName != null && !markerStandIds.contains(mannequin.getUniqueId())) {
-
-          // Check if it matches our marker naming patterns
           if (customName.contains("Spawn") || customName.contains("Right-click to remove")) {
             toRemove.add(mannequin);
           }
@@ -316,7 +304,6 @@ public class SpawnMarkerManager {
       }
     }
 
-    // Remove the orphaned markers
     for (Entity entity : toRemove) {
       entity.remove();
     }
