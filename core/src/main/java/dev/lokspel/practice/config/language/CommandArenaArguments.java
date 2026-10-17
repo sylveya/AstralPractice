@@ -69,6 +69,9 @@ public class CommandArenaArguments {
   @JsonProperty("PARTYFFACENTER")
   private Partyffacenter partyffacenter = new Partyffacenter();
 
+  @JsonProperty("SPECTATOR")
+  private Spectator spectator = new Spectator();
+
   @Getter
   public static class Help {
     @JsonProperty("STAFF")
@@ -129,6 +132,8 @@ public class CommandArenaArguments {
             " <red>» <click:suggest_command:'/%label% set partyffacenter"
                 + " '><hover:show_text:'<gray>Set Party FFA center to your location.'>/%label% set"
                 + " partyffacenter <arena>",
+            " <red>» <click:suggest_command:'/%label% set spectator '><hover:show_text:'<gray>Set"
+                + " spectator position to your location.'>/%label% set spectator <arena>",
             "<red><st>------------------------------------------");
   }
 
@@ -160,6 +165,7 @@ public class CommandArenaArguments {
             " <gray>» <gold>Player 2 Position: <white>%position1%",
             " <gray>» <gold>Player 2 Position: <white>%position2%",
             " <gray>» <gold>Party FFA Center: <white>%partyFfaCenter%",
+            " <gray>» <gold>Spectator Position: <white>%spectatorPosition%",
             "",
             " <gray>» <gold>Status: %status%",
             "<gray><st>-----------------------------------");
@@ -647,5 +653,29 @@ public class CommandArenaArguments {
 
     @JsonProperty("SET")
     private String set = "<green>You set the Party FFA center for arena <yellow>%arena%<green>.";
+  }
+
+  @Getter
+  public static class Spectator {
+    @JsonProperty("COMMAND-HELP")
+    private String commandHelp = "<red>/%label% set spectator <arena>";
+
+    @JsonProperty("ARENA-NOT-EXISTS")
+    private String arenaNotExists = "<red>%arena% arena doesn't exists.";
+
+    @JsonProperty("ARENA-ENABLED")
+    private String arenaEnabled = "<red>You can't edit an enabled arena.";
+
+    @JsonProperty("CANT-EDIT")
+    private String cantEdit = "<red>You can't edit arenas that have copies. (%arena%)";
+
+    @JsonProperty("NO-REGION")
+    private String noRegion = "<red>You must set the two corners of the arena first.";
+
+    @JsonProperty("POS-OUTSIDE-REGION")
+    private String posOutsideRegion = "<red>The spectator position must be inside the arena cube.";
+
+    @JsonProperty("SET")
+    private String set = "<green>You set the spectator position for arena <yellow>%arena%<green>.";
   }
 }

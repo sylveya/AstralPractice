@@ -593,6 +593,8 @@ public class Ffa implements Spectatable, dev.lokspel.api.interfaces.Ffa {
 
     if (target != null && this.players.containsKey(target)) {
       player.teleport(target);
+    } else if (this.arena.getSpectatorPosition() != null) {
+      player.teleport(this.arena.getSpectatorPosition());
     } else {
       if (players.isEmpty()) {
         this.teleportPlayer(player);

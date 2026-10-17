@@ -43,6 +43,9 @@ public class ArenaLayoutData {
   @JsonProperty("party-ffa-center")
   private Location partyFfaCenter;
 
+  @JsonProperty("spectator-position")
+  private Location spectatorPosition;
+
   /**
    * A section holding a first and a second value under the keys {@code 1} and {@code 2}.
    *

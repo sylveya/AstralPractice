@@ -153,6 +153,7 @@ public class ArenaSetupManager {
 
     if (arena instanceof FfaArena a) {
       modes.add(SetupMode.FFA_POSITIONS);
+      modes.add(SetupMode.SPECTATOR_POSITION);
       modes.add(SetupMode.DEAD_ZONE);
 
       if (a.isBuild()) {
@@ -160,6 +161,7 @@ public class ArenaSetupManager {
       }
     } else if (arena instanceof Arena a) {
       modes.add(SetupMode.POSITIONS);
+      modes.add(SetupMode.SPECTATOR_POSITION);
       modes.add(SetupMode.DEAD_ZONE);
 
       if (a.isBuild()) {

@@ -84,6 +84,8 @@ public final class InfoArg {
               .replace("%position2%", ArenaUtil.convertLocation(arena.getPosition2()))
               .replace("%partyFfaCenter%", ArenaUtil.convertLocation(arena.getPartyFfaCenter()))
               .replace(
+                  "%spectatorPosition%", ArenaUtil.convertLocation(arena.getSpectatorPosition()))
+              .replace(
                   "%status%",
                   arena.isEnabled()
                       ? PracticeConfig.language()

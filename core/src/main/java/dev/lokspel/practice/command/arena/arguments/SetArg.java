@@ -4,6 +4,7 @@ import dev.lokspel.practice.command.arena.arguments.set.IconArg;
 import dev.lokspel.practice.command.arena.arguments.set.PartyFfaCenterArg;
 import dev.lokspel.practice.command.arena.arguments.set.PortalProtArg;
 import dev.lokspel.practice.command.arena.arguments.set.SideBuildLimitArg;
+import dev.lokspel.practice.command.arena.arguments.set.SpectatorArg;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -29,6 +30,10 @@ public final class SetArg {
         case "partyffacenter":
           PartyFfaCenterArg.run(player, label, args);
           break;
+        case "spectator":
+        case "spectatorpos":
+          SpectatorArg.run(player, label, args);
+          break;
 
         default:
           break;
@@ -50,6 +55,7 @@ public final class SetArg {
       arguments.add("portalprot");
       arguments.add("sidebuildlimit");
       arguments.add("partyffacenter");
+      arguments.add("spectator");
 
       StringUtil.copyPartialMatches(args[1], arguments, completion);
     } else if (args.length > 2) {
@@ -59,6 +65,7 @@ public final class SetArg {
             case "portalprot" -> PortalProtArg.tabComplete(player, args);
             case "sidebuildlimit" -> SideBuildLimitArg.tabComplete(player, args);
             case "partyffacenter" -> PartyFfaCenterArg.tabComplete(player, args);
+            case "spectator", "spectatorpos" -> SpectatorArg.tabComplete(player, args);
             default -> completion;
           };
     }

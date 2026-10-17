@@ -129,6 +129,12 @@ public class ArenaCopyUtilListener implements Listener {
         arenaCopy.getFfaPositions().add(translateLocation(ffaPosCopy, reference, newLocation));
       }
 
+      if (arena.getSpectatorPosition() != null) {
+        Location spectatorPos = arena.getSpectatorPosition().clone();
+        spectatorPos.setWorld(copyWorld);
+        arenaCopy.setSpectatorPosition(translateLocation(spectatorPos, reference, newLocation));
+      }
+
       if (arena.isBuildMax()) {
         int difference = arena.getCorner1().getBlockY() - arena.getBuildMaxValue();
         arenaCopy.setBuildMax(true);

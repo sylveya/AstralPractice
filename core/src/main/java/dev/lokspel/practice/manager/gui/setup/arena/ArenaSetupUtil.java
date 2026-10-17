@@ -178,6 +178,9 @@ public enum ArenaSetupUtil {
                   "%position1%", Common.mmToNormal(ArenaUtil.convertLocation(arena.getPosition1())))
               .replace(
                   "%position2%", Common.mmToNormal(ArenaUtil.convertLocation(arena.getPosition2())))
+              .replace(
+                  "%spectatorPosition%",
+                  Common.mmToNormal(ArenaUtil.convertLocation(arena.getSpectatorPosition())))
               .replace("%bed1%", Common.mmToNormal(ArenaUtil.convertLocation(arena.getBedLoc1())))
               .replace("%bed2%", Common.mmToNormal(ArenaUtil.convertLocation(arena.getBedLoc2())))
               .replace(
@@ -212,6 +215,9 @@ public enum ArenaSetupUtil {
                   "%position1%", Common.mmToNormal(ArenaUtil.convertLocation(arena.getPosition1())))
               .replace(
                   "%position2%", Common.mmToNormal(ArenaUtil.convertLocation(arena.getPosition2())))
+              .replace(
+                  "%spectatorPosition%",
+                  Common.mmToNormal(ArenaUtil.convertLocation(arena.getSpectatorPosition())))
               .replace(
                   "%deathZoneY%",
                   arena.isDeadZone() ? String.valueOf(arena.getDeadZoneValue()) : "<red>Not Set");
