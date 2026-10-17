@@ -169,7 +169,7 @@ public class RematchRequest {
 
                 Inventory inventory = InventoryManager.getInstance().getPlayerInventory(player);
                 if (inventory instanceof LobbyInventory lobbyInventory) {
-                  lobbyInventory.addRematchItem(player);
+                  lobbyInventory.addRematchItem(player, getOtherPlayer(player));
                 }
               }
             },

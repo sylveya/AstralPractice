@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -70,7 +71,7 @@ public class EventSetupListener implements Listener {
     if (!interactCooldown.add(player.getUniqueId())) {
       return;
     }
-    org.bukkit.Bukkit.getScheduler()
+    Bukkit.getScheduler()
         .runTask(AstralPractice.getInstance(), () -> interactCooldown.remove(player.getUniqueId()));
 
     EventWandSetupManager.SetupSession session = setupManager.getSession(player);
@@ -170,7 +171,7 @@ public class EventSetupListener implements Listener {
     if (!entityInteractCooldown.add(player.getUniqueId())) {
       return;
     }
-    org.bukkit.Bukkit.getScheduler()
+    Bukkit.getScheduler()
         .runTask(
             AstralPractice.getInstance(),
             () -> entityInteractCooldown.remove(player.getUniqueId()));
@@ -250,7 +251,7 @@ public class EventSetupListener implements Listener {
     if (!markerDamageCooldown.add(player.getUniqueId())) {
       return;
     }
-    org.bukkit.Bukkit.getScheduler()
+    Bukkit.getScheduler()
         .runTask(
             AstralPractice.getInstance(), () -> markerDamageCooldown.remove(player.getUniqueId()));
 
@@ -274,17 +275,32 @@ public class EventSetupListener implements Listener {
       return;
     }
 
-    // Left-click on mannequin marker = Remove last spawn (same as left-click on block)
-    if (!eventData.getSpawns().isEmpty()) {
-      int index = eventData.getSpawns().size() - 1;
-      eventData.getSpawns().remove(index);
-      EventSpawnMarkerManager.getInstance().updateMarkers(eventData);
-      updateGui(eventData);
-      scheduleSave(eventData);
-      Common.sendMmMessage(player, "<red>Removed last spawn point. Remaining: " + index);
-    } else {
-      Common.sendMmMessage(player, "<red>No spawn points to remove.");
+    // Left-click on mannequin marker = Remove that specific spawn
+    EventSpawnMarkerManager markerManager = EventSpawnMarkerManager.getInstance();
+    if (!markerManager.isSpawnMarker(mannequin)) {
+      return;
     }
+
+    int spawnIndex = markerManager.getSpawnIndex(mannequin);
+    if (spawnIndex < 0 || spawnIndex >= eventData.getSpawns().size()) {
+      markerManager.updateMarkers(eventData);
+      updateGui(eventData);
+      Common.sendMmMessage(
+          player, "<red>This spawn marker is outdated. Markers have been refreshed.");
+      return;
+    }
+
+    eventData.getSpawns().remove(spawnIndex);
+    markerManager.updateMarkers(eventData);
+    updateGui(eventData);
+    scheduleSave(eventData);
+
+    Common.sendMmMessage(
+        player,
+        "<green>Removed spawn point #"
+            + (spawnIndex + 1)
+            + ". Remaining: "
+            + eventData.getSpawns().size());
   }
 
   @EventHandler
@@ -475,7 +491,7 @@ public class EventSetupListener implements Listener {
     }
   }
 
-  private static Location getSnappedLocation(org.bukkit.block.Block clickedBlock, Player player) {
+  private static Location getSnappedLocation(Block clickedBlock, Player player) {
     Location loc = clickedBlock.getLocation().add(0.5, 1, 0.5);
     float snappedYaw = Math.round(player.getLocation().getYaw() / 45f) * 45f;
     loc.setYaw(snappedYaw);
@@ -484,7 +500,6 @@ public class EventSetupListener implements Listener {
   }
 
   private static void scheduleSave(EventData eventData) {
-    org.bukkit.Bukkit.getScheduler()
-        .runTaskAsynchronously(AstralPractice.getInstance(), eventData::setData);
+    Bukkit.getScheduler().runTaskAsynchronously(AstralPractice.getInstance(), eventData::setData);
   }
 }

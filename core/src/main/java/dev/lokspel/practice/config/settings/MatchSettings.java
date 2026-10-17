@@ -396,6 +396,12 @@ public class MatchSettings {
             + "L3RleHR1cmUvOGUzNGM1MGZkY2E4ZTM2YzFlMDUwYjk2M2YyZTZlMWY3MGU0NjVlNTVjNDQzZjY4"
             + "OTQ3NDQzNDA5Y2M2YTMzOCJ9fX0=";
 
+    @Comment(
+        "If true, eating a golden head plays the eating animation like food instead of consuming"
+            + " instantly.")
+    @JsonProperty("ANIMATION")
+    private boolean animation = false;
+
     @Comment("Cooldown in seconds between Golden Head uses.")
     @JsonProperty("COOLDOWN")
     private int cooldown = 10;

@@ -9,23 +9,34 @@ import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.manager.profile.enums.ProfileStatus;
 import dev.lokspel.practice.util.actionbar.ActionBarPriority;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.Consumable;
+import io.papermc.paper.datacomponent.item.FoodProperties;
+import io.papermc.paper.datacomponent.item.consumable.ItemUseAnimation;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
+import net.kyori.adventure.key.Key;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -59,14 +70,12 @@ public class GoldenHead implements Listener {
         BackendUtil.getGuiItem(
                 PracticeConfig.settings().getMatchSettings().getGoldenHead().getItem())
             .get();
-    if (item == null) {
-      this.goldenHeadItem = new ItemStack(Material.GOLDEN_APPLE);
-    } else {
-      this.goldenHeadItem = item;
-    }
+    this.goldenHeadItem =
+        Objects.requireNonNullElseGet(item, () -> new ItemStack(Material.GOLDEN_APPLE));
 
     this.goldenHeadItem = applyCustomTexture(this.goldenHeadItem);
     markAsGoldenHead(this.goldenHeadItem);
+    applyAnimationComponents(this.goldenHeadItem);
     this.goldenHeadItem.setAmount(1);
 
     this.effects.clear();
@@ -136,6 +145,7 @@ public class GoldenHead implements Listener {
     return this.goldenHeadItem != null && itemStack.isSimilar(this.goldenHeadItem);
   }
 
+  @SuppressWarnings("HttpUrlsUsage")
   private ItemStack applyCustomTexture(ItemStack item) {
     String textureConfigValue =
         PracticeConfig.settings().getMatchSettings().getGoldenHead().getTexture().trim();
@@ -211,6 +221,11 @@ public class GoldenHead implements Listener {
                     if (removed != null) {
                       removed.cancel();
                     }
+                    if (onlinePlayer != null && onlinePlayer.isOnline()) {
+                      onlinePlayer.setCooldown(
+                          goldenHeadItem != null ? goldenHeadItem.getType() : Material.PLAYER_HEAD,
+                          0);
+                    }
                     return;
                   }
 
@@ -243,7 +258,39 @@ public class GoldenHead implements Listener {
     this.cooldownActionBarTasks.put(playerId, task);
   }
 
-  @EventHandler
+  public boolean isAnimationEnabled() {
+    return PracticeConfig.settings().getMatchSettings().getGoldenHead().isAnimation();
+  }
+
+  public void applyAnimationComponents(ItemStack item) {
+    if (item == null) {
+      return;
+    }
+    if (isAnimationEnabled()) {
+      item.setData(
+          DataComponentTypes.FOOD,
+          FoodProperties.food().nutrition(4).saturation(9.6f).canAlwaysEat(true).build());
+      item.setData(
+          DataComponentTypes.CONSUMABLE,
+          Consumable.consumable()
+              .consumeSeconds(1.6f)
+              .animation(ItemUseAnimation.EAT)
+              .hasConsumeParticles(true)
+              .sound(Key.key("entity.generic.eat"))
+              .build());
+    } else {
+      item.resetData(DataComponentTypes.FOOD);
+      item.resetData(DataComponentTypes.CONSUMABLE);
+    }
+  }
+
+  public void syncComponents(ItemStack item) {
+    if (item != null && isGoldenHead(item)) {
+      applyAnimationComponents(item);
+    }
+  }
+
+  @EventHandler(priority = EventPriority.HIGH)
   public void onGoldenHeadInteract(PlayerInteractEvent e) {
     Action action = e.getAction();
     if (action != Action.RIGHT_CLICK_AIR && action != Action.RIGHT_CLICK_BLOCK) {
@@ -255,7 +302,41 @@ public class GoldenHead implements Listener {
       return;
     }
 
+    Player player = e.getPlayer();
+    Profile profile = ProfileManager.getInstance().getProfile(player);
+    if (profile == null) {
+      return;
+    }
+
+    long remainingSeconds = getRemainingCooldownSeconds(player.getUniqueId());
+    if (remainingSeconds > 0 || player.hasCooldown(item.getType())) {
+      e.setCancelled(true);
+      startCooldownActionBar(profile);
+      if (remainingSeconds > 0 && !player.hasCooldown(item.getType())) {
+        player.setCooldown(item.getType(), (int) (remainingSeconds * 20));
+      }
+      return;
+    }
+
+    if (isAnimationEnabled()) {
+      syncComponents(item);
+      if (action == Action.RIGHT_CLICK_BLOCK) {
+        e.setUseInteractedBlock(Event.Result.DENY);
+        e.setUseItemInHand(Event.Result.ALLOW);
+      }
+      return;
+    }
+
     e.setCancelled(true);
+    consumeGoldenHead(player, profile, item, e.getHand());
+  }
+
+  @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+  public void onGoldenHeadConsume(PlayerItemConsumeEvent e) {
+    ItemStack item = e.getItem();
+    if (!isGoldenHead(item)) {
+      return;
+    }
 
     Player player = e.getPlayer();
     Profile profile = ProfileManager.getInstance().getProfile(player);
@@ -264,30 +345,59 @@ public class GoldenHead implements Listener {
     }
 
     long remainingSeconds = getRemainingCooldownSeconds(player.getUniqueId());
-    if (remainingSeconds > 0) {
+    if (remainingSeconds > 0 || player.hasCooldown(item.getType())) {
+      e.setCancelled(true);
       startCooldownActionBar(profile);
       return;
     }
 
+    this.lastConsumeAt.put(player.getUniqueId(), System.currentTimeMillis());
+    startCooldownActionBar(profile);
+    if (this.consumeCooldownSeconds > 0) {
+      player.setCooldown(item.getType(), (int) (this.consumeCooldownSeconds * 20));
+    }
+
+    applyEffects(player);
+  }
+
+  @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+  public void onBlockPlace(BlockPlaceEvent e) {
+    if (isGoldenHead(e.getItemInHand())) {
+      e.setCancelled(true);
+    }
+  }
+
+  @EventHandler(ignoreCancelled = true)
+  public void onItemHeld(PlayerItemHeldEvent e) {
+    ItemStack item = e.getPlayer().getInventory().getItem(e.getNewSlot());
+    if (item != null && isGoldenHead(item)) {
+      syncComponents(item);
+    }
+  }
+
+  private void consumeGoldenHead(
+      Player player, Profile profile, ItemStack item, EquipmentSlot hand) {
     player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_BURP, 1.0f, 1.0f);
 
     this.lastConsumeAt.put(player.getUniqueId(), System.currentTimeMillis());
     startCooldownActionBar(profile);
-
-    EquipmentSlot hand = e.getHand();
-
-    if (hand == null) {
-      return;
+    if (this.consumeCooldownSeconds > 0) {
+      player.setCooldown(item.getType(), (int) (this.consumeCooldownSeconds * 20));
     }
 
-    int amount = item.getAmount();
-
-    if (amount <= 1) {
-      player.getInventory().setItem(hand, null);
-    } else {
-      item.setAmount(amount - 1);
+    if (hand != null) {
+      int amount = item.getAmount();
+      if (amount <= 1) {
+        player.getInventory().setItem(hand, null);
+      } else {
+        item.setAmount(amount - 1);
+      }
     }
 
+    applyEffects(player);
+  }
+
+  private void applyEffects(Player player) {
     for (PotionEffect effect : effects) {
       PotionEffect active = player.getPotionEffect(effect.getType());
       if (active != null

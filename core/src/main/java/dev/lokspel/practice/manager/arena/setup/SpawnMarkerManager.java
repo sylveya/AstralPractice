@@ -16,6 +16,8 @@ import java.util.UUID;
 import lombok.Getter;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Mannequin;
 import org.bukkit.inventory.ItemStack;
@@ -62,18 +64,12 @@ public class SpawnMarkerManager {
     if (arena instanceof Arena standardArena) {
       // Show position 1
       if (standardArena.getPosition1() != null) {
-        Mannequin marker = createMarker(standardArena.getPosition1(), "<red><bold>Spawn 1");
-        if (marker != null) {
-          markers.add(marker);
-        }
+        markers.add(createMarker(standardArena.getPosition1(), "<red><bold>Spawn 1"));
       }
 
       // Show position 2
       if (standardArena.getPosition2() != null) {
-        Mannequin marker = createMarker(standardArena.getPosition2(), "<red><bold>Spawn 2");
-        if (marker != null) {
-          markers.add(marker);
-        }
+        markers.add(createMarker(standardArena.getPosition2(), "<red><bold>Spawn 2"));
       }
     } else if (arena instanceof FfaArena ffaArena) {
       // Show all FFA spawn positions with two-line labels
@@ -82,17 +78,17 @@ public class SpawnMarkerManager {
         // Create main marker with player model
         Mannequin marker =
             createMarker(spawnLoc, "<red><bold>FFA Spawn #" + (index + 1)); // Display as 1-based
-        if (marker != null) {
-          markers.add(marker);
-          // Track this main marker to its spawn index
-          markerToSpawnIndex.put(marker.getUniqueId(), index);
+        markers.add(marker);
+        // Track this main marker to its spawn index
+        markerToSpawnIndex.put(marker.getUniqueId(), index);
 
-          // Create second mannequin above for instruction text (closer spacing)
-          Location labelLoc = spawnLoc.clone().add(0, 2.3, 0);
-          Mannequin labelStand = createLabelOnly(labelLoc, "<gray>(Right-click to remove)");
-          if (labelStand != null) {
-            markers.add(labelStand);
-          }
+        // Create second mannequin above for instruction text (closer spacing)
+        Location labelLoc = spawnLoc.clone().add(0, 2.3, 0);
+        Mannequin labelStand = createLabelOnly(labelLoc);
+        if (labelStand != null) {
+          markers.add(labelStand);
+          // Track label stand to spawn index as well so interactions on it also work
+          markerToSpawnIndex.put(labelStand.getUniqueId(), index);
         }
         index++;
       }
@@ -130,15 +126,11 @@ public class SpawnMarkerManager {
 
     // Set player head (Steve head) for helmet
     ItemStack playerHead = new ItemStack(Material.PLAYER_HEAD);
-    if (mannequin.getEquipment() != null) {
-      mannequin.getEquipment().setHelmet(playerHead);
-    }
+    mannequin.getEquipment().setHelmet(playerHead);
 
     // Set red boots for visibility
     ItemStack boots = ItemCreateUtil.getRedBoots();
-    if (mannequin.getEquipment() != null) {
-      mannequin.getEquipment().setBoots(boots);
-    }
+    mannequin.getEquipment().setBoots(boots);
 
     // Track this mannequin
     markerStandIds.add(mannequin.getUniqueId());
@@ -146,8 +138,10 @@ public class SpawnMarkerManager {
     return mannequin;
   }
 
+  private static final String REMOVE_INSTRUCTION = "<gray>(Right-click to remove)";
+
   /** Creates a small invisible mannequin just for displaying text label. */
-  private Mannequin createLabelOnly(Location location, String text) {
+  private Mannequin createLabelOnly(Location location) {
     if (location == null || location.getWorld() == null) {
       return null;
     }
@@ -160,7 +154,7 @@ public class SpawnMarkerManager {
     labelStand.setGravity(false);
     labelStand.setCanPickupItems(false);
     labelStand.setCustomNameVisible(true);
-    labelStand.customName(Common.deserializeMiniMessage(text));
+    labelStand.customName(Common.deserializeMiniMessage(REMOVE_INSTRUCTION));
     labelStand.setAI(false);
     labelStand.setCollidable(false);
     labelStand.setSilent(true);
@@ -226,45 +220,8 @@ public class SpawnMarkerManager {
     showMarkers(arena);
   }
 
-  /**
-   * Finds the closest FFA spawn position to a given location. Returns the index of the spawn
-   * position or -1 if none found within range.
-   */
-  public int findClosestFfaSpawn(FfaArena arena, Location location, double maxDistance) {
-    if (arena == null || location == null) {
-      return -1;
-    }
-
-    List<Location> spawns = arena.getFfaPositions();
-    if (spawns.isEmpty()) {
-      return -1;
-    }
-
-    double closestDistanceSq = maxDistance * maxDistance;
-    int closestIndex = -1;
-
-    for (int i = 0; i < spawns.size(); i++) {
-      Location spawn = spawns.get(i);
-      if (spawn.getWorld() == null || !spawn.getWorld().equals(location.getWorld())) {
-        continue;
-      }
-
-      double distanceSq = spawn.distanceSquared(location);
-      if (distanceSq < closestDistanceSq) {
-        closestDistanceSq = distanceSq;
-        closestIndex = i;
-      }
-    }
-
-    return closestIndex;
-  }
-
-  /** Checks if markers are currently shown for an arena. */
-  public boolean hasMarkers(DisplayArena arena) {
-    return arenaMarkers.containsKey(arena) && !arenaMarkers.get(arena).isEmpty();
-  }
-
   /** Checks if a mannequin is a spawn marker. */
+  @SuppressWarnings("BooleanMethodIsAlwaysInverted")
   public boolean isMarker(Mannequin mannequin) {
     return mannequin != null && markerStandIds.contains(mannequin.getUniqueId());
   }
@@ -322,35 +279,24 @@ public class SpawnMarkerManager {
   }
 
   /**
-   * Removes all orphaned marker mannequins from a world. This is useful for cleaning up mannequins
-   * that persisted after server restart or were not properly removed due to timing issues.
-   *
-   * <p>Orphaned markers are identified by: - Having a custom name starting with "<red><bold>" (our
-   * marker naming pattern) - Being in the arenas world - Not being tracked in our current marker
-   * lists
+   * Removes all orphaned marker mannequins from a world.
    *
    * @param world The world to clean up
-   * @return The number of orphaned markers removed
    */
-  public int cleanupOrphanedMarkers(org.bukkit.World world) {
+  public void cleanupOrphanedMarkers(World world) {
     if (world == null) {
-      return 0;
+      return;
     }
 
-    int removed = 0;
-    List<org.bukkit.entity.Entity> toRemove = new ArrayList<>();
+    List<Entity> toRemove = new ArrayList<>();
 
-    // Find all mannequins in the world
-    for (org.bukkit.entity.Entity entity : world.getEntities()) {
+    for (Entity entity : world.getEntities()) {
       if (entity instanceof Mannequin mannequin) {
-        // Check if this looks like one of our markers but isn't tracked
         String customName =
             mannequin.customName() == null
                 ? null
                 : Common.serializeComponentToLegacyString(mannequin.customName());
         if (customName != null && !markerStandIds.contains(mannequin.getUniqueId())) {
-
-          // Check if it matches our marker naming patterns
           if (customName.contains("Spawn") || customName.contains("Right-click to remove")) {
             toRemove.add(mannequin);
           }
@@ -358,12 +304,8 @@ public class SpawnMarkerManager {
       }
     }
 
-    // Remove the orphaned markers
-    for (org.bukkit.entity.Entity entity : toRemove) {
+    for (Entity entity : toRemove) {
       entity.remove();
-      removed++;
     }
-
-    return removed;
   }
 }

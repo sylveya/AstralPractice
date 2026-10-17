@@ -121,14 +121,17 @@ public class InventoryListener implements Listener {
     if (isInLobbyWorld(player) && !player.hasPermission("ap.admin")) {
       invItem =
           inventory.getHoldItem(
-              itemDisplayName, item.getType(), e.getPlayer().getInventory().getHeldItemSlot());
+              item,
+              itemDisplayName,
+              item.getType(),
+              e.getPlayer().getInventory().getHeldItemSlot());
     } else {
       int slot = -1;
       if (profile.getStatus().equals(ProfileStatus.QUEUE)) {
         slot = e.getPlayer().getInventory().getHeldItemSlot();
       }
 
-      invItem = inventory.getHoldItem(itemDisplayName, item.getType(), slot);
+      invItem = inventory.getHoldItem(item, itemDisplayName, item.getType(), slot);
     }
 
     if (invItem != null) {

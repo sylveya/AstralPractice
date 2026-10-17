@@ -14,6 +14,7 @@ import java.util.function.Supplier;
 import lombok.Getter;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 @Getter
 public abstract class Inventory {
@@ -89,7 +90,14 @@ public abstract class Inventory {
     }
   }
 
-  public InvItem getHoldItem(String name, Material material, int slot) {
+  public InvItem getHoldItem(ItemStack item, String name, Material material, int slot) {
+    if (RematchInvItem.isRematchItem(item)) {
+      InvItem rematch = this.getInvItem();
+      if (rematch != null) {
+        return rematch;
+      }
+    }
+
     InvItem invItem = this.getInvItem(name, material);
 
     if (invItem == null && slot != -1) {
@@ -97,6 +105,10 @@ public abstract class Inventory {
     }
 
     return invItem;
+  }
+
+  public InvItem getHoldItem(String name, Material material, int slot) {
+    return getHoldItem(null, name, material, slot);
   }
 
   private void getExtraItems() {

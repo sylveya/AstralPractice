@@ -137,11 +137,20 @@ public class InventoryLayout {
     @JsonProperty("SLOT")
     private Integer slot;
 
+    @Comment(
+        "true = the rematch item becomes the opponent's player head (MATERIAL is then ignored).")
+    @JsonProperty("OPPONENT-HEAD")
+    private Boolean opponentHead;
+
     @JsonProperty("ITEM")
     private ItemConfig item;
 
     @JsonProperty("FLAGS")
     private List<String> flags;
+
+    public boolean isOpponentHead() {
+      return opponentHead != null && opponentHead;
+    }
 
     static InventoryItem queue() {
       InventoryItem value = new InventoryItem();
@@ -265,7 +274,10 @@ public class InventoryLayout {
     static InventoryItem rematch() {
       InventoryItem value = new InventoryItem();
       value.slot = 4;
-      value.item = ItemConfig.of("BLAZE_POWDER").name("<gold>Rematch <gray>(Right-Click)");
+      value.opponentHead = true;
+      value.item =
+          ItemConfig.of("BLAZE_POWDER")
+              .name("<gold>Rematch <yellow>%opponent% <gray>(Right-Click)");
 
       return value;
     }

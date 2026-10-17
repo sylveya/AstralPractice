@@ -1,5 +1,6 @@
 package dev.lokspel.practice.manager.arena.setup;
 
+import dev.lokspel.practice.AstralPractice;
 import dev.lokspel.practice.config.PracticeConfig;
 import dev.lokspel.practice.manager.arena.arenas.Arena;
 import dev.lokspel.practice.manager.arena.arenas.FfaArena;
@@ -15,10 +16,15 @@ import dev.lokspel.practice.manager.gui.setup.arena.ArenaGuiSetupManager;
 import dev.lokspel.practice.util.Common;
 import dev.lokspel.practice.util.Cuboid;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Mannequin;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -30,10 +36,15 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.EquipmentSlot;
 
 public class ArenaSetupListener implements Listener {
 
   private final ArenaSetupManager setupManager;
+
+  private final Set<UUID> entityInteractCooldown = new HashSet<>();
+  private final Set<UUID> markerDamageCooldown = new HashSet<>();
+  private final Set<UUID> markerDamagedThisTick = new HashSet<>();
 
   public ArenaSetupListener(ArenaSetupManager setupManager) {
     this.setupManager = setupManager;
@@ -71,10 +82,7 @@ public class ArenaSetupListener implements Listener {
         (currentMode == SetupMode.BUILD_MAX
             || currentMode == SetupMode.DEAD_ZONE
             || currentMode == SetupMode.TOGGLE_STATUS
-            || currentMode
-                == SetupMode
-                    .FFA_POSITIONS // Allow air clicks for FFA (left-click anywhere to remove last)
-        );
+            || currentMode == SetupMode.FFA_POSITIONS);
 
     if (!isAirAllowed) {
       if (action != Action.LEFT_CLICK_BLOCK && action != Action.RIGHT_CLICK_BLOCK) {
@@ -258,9 +266,17 @@ public class ArenaSetupListener implements Listener {
               .getSetFfapos()
               .replace("%arena%", ffaArena.getName())
               .replace("%posCount%", String.valueOf(ffaArena.getFfaPositions().size())));
-
     } else if (action == Action.LEFT_CLICK_BLOCK || action == Action.LEFT_CLICK_AIR) {
-      // Left-click anywhere: Remove last spawn
+      if (markerDamagedThisTick.contains(player.getUniqueId())) {
+        return;
+      }
+      Entity target = player.getTargetEntity(6);
+      if (target instanceof Mannequin mannequin
+          && SpawnMarkerManager.getInstance().isMarker(mannequin)) {
+        return;
+      }
+
+      // Left-click anywhere in air/block: Remove last spawn
       if (!ffaArena.getFfaPositions().isEmpty()) {
         int index = ffaArena.getFfaPositions().size() - 1;
         ffaArena.getFfaPositions().remove(index);
@@ -898,6 +914,10 @@ public class ArenaSetupListener implements Listener {
   // Handle right-clicking mannequin markers to remove them (FFA ONLY)
   @EventHandler(priority = EventPriority.HIGHEST)
   public void onMarkerInteract(PlayerInteractAtEntityEvent event) {
+    if (event.getHand() != EquipmentSlot.HAND) {
+      return;
+    }
+
     if (!(event.getRightClicked() instanceof Mannequin mannequin)) {
       return;
     }
@@ -910,6 +930,14 @@ public class ArenaSetupListener implements Listener {
     }
 
     event.setCancelled(true);
+
+    if (!entityInteractCooldown.add(player.getUniqueId())) {
+      return;
+    }
+    Bukkit.getScheduler()
+        .runTask(
+            AstralPractice.getInstance(),
+            () -> entityInteractCooldown.remove(player.getUniqueId()));
 
     // Check if player is in setup mode
     if (!setupManager.isSettingUp(player)) {
@@ -977,6 +1005,14 @@ public class ArenaSetupListener implements Listener {
       return;
     }
 
+    // Some client/server combos can emit duplicate damage callbacks for one swing.
+    if (!markerDamageCooldown.add(player.getUniqueId())) {
+      return;
+    }
+    Bukkit.getScheduler()
+        .runTask(
+            AstralPractice.getInstance(), () -> markerDamageCooldown.remove(player.getUniqueId()));
+
     // Check if player is in setup mode
     if (!setupManager.isSettingUp(player)) {
       return;
@@ -1004,15 +1040,22 @@ public class ArenaSetupListener implements Listener {
       return;
     }
 
-    // Left-click on mannequin marker = Remove last spawn (same as left-click on block)
-    if (!ffaArena.getFfaPositions().isEmpty()) {
-      int index = ffaArena.getFfaPositions().size() - 1;
-      ffaArena.getFfaPositions().remove(index);
-      SpawnMarkerManager.getInstance().updateMarkers(ffaArena);
-      updateGui(ffaArena);
-      Common.sendMmMessage(player, "<red>Removed last FFA spawn point. Remaining: " + index);
+    markerDamagedThisTick.add(player.getUniqueId());
+    Bukkit.getScheduler()
+        .runTask(
+            AstralPractice.getInstance(), () -> markerDamagedThisTick.remove(player.getUniqueId()));
+
+    // Left-click on mannequin marker = Remove that specific spawn
+    SpawnMarkerManager markerManager = SpawnMarkerManager.getInstance();
+    boolean removed = markerManager.removeMarker(mannequin, arena);
+    if (removed) {
+      markerManager.updateMarkers(arena);
+      updateGui(arena);
+
+      Common.sendMmMessage(
+          player, "<red>Removed FFA spawn. Remaining: " + ffaArena.getFfaPositions().size());
     } else {
-      Common.sendMmMessage(player, "<red>No spawn points to remove.");
+      Common.sendMmMessage(player, "<red>Failed to remove spawn marker.");
     }
   }
 }
