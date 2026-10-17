@@ -1,5 +1,6 @@
 package dev.lokspel.practice.manager.arena.setup;
 
+import dev.lokspel.practice.AstralPractice;
 import dev.lokspel.practice.config.PracticeConfig;
 import dev.lokspel.practice.manager.arena.arenas.Arena;
 import dev.lokspel.practice.manager.arena.arenas.FfaArena;
@@ -15,7 +16,11 @@ import dev.lokspel.practice.manager.gui.setup.arena.ArenaGuiSetupManager;
 import dev.lokspel.practice.util.Common;
 import dev.lokspel.practice.util.Cuboid;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -30,10 +35,15 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.EquipmentSlot;
 
 public class ArenaSetupListener implements Listener {
 
   private final ArenaSetupManager setupManager;
+
+  private final Set<UUID> interactCooldown = new HashSet<>();
+  private final Set<UUID> entityInteractCooldown = new HashSet<>();
+  private final Set<UUID> markerDamageCooldown = new HashSet<>();
 
   public ArenaSetupListener(ArenaSetupManager setupManager) {
     this.setupManager = setupManager;
@@ -41,6 +51,10 @@ public class ArenaSetupListener implements Listener {
 
   @EventHandler
   public void onInteract(PlayerInteractEvent event) {
+    if (event.getHand() != EquipmentSlot.HAND) {
+      return;
+    }
+
     Player player = event.getPlayer();
 
     if (!setupManager.isSettingUp(player) || !setupManager.isSetupWand(event.getItem())) {
@@ -48,6 +62,12 @@ public class ArenaSetupListener implements Listener {
     }
 
     event.setCancelled(true);
+
+    if (!interactCooldown.add(player.getUniqueId())) {
+      return;
+    }
+    Bukkit.getScheduler()
+        .runTask(AstralPractice.getInstance(), () -> interactCooldown.remove(player.getUniqueId()));
 
     ArenaSetupManager.SetupSession session = setupManager.getSession(player);
     DisplayArena displayArena = session.getArena();
@@ -898,6 +918,10 @@ public class ArenaSetupListener implements Listener {
   // Handle right-clicking mannequin markers to remove them (FFA ONLY)
   @EventHandler(priority = EventPriority.HIGHEST)
   public void onMarkerInteract(PlayerInteractAtEntityEvent event) {
+    if (event.getHand() != EquipmentSlot.HAND) {
+      return;
+    }
+
     if (!(event.getRightClicked() instanceof Mannequin mannequin)) {
       return;
     }
@@ -910,6 +934,14 @@ public class ArenaSetupListener implements Listener {
     }
 
     event.setCancelled(true);
+
+    if (!entityInteractCooldown.add(player.getUniqueId())) {
+      return;
+    }
+    Bukkit.getScheduler()
+        .runTask(
+            AstralPractice.getInstance(),
+            () -> entityInteractCooldown.remove(player.getUniqueId()));
 
     // Check if player is in setup mode
     if (!setupManager.isSettingUp(player)) {
@@ -977,6 +1009,14 @@ public class ArenaSetupListener implements Listener {
       return;
     }
 
+    // Some client/server combos can emit duplicate damage callbacks for one swing.
+    if (!markerDamageCooldown.add(player.getUniqueId())) {
+      return;
+    }
+    Bukkit.getScheduler()
+        .runTask(
+            AstralPractice.getInstance(), () -> markerDamageCooldown.remove(player.getUniqueId()));
+
     // Check if player is in setup mode
     if (!setupManager.isSettingUp(player)) {
       return;
@@ -1004,15 +1044,17 @@ public class ArenaSetupListener implements Listener {
       return;
     }
 
-    // Left-click on mannequin marker = Remove last spawn (same as left-click on block)
-    if (!ffaArena.getFfaPositions().isEmpty()) {
-      int index = ffaArena.getFfaPositions().size() - 1;
-      ffaArena.getFfaPositions().remove(index);
-      SpawnMarkerManager.getInstance().updateMarkers(ffaArena);
-      updateGui(ffaArena);
-      Common.sendMmMessage(player, "<red>Removed last FFA spawn point. Remaining: " + index);
+    // Left-click on mannequin marker = Remove that specific spawn
+    SpawnMarkerManager markerManager = SpawnMarkerManager.getInstance();
+    boolean removed = markerManager.removeMarker(mannequin, arena);
+    if (removed) {
+      markerManager.updateMarkers(arena);
+      updateGui(arena);
+
+      Common.sendMmMessage(
+          player, "<red>Removed FFA spawn. Remaining: " + ffaArena.getFfaPositions().size());
     } else {
-      Common.sendMmMessage(player, "<red>No spawn points to remove.");
+      Common.sendMmMessage(player, "<red>Failed to remove spawn marker.");
     }
   }
 }

@@ -12,6 +12,7 @@ import java.util.UUID;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Mannequin;
 import org.bukkit.inventory.ItemStack;
@@ -91,6 +92,7 @@ public class EventSpawnMarkerManager {
           Mannequin labelStand = createLabelOnly(labelLoc);
           if (labelStand != null) {
             markers.add(labelStand);
+            markerToSpawnIndex.put(labelStand.getUniqueId(), index);
           }
         }
         index++;
@@ -131,8 +133,7 @@ public class EventSpawnMarkerManager {
     mannequin.teleport(facingLoc);
 
     // Give it a sword to hold (to make it more visible)
-    ItemStack sword =
-        ItemCreateUtil.createItem("<red>Spawn Marker", org.bukkit.Material.DIAMOND_SWORD);
+    ItemStack sword = ItemCreateUtil.createItem("<red>Spawn Marker", Material.DIAMOND_SWORD);
     mannequin.getEquipment().setItemInMainHand(sword);
 
     // Make it invulnerable and non-persistent.
