@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
+import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 
 @Getter
@@ -206,6 +207,12 @@ public class Party implements dev.lokspel.api.interfaces.Party {
   public void sendMessage(String message) {
     for (Player player : members) {
       Common.sendMmMessage(player, message);
+    }
+  }
+
+  public void sendMessage(Component component) {
+    for (Player player : members) {
+      Common.send(player, component);
     }
   }
 

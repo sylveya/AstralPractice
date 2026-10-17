@@ -86,4 +86,15 @@ public final class PracticeJourney {
     console.sendCommand(command);
     console.await(expected, before, WAIT);
   }
+
+  public static void assertReceived(SimulatedPlayer player, int before, String expected) {
+    Messages messages = player.capability(Messages.class);
+    try {
+      messages.received(text -> text.contains(expected), before, WAIT);
+    } catch (RuntimeException e) {
+      throw new AssertionError(
+          player.name() + " did not receive '" + expected + "'; received: " + messages.history(),
+          e);
+    }
+  }
 }

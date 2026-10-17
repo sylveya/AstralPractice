@@ -12,25 +12,20 @@ import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.util.ChatFormatUtil;
 import dev.lokspel.practice.util.Common;
-import dev.lokspel.practice.util.PapiUtil;
-import dev.lokspel.practice.util.SoftDependUtil;
-import dev.lokspel.practice.util.StringUtil;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import java.util.Collection;
 import java.util.Set;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 
 public class PlayerChatListener implements Listener {
-
-  private static final String MESSAGE_PLACEHOLDER = "<ap-message>";
 
   @EventHandler(priority = EventPriority.NORMAL)
   public void onPlayerChat(AsyncChatEvent e) {
@@ -110,29 +105,10 @@ public class PlayerChatListener implements Listener {
   }
 
   private void applyRenderer(AsyncChatEvent e, Component message, String formatString) {
-
     e.renderer(
-        (_, _, _, viewer) -> {
-          String format = formatString.replace("%%message%%", MESSAGE_PLACEHOLDER);
-
-          Component component;
-
-          if (SoftDependUtil.isPAPI_ENABLED && viewer instanceof Player viewerPlayer) {
-
-            component = PapiUtil.runThroughFormat(viewerPlayer, format);
-
-          } else {
-
-            component =
-                AstralPractice.getMiniMessage().deserialize(StringUtil.legacyToMiniMessage(format));
-          }
-
-          return component.replaceText(
-              TextReplacementConfig.builder()
-                  .matchLiteral(MESSAGE_PLACEHOLDER)
-                  .replacement(message)
-                  .build());
-        });
+        (_, _, _, viewer) ->
+            ChatFormatUtil.formatChatMessage(
+                viewer instanceof CommandSender sender ? sender : null, formatString, message));
   }
 
   private void applyMatchChatIsolation(AsyncChatEvent e, Player sender) {

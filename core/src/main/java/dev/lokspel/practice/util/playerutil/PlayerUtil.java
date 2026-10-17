@@ -5,6 +5,7 @@ import dev.lokspel.practice.config.PracticeConfig;
 import dev.lokspel.practice.manager.ladder.abstraction.Ladder;
 import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
+import dev.lokspel.practice.util.ChatFormatUtil;
 import dev.lokspel.practice.util.Common;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -115,22 +116,21 @@ public final class PlayerUtil {
   }
 
   public static void sendStaffMessage(Player sender, String message) {
-    String senderName =
-        sender != null ? sender.getName() : PracticeConfig.language().getConsoleName();
+    String format =
+        sender != null
+            ? ChatFormatUtil.buildStaffChatMessage(sender)
+            : PracticeConfig.language()
+                .getGeneralChat()
+                .getStaffChat()
+                .replace("%%player%%", PracticeConfig.language().getConsoleName())
+                .replace("%player%", PracticeConfig.language().getConsoleName());
 
     for (Player online : Bukkit.getOnlinePlayers()) {
       if (!online.hasPermission("ap.staffmode.chat")) {
         continue;
       }
 
-      String formattedMessage =
-          PracticeConfig.language()
-              .getGeneralChat()
-              .getStaffChat()
-              .replace("%%player%%", senderName)
-              .replace("%%message%%", message);
-
-      Common.sendMmMessage(online, formattedMessage);
+      Common.send(online, ChatFormatUtil.formatChatMessage(online, format, message));
     }
   }
 

@@ -3,6 +3,7 @@ package dev.lokspel.practice.command.privatemessage;
 import dev.lokspel.practice.config.PracticeConfig;
 import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
+import dev.lokspel.practice.util.ChatFormatUtil;
 import dev.lokspel.practice.util.Common;
 import java.util.List;
 import org.bukkit.command.CommandSender;
@@ -74,31 +75,29 @@ public class ReplyCommand extends PrivateMessageCommand {
       return;
     }
 
-    StringBuilder message = new StringBuilder();
-    for (String arg : args) {
-      message.append(arg).append(" ");
-    }
+    String message = String.join(" ", args);
 
-    Common.sendMmMessage(
-        player,
+    String senderFormat =
         PracticeConfig.language()
             .getCommand()
             .getPrivateMessage()
             .getReply()
             .getSenderMessage()
             .replace("%sender%", player.getName())
-            .replace("%receiver%", target.getName())
-            .replace("%message%", message.toString()));
-    Common.sendMmMessage(
-        target,
+            .replace("%receiver%", target.getName());
+    String receiverFormat =
         PracticeConfig.language()
             .getCommand()
             .getPrivateMessage()
             .getReply()
             .getReceiverMessage()
             .replace("%sender%", player.getName())
-            .replace("%receiver%", target.getName())
-            .replace("%message%", message.toString()));
+            .replace("%receiver%", target.getName());
+
+    Common.send(player, ChatFormatUtil.formatChatMessage(player, senderFormat, message));
+    if (!player.equals(target)) {
+      Common.send(target, ChatFormatUtil.formatChatMessage(target, receiverFormat, message));
+    }
 
     MessageCommand.setLatestMessage(target, player);
   }

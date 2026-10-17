@@ -49,12 +49,8 @@ public final class ChatArg {
                 .getChatDisabled());
       }
     } else {
-      StringBuilder message = new StringBuilder();
-      for (int i = 1; i < args.length; i++) {
-        message.append(args[i]).append(" ");
-      }
-
-      PlayerUtil.sendStaffMessage(player, message.toString());
+      String message = String.join(" ", java.util.Arrays.copyOfRange(args, 1, args.length));
+      PlayerUtil.sendStaffMessage(player, message);
     }
   }
 
@@ -68,12 +64,8 @@ public final class ChatArg {
     if (args.length == 1) {
       Common.sendConsoleMmMessage("<red>Use: /staff chat <message>");
     } else {
-      StringBuilder message = new StringBuilder();
-      for (int i = 1; i < args.length; i++) {
-        message.append(args[i]).append(" ");
-      }
-
-      PlayerUtil.sendStaffMessage(null, message.toString());
+      String message = String.join(" ", java.util.Arrays.copyOfRange(args, 1, args.length));
+      PlayerUtil.sendStaffMessage(null, message);
     }
   }
 }
