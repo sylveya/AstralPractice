@@ -109,9 +109,6 @@ public class SpawnMarkerManager {
   private Mannequin createSpectatorMarker(@NotNull Location location) {
     Mannequin mannequin = spawnBaseMannequin(location, "<aqua><bold>Spectator Spawn", false);
 
-    // Give spectator distinctive gear: Spyglass, Ender Eye in offhand, Elytra, and Aqua boots
-    ArenaUtil.setMannequinItemInHand(mannequin, new ItemStack(Material.SPYGLASS), true);
-    ArenaUtil.setMannequinItemInHand(mannequin, new ItemStack(Material.ENDER_EYE), false);
     mannequin.getEquipment().setHelmet(new ItemStack(Material.PLAYER_HEAD));
     mannequin.getEquipment().setChestplate(new ItemStack(Material.ELYTRA));
     mannequin.getEquipment().setBoots(createDyedBoots(Color.AQUA));
