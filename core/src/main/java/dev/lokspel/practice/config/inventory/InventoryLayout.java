@@ -275,7 +275,9 @@ public class InventoryLayout {
       InventoryItem value = new InventoryItem();
       value.slot = 4;
       value.opponentHead = true;
-      value.item = ItemConfig.of("BLAZE_POWDER").name("<gold>Rematch <gray>(Right-Click)");
+      value.item =
+          ItemConfig.of("BLAZE_POWDER")
+              .name("<gold>Rematch <yellow>%opponent% <gray>(Right-Click)");
 
       return value;
     }
