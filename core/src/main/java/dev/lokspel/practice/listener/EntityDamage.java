@@ -20,7 +20,7 @@ public class EntityDamage implements Listener {
       return;
     }
 
-    WorldEnum worldEnum = ServerManager.getInstance().getInWorld().get(player);
+    WorldEnum worldEnum = ServerManager.getInstance().getWorld(player);
     if (worldEnum == WorldEnum.LOBBY) {
       Location lobbyLocation = ServerManager.getLobby();
       if (lobbyLocation != null) {

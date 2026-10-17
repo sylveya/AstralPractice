@@ -56,17 +56,9 @@ public enum EndMessageUtil {
         message.add(
             line.replace("%matchId%", duel.getId())
                 .replace("%winner%", winner.getName())
-                .replace(
-                    "%winner_uuid%",
-                    ProfileManager.getInstance().getUuids().get(winner) != null
-                        ? ProfileManager.getInstance().getUuids().get(winner).toString()
-                        : "")
+                .replace("%winner_uuid%", winner.getUniqueId().toString())
                 .replace("%loser%", loser.getName())
-                .replace(
-                    "%loser_uuid%",
-                    ProfileManager.getInstance().getUuids().get(loser) != null
-                        ? ProfileManager.getInstance().getUuids().get(loser).toString()
-                        : ""));
+                .replace("%loser_uuid%", loser.getUniqueId().toString()));
       }
     }
 
@@ -87,7 +79,6 @@ public enum EndMessageUtil {
       }
 
       if (partyFfa.getPlayers().contains(loser)) {
-        var uuid = ProfileManager.getInstance().getUuids().get(loser);
         losersBuilder.append(
             PracticeConfig.language()
                 .getMatch()
@@ -96,7 +87,7 @@ public enum EndMessageUtil {
                 .getLoserPlayerFormat()
                 .replace("%matchId%", partyFfa.getId())
                 .replace("%player%", loser.getName())
-                .replace("%player_uuid%", uuid != null ? uuid.toString() : ""));
+                .replace("%player_uuid%", loser.getUniqueId().toString()));
       } else {
         losersBuilder.append(
             PracticeConfig.language()
@@ -139,11 +130,7 @@ public enum EndMessageUtil {
             line.replace("%matchId%", partyFfa.getId())
                 .replace("%losers%", losersString)
                 .replace("%winner%", winner.getName())
-                .replace(
-                    "%winner_uuid%",
-                    ProfileManager.getInstance().getUuids().get(winner) != null
-                        ? ProfileManager.getInstance().getUuids().get(winner).toString()
-                        : ""));
+                .replace("%winner_uuid%", winner.getUniqueId().toString()));
       }
     }
 
@@ -227,12 +214,11 @@ public enum EndMessageUtil {
         builder.append(", ");
       }
       if (match.getPlayers().contains(player)) {
-        var uuid = ProfileManager.getInstance().getUuids().get(player);
         builder.append(
             playerFormat
                 .replace("%matchId%", match.getId())
                 .replace("%player%", player.getName())
-                .replace("%player_uuid%", uuid != null ? uuid.toString() : ""));
+                .replace("%player_uuid%", player.getUniqueId().toString()));
       } else if (leftFormat != null && !leftFormat.isEmpty()) {
         builder.append(leftFormat.replace("%player%", player.getName()));
       } else {

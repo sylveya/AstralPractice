@@ -202,6 +202,14 @@ public class QueueManager implements Listener {
     }
   }
 
+  /** Cancels all regular and custom-kit queues for a player and restores their lobby state. */
+  public void leaveQueue(Player player) {
+    endAllQueuesForPlayer(player, false, null);
+    if (!CustomKitQueueManager.getInstance().cancelJoinSearch(player, true, true)) {
+      CustomKitQueueManager.getInstance().cancelHostedQueue(player, true, true);
+    }
+  }
+
   public boolean isMultiQueueAllowed(Player player) {
     if (!PracticeConfig.settings().getQueue().getMulti().isEnabled()) {
       return false;

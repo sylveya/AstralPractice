@@ -23,7 +23,7 @@ public abstract class FightPlayer {
 
   public FightPlayer(Player player, Spectatable spectatable) {
     this.player = player;
-    this.uuid = ProfileManager.getInstance().getUuids().get(player);
+    this.uuid = player.getUniqueId();
     this.profile = ProfileManager.getInstance().getProfile(player);
     this.spectatable = spectatable;
   }

@@ -1,41 +1,74 @@
 package dev.lokspel.practice.util.cooldown;
 
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import lombok.Getter;
+import java.util.UUID;
 import org.bukkit.entity.Player;
 
 public final class PlayerCooldown {
 
   private PlayerCooldown() {}
 
-  @Getter
-  private static final Map<Player, Map<CooldownObject, Long>> cooldowns = new ConcurrentHashMap<>();
+  private static final Map<UUID, Map<CooldownObject, Long>> cooldowns = new HashMap<>();
 
   public static void addCooldown(Player player, CooldownObject object, int time) {
     addCooldown(player, object, (double) time);
   }
 
   public static void addCooldown(Player player, CooldownObject object, double time) {
+    if (player == null || object == null) {
+      return;
+    }
+    addCooldown(player.getUniqueId(), object, time);
+  }
+
+  public static void addCooldown(UUID uuid, CooldownObject object, double time) {
+    if (uuid == null || object == null) {
+      return;
+    }
     cooldowns
-        .computeIfAbsent(player, _ -> new EnumMap<>(CooldownObject.class))
+        .computeIfAbsent(uuid, _ -> new EnumMap<>(CooldownObject.class))
         .put(object, (long) (System.currentTimeMillis() + time * 1000L));
   }
 
   public static void removeCooldown(Player player, CooldownObject object) {
-    Map<CooldownObject, Long> playerCooldowns = cooldowns.get(player);
+    if (player != null) {
+      removeCooldown(player.getUniqueId(), object);
+    }
+  }
+
+  public static void removeCooldown(UUID uuid, CooldownObject object) {
+    if (uuid == null || object == null) {
+      return;
+    }
+    Map<CooldownObject, Long> playerCooldowns = cooldowns.get(uuid);
     if (playerCooldowns != null) {
       playerCooldowns.remove(object);
     }
   }
 
   public static void clearPlayer(Player player) {
-    cooldowns.remove(player);
+    if (player != null) {
+      clearPlayer(player.getUniqueId());
+    }
+  }
+
+  public static void clearPlayer(UUID uuid) {
+    if (uuid != null) {
+      cooldowns.remove(uuid);
+    }
   }
 
   public static boolean isActive(Player player, CooldownObject object) {
-    Map<CooldownObject, Long> playerCooldowns = cooldowns.get(player);
+    return player != null && isActive(player.getUniqueId(), object);
+  }
+
+  public static boolean isActive(UUID uuid, CooldownObject object) {
+    if (uuid == null || object == null) {
+      return false;
+    }
+    Map<CooldownObject, Long> playerCooldowns = cooldowns.get(uuid);
     if (playerCooldowns != null) {
       Long expiry = playerCooldowns.get(object);
       return expiry != null && System.currentTimeMillis() < expiry;
@@ -44,7 +77,14 @@ public final class PlayerCooldown {
   }
 
   public static long getLeft(Player player, CooldownObject object) {
-    Map<CooldownObject, Long> playerCooldowns = cooldowns.get(player);
+    return player != null ? getLeft(player.getUniqueId(), object) : 0L;
+  }
+
+  public static long getLeft(UUID uuid, CooldownObject object) {
+    if (uuid == null || object == null) {
+      return 0L;
+    }
+    Map<CooldownObject, Long> playerCooldowns = cooldowns.get(uuid);
     if (playerCooldowns != null) {
       Long expiry = playerCooldowns.get(object);
       if (expiry != null && System.currentTimeMillis() < expiry) {
@@ -55,7 +95,11 @@ public final class PlayerCooldown {
   }
 
   public static double getLeftInDouble(Player player, CooldownObject object) {
-    long left = getLeft(player, object);
+    return player != null ? getLeftInDouble(player.getUniqueId(), object) : 0.0;
+  }
+
+  public static double getLeftInDouble(UUID uuid, CooldownObject object) {
+    long left = getLeft(uuid, object);
     return Math.round(left / 100.0) / 10.0;
   }
 }

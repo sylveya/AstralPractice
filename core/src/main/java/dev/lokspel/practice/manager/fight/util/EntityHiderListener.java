@@ -6,7 +6,6 @@ import com.github.retrooper.packetevents.event.PacketListenerPriority;
 import com.github.retrooper.packetevents.event.PacketSendEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.util.Vector3d;
-import com.github.retrooper.packetevents.util.Vector3i;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityEffect;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerParticle;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSoundEffect;
@@ -26,9 +25,9 @@ import dev.lokspel.practice.manager.profile.enums.ProfileStatus;
 import dev.lokspel.practice.manager.server.ServerManager;
 import dev.lokspel.practice.manager.server.WorldEnum;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -61,10 +60,10 @@ public class EntityHiderListener implements PacketListener, Listener {
     PacketEvents.getAPI().getEventManager().registerListener(this, PacketListenerPriority.NORMAL);
   }
 
-  protected final Set<Player> effectTo = new HashSet<>();
-  private final ConcurrentHashMap<java.util.UUID, AtomicInteger> allowedParticlePackets =
+  private final Set<UUID> effectTo = ConcurrentHashMap.newKeySet();
+  private final ConcurrentHashMap<UUID, AtomicInteger> allowedParticlePackets =
       new ConcurrentHashMap<>();
-  private final ConcurrentHashMap<java.util.UUID, CopyOnWriteArrayList<ParticleBurstPermit>>
+  private final ConcurrentHashMap<UUID, CopyOnWriteArrayList<ParticleBurstPermit>>
       allowedParticleBursts = new ConcurrentHashMap<>();
 
   private final ConcurrentHashMap<Integer, Location> entityLocations = new ConcurrentHashMap<>();
@@ -148,22 +147,9 @@ public class EntityHiderListener implements PacketListener, Listener {
   }
 
   private boolean checkPlayer(Player player) {
-    if (!ServerManager.getInstance().getInWorld().containsKey(player)) {
+    WorldEnum worldEnum = ServerManager.getInstance().getWorld(player);
+    if (worldEnum == null || worldEnum == WorldEnum.LOBBY || worldEnum == WorldEnum.OTHER) {
       return false;
-    }
-
-    WorldEnum worldEnum = ServerManager.getInstance().getInWorld().get(player);
-    if (worldEnum == null) {
-      return false;
-    }
-
-    switch (worldEnum) {
-      case LOBBY:
-      case OTHER:
-        return false;
-
-      default:
-        break;
     }
 
     Profile profile = ProfileManager.getInstance().getProfile(player);
@@ -195,21 +181,32 @@ public class EntityHiderListener implements PacketListener, Listener {
     }
   }
 
-  @EventHandler
+  @EventHandler(ignoreCancelled = true)
   public void onPlayerMove(PlayerMoveEvent e) {
+    Location from = e.getFrom();
+    Location to = e.getTo();
+    if (from.getX() == to.getX() && from.getY() == to.getY() && from.getZ() == to.getZ()) {
+      return;
+    }
+
     Player player = e.getPlayer();
     int entityId = player.getEntityId();
 
-    Bukkit.getScheduler()
-        .runTaskAsynchronously(
-            AstralPractice.getInstance(),
-            () -> {
-              if (this.checkPlayer(player)) {
-                entityLocations.put(entityId, player.getLocation());
-              } else {
-                entityLocations.remove(entityId);
-              }
-            });
+    if (this.checkPlayer(player)) {
+      entityLocations.put(entityId, to);
+    } else {
+      entityLocations.remove(entityId);
+    }
+  }
+
+  public void clearPlayer(Player player) {
+    if (player == null) {
+      return;
+    }
+    entityLocations.remove(player.getEntityId());
+    effectTo.remove(player.getUniqueId());
+    allowedParticlePackets.remove(player.getUniqueId());
+    allowedParticleBursts.remove(player.getUniqueId());
   }
 
   @Override
@@ -221,100 +218,104 @@ public class EntityHiderListener implements PacketListener, Listener {
       return;
     }
 
+    UUID uuid = player.getUniqueId();
+
     if (!this.checkPlayer(player)) {
-      effectTo.remove(player);
+      effectTo.remove(uuid);
       entityLocations.remove(player.getEntityId());
-      allowedParticlePackets.remove(player.getUniqueId());
-      allowedParticleBursts.remove(player.getUniqueId());
+      allowedParticlePackets.remove(uuid);
+      allowedParticleBursts.remove(uuid);
       return;
     }
 
-    if (e.getPacketType() == PacketType.Play.Server.SPAWN_ENTITY) {
-      WrapperPlayServerSpawnEntity event = new WrapperPlayServerSpawnEntity(e);
+    if (e.getPacketType() instanceof PacketType.Play.Server serverPacket) {
+      switch (serverPacket) {
+        case SPAWN_ENTITY -> {
+          WrapperPlayServerSpawnEntity event = new WrapperPlayServerSpawnEntity(e);
 
-      Entity entity = SpigotConversionUtil.getEntityById(player.getWorld(), event.getEntityId());
-      if (entity instanceof Projectile projectile) {
-        if (projectile.getShooter() instanceof Player shooter) {
-          if (!player.canSee(shooter)) {
+          Entity entity =
+              SpigotConversionUtil.getEntityById(player.getWorld(), event.getEntityId());
+          if (entity instanceof Projectile projectile) {
+            if (projectile.getShooter() instanceof Player shooter) {
+              if (!player.canSee(shooter)) {
+                e.setCancelled(true);
+              }
+            }
+          }
+        }
+        case EFFECT -> {
+          if (!effectTo.contains(uuid)) {
+            e.setCancelled(true);
+            return;
+          }
+
+          effectTo.remove(uuid);
+        }
+        case PARTICLE -> {
+          WrapperPlayServerParticle particleWrapper = new WrapperPlayServerParticle(e);
+          if (!consumeAllowedParticleBurst(player, particleWrapper)
+              && !consumeAllowedParticlePacket(player)) {
             e.setCancelled(true);
           }
         }
-      }
-    } else if (e.getPacketType() == PacketType.Play.Server.EFFECT) {
-      if (!effectTo.contains(player)) {
-        e.setCancelled(true);
-        return;
-      }
+        case SOUND_EFFECT -> {
+          WrapperPlayServerSoundEffect soundWrapper = new WrapperPlayServerSoundEffect(e);
+          Vector3d pos = soundWrapper.getPosition();
 
-      effectTo.remove(player);
-    } else if (e.getPacketType() == PacketType.Play.Server.PARTICLE) {
-      WrapperPlayServerParticle particleWrapper = new WrapperPlayServerParticle(e);
-      if (!consumeAllowedParticleBurst(player, particleWrapper)
-          && !consumeAllowedParticlePacket(player)) {
-        e.setCancelled(true);
-      }
-    } else if (e.getPacketType() == PacketType.Play.Server.SOUND_EFFECT) {
-      WrapperPlayServerSoundEffect soundWrapper = new WrapperPlayServerSoundEffect(e);
-      Vector3i pos = soundWrapper.getEffectPosition();
-      Location location =
-          new Location(
-              player.getWorld(),
-              (double) pos.getX() / 8,
-              (double) pos.getY() / 8,
-              (double) pos.getZ() / 8);
+          Location location = new Location(player.getWorld(), pos.getX(), pos.getY(), pos.getZ());
 
-      int closestEntityId = -1;
-      double closestDistanceSquared = Double.MAX_VALUE;
+          int closestEntityId = -1;
+          double closestDistanceSquared = Double.MAX_VALUE;
 
-      for (Map.Entry<Integer, Location> entry : entityLocations.entrySet()) {
-        if (location.getWorld() != entry.getValue().getWorld()) {
-          continue;
-        }
+          for (Map.Entry<Integer, Location> entry : entityLocations.entrySet()) {
+            if (location.getWorld() != entry.getValue().getWorld()) {
+              continue;
+            }
 
-        double distanceSquared = entry.getValue().distanceSquared(location);
+            double distanceSquared = entry.getValue().distanceSquared(location);
 
-        if (distanceSquared < closestDistanceSquared) {
-          closestDistanceSquared = distanceSquared;
-          closestEntityId = entry.getKey();
-        }
-      }
+            if (distanceSquared < closestDistanceSquared) {
+              closestDistanceSquared = distanceSquared;
+              closestEntityId = entry.getKey();
+            }
+          }
 
-      if (closestEntityId != -1) {
-        Entity closestEntity =
-            SpigotConversionUtil.getEntityById(player.getWorld(), closestEntityId);
-        if (closestEntity instanceof Player target) {
-          if (!player.canSee(target)) {
-            e.setCancelled(true);
+          if (closestEntityId != -1) {
+            Entity closestEntity =
+                SpigotConversionUtil.getEntityById(player.getWorld(), closestEntityId);
+            if (closestEntity instanceof Player target) {
+              if (!player.canSee(target)) {
+                e.setCancelled(true);
+              }
+            }
           }
         }
-      }
-    } else if (e.getPacketType() == PacketType.Play.Server.ENTITY_EFFECT) {
-      WrapperPlayServerEntityEffect event = new WrapperPlayServerEntityEffect(e);
-      Entity entity = SpigotConversionUtil.getEntityById(player.getWorld(), event.getEntityId());
-      if (entity instanceof Player target) {
-        if (!player.canSee(target)) {
-          e.setCancelled(true);
+        case ENTITY_EFFECT -> {
+          WrapperPlayServerEntityEffect event = new WrapperPlayServerEntityEffect(e);
+          Entity entity =
+              SpigotConversionUtil.getEntityById(player.getWorld(), event.getEntityId());
+          if (entity instanceof Player target) {
+            if (!player.canSee(target)) {
+              e.setCancelled(true);
+            }
+          }
         }
+        default -> {}
       }
     }
   }
 
-  private static final class ParticleBurstPermit {
-    private final double positionX;
-    private final double positionY;
-    private final double positionZ;
-    private final double radiusSquared;
-    private final long expiresAtMillis;
-    private final AtomicInteger remaining;
+  private record ParticleBurstPermit(
+      double positionX,
+      double positionY,
+      double positionZ,
+      double radiusSquared,
+      long expiresAtMillis,
+      AtomicInteger remaining) {
 
     private ParticleBurstPermit(
         double x, double y, double z, double radiusSquared, long expiresAtMillis, int packetCount) {
-      this.positionX = x;
-      this.positionY = y;
-      this.positionZ = z;
-      this.radiusSquared = radiusSquared;
-      this.expiresAtMillis = expiresAtMillis;
-      this.remaining = new AtomicInteger(packetCount);
+      this(x, y, z, radiusSquared, expiresAtMillis, new AtomicInteger(packetCount));
     }
 
     private boolean isExpired(long now) {
@@ -363,8 +364,12 @@ public class EntityHiderListener implements PacketListener, Listener {
         }
 
         if (!match.getLadder().isBuild()) {
-          effectTo.addAll(match.getPlayers());
-          effectTo.addAll(match.getSpectators());
+          for (Player p : match.getPlayers()) {
+            effectTo.add(p.getUniqueId());
+          }
+          for (Player p : match.getSpectators()) {
+            effectTo.add(p.getUniqueId());
+          }
         }
         break;
       case FFA:
@@ -395,8 +400,12 @@ public class EntityHiderListener implements PacketListener, Listener {
             e.setIntensity(entity, 0);
           }
 
-          effectTo.addAll(duelFight.getPlayers());
-          effectTo.addAll(duelFight.getSpectators());
+          for (Player p : duelFight.getPlayers()) {
+            effectTo.add(p.getUniqueId());
+          }
+          for (Player p : duelFight.getSpectators()) {
+            effectTo.add(p.getUniqueId());
+          }
         }
         break;
 

@@ -2,8 +2,6 @@ package dev.lokspel.practice.manager.inventory.inventoryitem.queueitems;
 
 import dev.lokspel.practice.config.PracticeConfig;
 import dev.lokspel.practice.manager.inventory.inventoryitem.InvItem;
-import dev.lokspel.practice.manager.queue.CustomKitQueueManager;
-import dev.lokspel.practice.manager.queue.Queue;
 import dev.lokspel.practice.manager.queue.QueueManager;
 import org.bukkit.entity.Player;
 
@@ -15,16 +13,6 @@ public class MatchQueueLeaveInvItem extends InvItem {
 
   @Override
   public void handleClickEvent(Player player) {
-    Queue queue = QueueManager.getInstance().getQueue(player);
-    if (queue != null) {
-      QueueManager.getInstance().endAllQueuesForPlayer(player, false, null);
-      return;
-    }
-
-    if (CustomKitQueueManager.getInstance().cancelJoinSearch(player, true, true)) {
-      return;
-    }
-
-    CustomKitQueueManager.getInstance().cancelHostedQueue(player, true, true);
+    QueueManager.getInstance().leaveQueue(player);
   }
 }

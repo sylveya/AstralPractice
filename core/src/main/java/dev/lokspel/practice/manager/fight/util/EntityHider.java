@@ -1,15 +1,9 @@
 package dev.lokspel.practice.manager.fight.util;
 
-import com.github.retrooper.packetevents.PacketEvents;
-import com.github.retrooper.packetevents.event.PacketListener;
-import com.github.retrooper.packetevents.event.PacketListenerPriority;
-import com.github.retrooper.packetevents.event.PacketSendEvent;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
-import dev.lokspel.practice.AstralPractice;
 import java.util.Map;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -17,8 +11,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.Plugin;
-import org.jetbrains.annotations.Nullable;
-import org.jspecify.annotations.NonNull;
 
 public class EntityHider implements Listener {
 
@@ -46,12 +38,7 @@ public class EntityHider implements Listener {
     this.policy = policy;
     this.plugin = plugin;
 
-    PacketEvents.getAPI()
-        .getEventManager()
-        .registerListener(constructProtocol(), PacketListenerPriority.NORMAL);
-
-    // Register events and packet listener
-    plugin.getServer().getPluginManager().registerEvents(constructBukkit(), plugin);
+    plugin.getServer().getPluginManager().registerEvents(this, plugin);
   }
 
   /**
@@ -134,61 +121,14 @@ public class EntityHider implements Listener {
     observerEntityMap.rowMap().remove(player.getEntityId());
   }
 
-  /**
-   * Construct the Bukkit event listener.
-   *
-   * @return Our listener.
-   */
-  private Listener constructBukkit() {
-    return new Listener() {
-      @EventHandler
-      public void onEntityDeath(EntityDeathEvent e) {
-        removeEntity(e.getEntity());
-      }
-
-      @EventHandler
-      public void onPlayerQuit(PlayerQuitEvent e) {
-        Player player = e.getPlayer();
-
-        Bukkit.getScheduler()
-            .runTaskLater(
-                AstralPractice.getInstance(),
-                () -> {
-                  if (Bukkit.getPlayer(player.getUniqueId()) != null) {
-                    return;
-                  }
-
-                  removePlayer(player);
-                },
-                1L);
-      }
-    };
+  @EventHandler
+  public void onEntityDeath(EntityDeathEvent e) {
+    removeEntity(e.getEntity());
   }
 
-  /**
-   * Construct the packet listener that will be used to intercept every entity-related packet.
-   *
-   * @return The packet listener.
-   */
-  private PacketListener constructProtocol() {
-    return new PacketListener() {
-      @Override
-      public void onPacketSend(@NonNull PacketSendEvent event) {
-        PacketListener.super.onPacketSend(event);
-
-        @Nullable Player player = event.getPlayer();
-        // noinspection
-        if (player == null) {
-          return;
-        }
-
-        int entityId = event.getPacketId();
-
-        if (!isVisible(player, entityId)) {
-          event.setCancelled(true);
-        }
-      }
-    };
+  @EventHandler
+  public void onPlayerQuit(PlayerQuitEvent e) {
+    removePlayer(e.getPlayer());
   }
 
   /**

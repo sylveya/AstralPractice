@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import lombok.Getter;
 import org.bukkit.Bukkit;
@@ -33,8 +34,16 @@ public class SpectatorManager {
     return instance;
   }
 
-  private final Map<Player, Spectatable> spectators = new HashMap<>();
+  private final Map<UUID, Spectatable> spectators = new HashMap<>();
   private SpectatorMenuGui spectatorMenuGui;
+
+  public Spectatable getSpectatable(Player player) {
+    return player == null ? null : spectators.get(player.getUniqueId());
+  }
+
+  public boolean isSpectating(Player player) {
+    return player != null && spectators.containsKey(player.getUniqueId());
+  }
 
   private SpectatorManager() {
     Bukkit.getPluginManager().registerEvents(new SpectatorListener(), AstralPractice.getInstance());
@@ -86,7 +95,7 @@ public class SpectatorManager {
    * spectator stopped watching that match in the meantime.
    */
   public void teleportToTarget(Player spectator, Match match, Player target) {
-    if (this.spectators.get(spectator) != match) {
+    if (spectator == null || this.spectators.get(spectator.getUniqueId()) != match) {
       return;
     }
     if (!match.getPlayers().contains(target)) {

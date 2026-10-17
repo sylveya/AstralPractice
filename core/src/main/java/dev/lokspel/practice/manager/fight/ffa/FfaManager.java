@@ -117,7 +117,11 @@ public class FfaManager {
   }
 
   public Ffa getFfaBySpectator(Player player) {
-    Spectatable spectatable = SpectatorManager.getInstance().getSpectators().get(player);
+    if (player == null) {
+      return null;
+    }
+    Spectatable spectatable =
+        SpectatorManager.getInstance().getSpectators().get(player.getUniqueId());
     if (spectatable instanceof Ffa) {
       return (Ffa) spectatable;
     } else {

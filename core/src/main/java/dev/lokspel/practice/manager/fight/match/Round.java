@@ -14,7 +14,6 @@ import dev.lokspel.practice.manager.fight.match.util.TempKillPlayer;
 import dev.lokspel.practice.manager.fight.util.BedUtil;
 import dev.lokspel.practice.manager.fight.util.stats.Statistic;
 import dev.lokspel.practice.manager.ladder.enums.LadderType;
-import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.util.TimeUtil;
 import dev.lokspel.practice.util.entityhider.PlayerHider;
 import dev.lokspel.practice.util.playerutil.PlayerUtil;
@@ -66,7 +65,7 @@ public abstract class Round extends BukkitRunnable {
     }
 
     for (Player player : match.getPlayers()) {
-      UUID playerUuid = ProfileManager.getInstance().getUuids().get(player);
+      UUID playerUuid = player.getUniqueId();
 
       Statistic statistic = new Statistic(playerUuid);
       this.statistics.put(playerUuid, statistic);
@@ -129,6 +128,7 @@ public abstract class Round extends BukkitRunnable {
           this.roundEndRunnable = new RoundEndRunnable(this, true).begin();
         }
       }
+      this.match.initMatchStatsGuis();
     } else if (needsReset) {
       // Non-ending round that requires an arena rollback.
       // Delay rollback until after ROUND_END_DELAY so death effects/titles stay visible.

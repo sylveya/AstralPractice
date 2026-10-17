@@ -60,9 +60,15 @@ public class PartyRequest {
     new BukkitRunnable() {
       @Override
       public void run() {
-        requestManager.getRequests().get(target).remove(partyRequest);
+        List<PartyRequest> targetRequests = requestManager.getRequests().get(target);
+        if (targetRequests != null) {
+          targetRequests.remove(partyRequest);
+          if (targetRequests.isEmpty()) {
+            requestManager.getRequests().remove(target);
+          }
+        }
       }
-    }.runTaskLaterAsynchronously(
+    }.runTaskLater(
         AstralPractice.getInstance(),
         20L * PracticeConfig.settings().getParty().getRequestExpiry());
   }

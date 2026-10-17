@@ -7,6 +7,7 @@ import dev.lokspel.practice.manager.gui.guis.selectors.LadderSelectorGui;
 import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.manager.profile.enums.ProfileStatus;
+import dev.lokspel.practice.manager.queue.QueueManager;
 import dev.lokspel.practice.util.Common;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -47,9 +48,15 @@ public class DuelCommand implements CommandExecutor, TabCompleter {
       return false;
     }
 
-    if (!profile.getStatus().equals(ProfileStatus.LOBBY) || profile.isParty()) {
+    if ((!profile.getStatus().equals(ProfileStatus.LOBBY)
+            && !profile.getStatus().equals(ProfileStatus.QUEUE))
+        || profile.isParty()) {
       Common.sendMmMessage(player, PracticeConfig.language().getCommand().getDuel().getCantDuel());
       return false;
+    }
+
+    if (profile.getStatus().equals(ProfileStatus.QUEUE)) {
+      QueueManager.getInstance().leaveQueue(player);
     }
 
     Player target = Bukkit.getPlayer(args[0]);
@@ -95,7 +102,8 @@ public class DuelCommand implements CommandExecutor, TabCompleter {
 
     if (!targetProfile.getStatus().equals(ProfileStatus.LOBBY)
         && !targetProfile.getStatus().equals(ProfileStatus.EDITOR)
-        && !targetProfile.getStatus().equals(ProfileStatus.SPECTATE)) {
+        && !targetProfile.getStatus().equals(ProfileStatus.SPECTATE)
+        && !targetProfile.getStatus().equals(ProfileStatus.QUEUE)) {
       Common.sendMmMessage(
           player,
           PracticeConfig.language()
@@ -134,7 +142,9 @@ public class DuelCommand implements CommandExecutor, TabCompleter {
 
     Profile profile = ProfileManager.getInstance().getProfile(player);
 
-    if (!profile.getStatus().equals(ProfileStatus.LOBBY) || profile.isParty()) {
+    if ((!profile.getStatus().equals(ProfileStatus.LOBBY)
+            && !profile.getStatus().equals(ProfileStatus.QUEUE))
+        || profile.isParty()) {
       return arguments;
     }
 
@@ -147,7 +157,8 @@ public class DuelCommand implements CommandExecutor, TabCompleter {
         Profile targetProfile = ProfileManager.getInstance().getProfile(target);
         if (!targetProfile.getStatus().equals(ProfileStatus.LOBBY)
             && !targetProfile.getStatus().equals(ProfileStatus.EDITOR)
-            && !targetProfile.getStatus().equals(ProfileStatus.SPECTATE)) {
+            && !targetProfile.getStatus().equals(ProfileStatus.SPECTATE)
+            && !targetProfile.getStatus().equals(ProfileStatus.QUEUE)) {
           continue;
         }
 

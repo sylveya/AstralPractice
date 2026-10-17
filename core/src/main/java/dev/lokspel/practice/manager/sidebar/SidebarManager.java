@@ -9,6 +9,7 @@ import dev.lokspel.practice.manager.sidebar.adapter.SidebarAdapter;
 import dev.lokspel.practice.util.Common;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.Getter;
 import net.megavex.scoreboardlibrary.api.ScoreboardLibrary;
@@ -35,7 +36,7 @@ public class SidebarManager implements Listener {
 
   @Getter private ScoreboardLibrary scoreboardLibrary;
 
-  private final Map<Player, PracticeSidebar> boards = new ConcurrentHashMap<>();
+  private final Map<UUID, PracticeSidebar> boards = new ConcurrentHashMap<>();
   @Getter private final SidebarAdapter sidebarAdapter;
   private BukkitTask updateTask;
 
@@ -135,23 +136,11 @@ public class SidebarManager implements Listener {
 
   @EventHandler
   public void onQuit(PlayerQuitEvent e) {
-    Player player = e.getPlayer();
-
-    Bukkit.getScheduler()
-        .runTaskLater(
-            AstralPractice.getInstance(),
-            () -> {
-              if (Bukkit.getPlayer(player.getUniqueId()) != null) {
-                return;
-              }
-
-              unLoadSidebar(player);
-            },
-            1L);
+    unLoadSidebar(e.getPlayer().getUniqueId());
   }
 
   public void loadSidebar(Player player) {
-    if (!isSidebarGloballyEnabled()) {
+    if (!isSidebarGloballyEnabled() || player == null) {
       return;
     }
 
@@ -160,23 +149,33 @@ public class SidebarManager implements Listener {
       return;
     }
 
+    UUID uuid = player.getUniqueId();
     // If sidebar already exists, ensure it's still open before returning
-    PracticeSidebar existing = boards.get(player);
+    PracticeSidebar existing = boards.get(uuid);
     if (existing != null) {
       if (existing.getSidebar() != null && !existing.getSidebar().closed()) {
         return;
       }
       // If the sidebar was closed, remove it so we can recreate it
-      boards.remove(player);
+      boards.remove(uuid);
     }
 
     ensureScoreboardLibrary();
 
-    boards.put(player, new PracticeSidebar(this, scoreboardLibrary.createSidebar(), player));
+    boards.put(uuid, new PracticeSidebar(this, scoreboardLibrary.createSidebar(), player));
   }
 
   public void unLoadSidebar(Player player) {
-    PracticeSidebar sidebar = boards.remove(player);
+    if (player != null) {
+      unLoadSidebar(player.getUniqueId());
+    }
+  }
+
+  public void unLoadSidebar(UUID uuid) {
+    if (uuid == null) {
+      return;
+    }
+    PracticeSidebar sidebar = boards.remove(uuid);
     if (sidebar != null && sidebar.getSidebar() != null) {
       sidebar.getSidebar().close();
     }
@@ -189,11 +188,11 @@ public class SidebarManager implements Listener {
    * @param player the player whose scoreboard should be updated
    */
   public void updatePlayerSidebar(Player player) {
-    if (!isSidebarGloballyEnabled()) {
+    if (!isSidebarGloballyEnabled() || player == null) {
       return;
     }
 
-    PracticeSidebar sidebar = boards.get(player);
+    PracticeSidebar sidebar = boards.get(player.getUniqueId());
     if (sidebar != null && sidebar.getSidebar() != null && !sidebar.getSidebar().closed()) {
       sidebar.update();
     }
@@ -217,8 +216,8 @@ public class SidebarManager implements Listener {
             AstralPractice.getInstance(),
             () -> {
               if (!isSidebarGloballyEnabled()) {
-                for (Player player : new ArrayList<>(boards.keySet())) {
-                  unLoadSidebar(player);
+                for (UUID uuid : new ArrayList<>(boards.keySet())) {
+                  unLoadSidebar(uuid);
                 }
                 stopUpdateTask();
                 return;
@@ -240,8 +239,11 @@ public class SidebarManager implements Listener {
                 }
               }
 
-              for (Player player : new ArrayList<>(boards.keySet())) {
-                updatePlayerSidebar(player);
+              for (UUID uuid : new ArrayList<>(boards.keySet())) {
+                Player player = Bukkit.getPlayer(uuid);
+                if (player != null) {
+                  updatePlayerSidebar(player);
+                }
               }
             });
   }
@@ -249,8 +251,8 @@ public class SidebarManager implements Listener {
   public void close() {
     stopUpdateTask();
 
-    for (Player player : new ArrayList<>(boards.keySet())) {
-      unLoadSidebar(player);
+    for (UUID uuid : new ArrayList<>(boards.keySet())) {
+      unLoadSidebar(uuid);
     }
 
     try {
@@ -259,7 +261,6 @@ public class SidebarManager implements Listener {
       }
     } catch (IllegalStateException ignored) {
       // This best-effort operation may fail without interrupting its caller.
-
     }
   }
 }

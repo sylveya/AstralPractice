@@ -389,7 +389,7 @@ public abstract class Event implements Spectatable, dev.lokspel.api.interfaces.E
   }
 
   public boolean addSpectator(Player player) {
-    SpectatorManager.getInstance().getSpectators().put(player, this);
+    SpectatorManager.getInstance().getSpectators().put(player.getUniqueId(), this);
 
     if (this.spectators.contains(player)) {
       return false;
@@ -406,7 +406,7 @@ public abstract class Event implements Spectatable, dev.lokspel.api.interfaces.E
     }
 
     this.spectators.remove(player);
-    SpectatorManager.getInstance().getSpectators().remove(player);
+    SpectatorManager.getInstance().getSpectators().remove(player.getUniqueId());
 
     return true;
   }

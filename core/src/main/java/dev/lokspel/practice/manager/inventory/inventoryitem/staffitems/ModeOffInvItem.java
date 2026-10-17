@@ -7,6 +7,7 @@ import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.manager.spectator.SpectatorManager;
 import dev.lokspel.practice.util.entityhider.PlayerHider;
+import dev.lokspel.practice.util.interfaces.Spectatable;
 import org.bukkit.entity.Player;
 
 public class ModeOffInvItem extends InvItem {
@@ -22,8 +23,9 @@ public class ModeOffInvItem extends InvItem {
     profile.setHideFromPlayers(false);
     PlayerHider.getInstance().toggleStaffVisibility(player);
 
-    if (SpectatorManager.getInstance().getSpectators().containsKey(player)) {
-      SpectatorManager.getInstance().getSpectators().get(player).removeSpectator(player);
+    Spectatable spectatable = SpectatorManager.getInstance().getSpectatable(player);
+    if (spectatable != null) {
+      spectatable.removeSpectator(player);
     } else {
       InventoryManager.getInstance().setLobbyInventory(player, false);
     }

@@ -36,8 +36,7 @@ public class PartyVsParty extends PlayersVsPlayers {
               party1Player,
               TeamEnum.TEAM1.getPrefix(),
               TeamEnum.TEAM1.getNameColor(),
-              TeamEnum.TEAM1.getSuffix(),
-              20);
+              TeamEnum.TEAM1.getSuffix());
     }
 
     for (Player party2Player : party2.getMembers()) {
@@ -48,8 +47,7 @@ public class PartyVsParty extends PlayersVsPlayers {
               party2Player,
               TeamEnum.TEAM2.getPrefix(),
               TeamEnum.TEAM2.getNameColor(),
-              TeamEnum.TEAM2.getSuffix(),
-              21);
+              TeamEnum.TEAM2.getSuffix());
     }
   }
 

@@ -902,7 +902,7 @@ public class LadderTypeListener implements Listener {
   public void onExpPickup(PlayerPickupExperienceEvent e) {
     Player player = e.getPlayer();
 
-    if (SpectatorManager.getInstance().getSpectators().containsKey(player)) {
+    if (SpectatorManager.getInstance().getSpectators().containsKey(player.getUniqueId())) {
       e.setCancelled(true);
     }
   }
@@ -913,7 +913,7 @@ public class LadderTypeListener implements Listener {
       return;
     }
 
-    if (SpectatorManager.getInstance().getSpectators().containsKey(player)) {
+    if (SpectatorManager.getInstance().getSpectators().containsKey(player.getUniqueId())) {
       e.setCancelled(true);
     }
   }

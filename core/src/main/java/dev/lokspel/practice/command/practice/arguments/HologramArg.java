@@ -53,8 +53,7 @@ public final class HologramArg {
       return;
     }
 
-    if (!ServerManager.getInstance().getInWorld().containsKey(player)
-        || !ServerManager.getInstance().getInWorld().get(player).equals(WorldEnum.LOBBY)) {
+    if (!ServerManager.getInstance().isInWorld(player, WorldEnum.LOBBY)) {
       Common.sendMmMessage(
           player, PracticeConfig.language().getCommand().getHologram().getOnlyInLobby());
       return;

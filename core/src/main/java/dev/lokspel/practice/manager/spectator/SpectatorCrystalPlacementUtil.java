@@ -78,7 +78,7 @@ public final class SpectatorCrystalPlacementUtil {
       return true;
     }
 
-    if (SpectatorManager.getInstance().getSpectators().containsKey(player)) {
+    if (SpectatorManager.getInstance().isSpectating(player)) {
       return true;
     }
 

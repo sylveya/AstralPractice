@@ -1134,7 +1134,11 @@ public class PracticeAdapter implements SidebarAdapter {
   }
 
   private void buildSpectateLines(Player player, SidebarConfig config, List<Component> sidebar) {
-    Spectatable spectatable = SpectatorManager.getInstance().getSpectators().get(player);
+    if (player == null) {
+      return;
+    }
+    Spectatable spectatable =
+        SpectatorManager.getInstance().getSpectators().get(player.getUniqueId());
     if (spectatable == null) {
       return;
     }

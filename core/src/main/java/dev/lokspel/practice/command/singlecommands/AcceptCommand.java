@@ -9,8 +9,10 @@ import dev.lokspel.practice.manager.party.matchrequest.PartyRequest;
 import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.manager.profile.enums.ProfileStatus;
+import dev.lokspel.practice.manager.queue.QueueManager;
 import dev.lokspel.practice.manager.spectator.SpectatorManager;
 import dev.lokspel.practice.util.Common;
+import dev.lokspel.practice.util.interfaces.Spectatable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -45,7 +47,8 @@ public class AcceptCommand implements CommandExecutor, TabCompleter {
     }
 
     if ((!profile.getStatus().equals(ProfileStatus.LOBBY)
-        && !profile.getStatus().equals(ProfileStatus.SPECTATE))) {
+        && !profile.getStatus().equals(ProfileStatus.SPECTATE)
+        && !profile.getStatus().equals(ProfileStatus.QUEUE))) {
       Common.sendMmMessage(
           player, PracticeConfig.language().getCommand().getAccept().getCantAccept());
       return false;
@@ -121,10 +124,21 @@ public class AcceptCommand implements CommandExecutor, TabCompleter {
           }
 
           if ((targetProfile.getStatus().equals(ProfileStatus.LOBBY)
-                  || targetProfile.getStatus().equals(ProfileStatus.EDITOR))
+                  || targetProfile.getStatus().equals(ProfileStatus.EDITOR)
+                  || targetProfile.getStatus().equals(ProfileStatus.QUEUE))
               && !targetProfile.isParty()) {
+            if (profile.getStatus().equals(ProfileStatus.QUEUE)) {
+              QueueManager.getInstance().leaveQueue(player);
+            }
+            if (targetProfile.getStatus().equals(ProfileStatus.QUEUE)) {
+              QueueManager.getInstance().leaveQueue(target);
+            }
             if (profile.getStatus().equals(ProfileStatus.SPECTATE)) {
-              SpectatorManager.getInstance().getSpectators().get(player).removeSpectator(player);
+              Spectatable spectatable =
+                  SpectatorManager.getInstance().getSpectators().get(player.getUniqueId());
+              if (spectatable != null) {
+                spectatable.removeSpectator(player);
+              }
             }
 
             // Update sender reference to the current online Player instance
@@ -168,7 +182,8 @@ public class AcceptCommand implements CommandExecutor, TabCompleter {
     Profile profile = ProfileManager.getInstance().getProfile(player);
 
     if ((!profile.getStatus().equals(ProfileStatus.LOBBY)
-        && !profile.getStatus().equals(ProfileStatus.SPECTATE))) {
+        && !profile.getStatus().equals(ProfileStatus.SPECTATE)
+        && !profile.getStatus().equals(ProfileStatus.QUEUE))) {
       return arguments;
     }
 

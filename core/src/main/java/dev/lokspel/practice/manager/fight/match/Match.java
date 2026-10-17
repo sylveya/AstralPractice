@@ -360,13 +360,22 @@ public abstract class Match extends BukkitRunnable
 
     this.cancel();
 
-    if (AstralPractice.getInstance().isEnabled()) {
-      for (UUID uuid : rounds.get(1).getStatistics().keySet()) {
-        matchStatsGuis.put(uuid, new MatchStatsGui(this, uuid));
-      }
-    }
+    initMatchStatsGuis();
 
     // Availability is flipped in the reset callback above.
+  }
+
+  public void initMatchStatsGuis() {
+    if (AstralPractice.getInstance().isEnabled() && !rounds.isEmpty() && rounds.get(1) != null) {
+      for (UUID uuid : rounds.get(1).getStatistics().keySet()) {
+        matchStatsGuis.computeIfAbsent(uuid, id -> new MatchStatsGui(this, id));
+      }
+    }
+  }
+
+  public Map<UUID, MatchStatsGui> getMatchStatsGuis() {
+    initMatchStatsGuis();
+    return this.matchStatsGuis;
   }
 
   /*
@@ -374,12 +383,10 @@ public abstract class Match extends BukkitRunnable
    */
   public Statistic getCurrentStat(Player player) {
     Round currentRound = this.getCurrentRound();
-    if (currentRound == null) {
+    if (currentRound == null || player == null) {
       return null;
     }
-    return currentRound
-        .getStatistics()
-        .getOrDefault(ProfileManager.getInstance().getUuids().get(player), null);
+    return currentRound.getStatistics().getOrDefault(player.getUniqueId(), null);
   }
 
   @Override
@@ -476,13 +483,14 @@ public abstract class Match extends BukkitRunnable
     }
 
     // If the spectator was spectating a match, remove.
-    Spectatable spectatable = SpectatorManager.getInstance().getSpectators().get(player);
+    Spectatable spectatable =
+        SpectatorManager.getInstance().getSpectators().get(player.getUniqueId());
     if (spectatable != null) {
       spectatable.removeSpectator(player);
     }
 
     this.spectators.add(player);
-    SpectatorManager.getInstance().getSpectators().put(player, this);
+    SpectatorManager.getInstance().getSpectators().put(player.getUniqueId(), this);
     this.addPlayerToBelowName(player);
 
     if (message) {
@@ -522,7 +530,7 @@ public abstract class Match extends BukkitRunnable
     }
 
     this.spectators.remove(player);
-    SpectatorManager.getInstance().getSpectators().remove(player);
+    SpectatorManager.getInstance().getSpectators().remove(player.getUniqueId());
     this.removePlayerFromBelowName(player);
 
     if (!status.equals(MatchStatus.END) && !status.equals(MatchStatus.OVER)) {

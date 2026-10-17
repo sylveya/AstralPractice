@@ -40,7 +40,6 @@ public class ProfileManager {
 
   private ProfileManager() {}
 
-  @Getter private final Map<Player, UUID> uuids = new ConcurrentHashMap<>();
   @Getter private final Map<UUID, Profile> profiles = new ConcurrentHashMap<>();
 
   public Profile getProfile(UUID uuid) {
@@ -61,7 +60,6 @@ public class ProfileManager {
       return null;
     }
     UUID uuid = player.getUniqueId();
-    uuids.put(player, uuid);
     Profile profile = profiles.get(uuid);
     if (profile == null) {
       profile = loadProfileIfExists(uuid, player);
@@ -350,14 +348,6 @@ public class ProfileManager {
     profile.save();
     profile.onQuit();
     saveProfileToDatabase(profile);
-  }
-
-  public void clearPlayerReference(Player player) {
-    if (player == null) {
-      return;
-    }
-
-    uuids.remove(player);
   }
 
   private Profile loadProfileIfExists(UUID uuid, OfflinePlayer offlinePlayer) {
