@@ -97,13 +97,18 @@ public class LobbyInventory extends Inventory {
     }
   }
 
-  public void addRematchItem(Player player) {
+  public void addRematchItem(Player player, Player opponent) {
     InvItem invItem = getRematchInvItem();
     if (invItem == null) {
       return;
     }
 
-    player.getInventory().setItem(invItem.getSlot(), invItem.getItem());
+    ItemStack item = RematchInvItem.createRematchItem(opponent);
+    if (item == null) {
+      item = invItem.getItem();
+    }
+
+    player.getInventory().setItem(invItem.getSlot(), item);
   }
 
   public void removeRematchItem(Player player) {
@@ -123,7 +128,7 @@ public class LobbyInventory extends Inventory {
     }
 
     // Only clear the slot if the current item is still the rematch item.
-    if (current.isSimilar(invItem.getItem())) {
+    if (RematchInvItem.isRematchItem(current) || current.isSimilar(invItem.getItem())) {
       player.getInventory().setItem(slot, null);
       player.updateInventory();
     }
