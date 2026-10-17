@@ -221,6 +221,11 @@ public class GoldenHead implements Listener {
                     if (removed != null) {
                       removed.cancel();
                     }
+                    if (onlinePlayer != null && onlinePlayer.isOnline()) {
+                      onlinePlayer.setCooldown(
+                          goldenHeadItem != null ? goldenHeadItem.getType() : Material.PLAYER_HEAD,
+                          0);
+                    }
                     return;
                   }
 
@@ -304,9 +309,12 @@ public class GoldenHead implements Listener {
     }
 
     long remainingSeconds = getRemainingCooldownSeconds(player.getUniqueId());
-    if (remainingSeconds > 0) {
+    if (remainingSeconds > 0 || player.hasCooldown(item.getType())) {
       e.setCancelled(true);
       startCooldownActionBar(profile);
+      if (remainingSeconds > 0 && !player.hasCooldown(item.getType())) {
+        player.setCooldown(item.getType(), (int) (remainingSeconds * 20));
+      }
       return;
     }
 
@@ -337,7 +345,7 @@ public class GoldenHead implements Listener {
     }
 
     long remainingSeconds = getRemainingCooldownSeconds(player.getUniqueId());
-    if (remainingSeconds > 0) {
+    if (remainingSeconds > 0 || player.hasCooldown(item.getType())) {
       e.setCancelled(true);
       startCooldownActionBar(profile);
       return;
@@ -345,6 +353,9 @@ public class GoldenHead implements Listener {
 
     this.lastConsumeAt.put(player.getUniqueId(), System.currentTimeMillis());
     startCooldownActionBar(profile);
+    if (this.consumeCooldownSeconds > 0) {
+      player.setCooldown(item.getType(), (int) (this.consumeCooldownSeconds * 20));
+    }
 
     applyEffects(player);
   }
@@ -370,6 +381,9 @@ public class GoldenHead implements Listener {
 
     this.lastConsumeAt.put(player.getUniqueId(), System.currentTimeMillis());
     startCooldownActionBar(profile);
+    if (this.consumeCooldownSeconds > 0) {
+      player.setCooldown(item.getType(), (int) (this.consumeCooldownSeconds * 20));
+    }
 
     if (hand != null) {
       int amount = item.getAmount();
