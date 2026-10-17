@@ -9,10 +9,11 @@ import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.manager.profile.enums.ProfileStatus;
 import dev.lokspel.practice.util.PapiUtil;
 import dev.lokspel.practice.util.PermanentConfig;
-import io.papermc.paper.scoreboard.numbers.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import net.kyori.adventure.text.Component;
@@ -20,15 +21,11 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitTask;
-import org.bukkit.scoreboard.Criteria;
-import org.bukkit.scoreboard.DisplaySlot;
-import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.RenderType;
-import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
@@ -76,7 +73,7 @@ public class NametagManager {
   private final Map<UUID, ClientTextDisplay> displays = new ConcurrentHashMap<>();
   private final Map<UUID, NametagOverride> customNametags = new ConcurrentHashMap<>();
   private final Map<UUID, Component> belowNameLines = new ConcurrentHashMap<>();
-  private final java.util.Set<UUID> belowNameUsers = ConcurrentHashMap.newKeySet();
+  private final Set<UUID> belowNameUsers = ConcurrentHashMap.newKeySet();
 
   private Team hideVanillaTeam;
   private NametagDisplayListener listener;
@@ -84,12 +81,12 @@ public class NametagManager {
   private BukkitTask belowNameRefreshTask;
 
   public void initialize() {
+    TeamPacketBlocker.getInstance().register();
+
     if (!PermanentConfig.NAMETAG_MANAGEMENT_ENABLED) {
       startBelowNameRefreshTask();
       return;
     }
-
-    TeamPacketBlocker.getInstance().register();
 
     for (Player online : Bukkit.getOnlinePlayers()) {
       hideVanillaNametag(online);
@@ -161,8 +158,16 @@ public class NametagManager {
   }
 
   public void shutdown() {
+    TeamPacketBlocker.getInstance().unregister();
+
     if (!PermanentConfig.NAMETAG_MANAGEMENT_ENABLED) {
       stopBelowNameRefreshTask();
+      for (UUID uuid : belowNameUsers) {
+        Player player = Bukkit.getPlayer(uuid);
+        if (player != null && player.isOnline()) {
+          Packet.sendRemoveBelowName(player, BELOW_NAME_OBJECTIVE);
+        }
+      }
       belowNameUsers.clear();
       belowNameLines.clear();
       return;
@@ -213,21 +218,19 @@ public class NametagManager {
     belowNameLines.remove(uuid);
     belowNameUsers.remove(uuid);
 
-    updateNametag(online);
+    if (PermanentConfig.NAMETAG_MANAGEMENT_ENABLED) {
+      updateNametag(online);
+    } else {
+      preserveTabListName(online);
+    }
   }
 
   public void setNametag(
-      Player player,
-      Component prefix,
-      NamedTextColor namedTextColor,
-      Component suffix,
-      int sortPriority) {
-    if (!PermanentConfig.NAMETAG_MANAGEMENT_ENABLED) {
-      return;
-    }
-
+      Player player, Component prefix, NamedTextColor namedTextColor, Component suffix) {
     customNametags.put(player.getUniqueId(), new NametagOverride(prefix, namedTextColor, suffix));
-    updateNametag(player);
+    if (PermanentConfig.NAMETAG_MANAGEMENT_ENABLED) {
+      updateNametag(player);
+    }
     preserveTabListName(player);
   }
 
@@ -272,6 +275,12 @@ public class NametagManager {
 
   public void onPlayerQuit(Player player) {
     if (player == null) {
+      return;
+    }
+
+    if (!PermanentConfig.NAMETAG_MANAGEMENT_ENABLED) {
+      customNametags.remove(player.getUniqueId());
+      cleanUpForUser(player);
       return;
     }
 
@@ -520,26 +529,39 @@ public class NametagManager {
       return;
     }
 
+    belowNameUsers.add(player.getUniqueId());
+
     if (PermanentConfig.NAMETAG_MANAGEMENT_ENABLED) {
-      belowNameUsers.add(player.getUniqueId());
       if (player.isOnline()) {
         setBelowNameLine(player, formatHealth(player, PlayerUtil.getPlayerHealth(player)));
       }
       return;
     }
 
-    Scoreboard scoreboard = player.getScoreboard();
-    if (scoreboard == Bukkit.getScoreboardManager().getMainScoreboard()) {
-      scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
-      player.setScoreboard(scoreboard);
-    }
+    Packet.sendCreateBelowName(player, BELOW_NAME_OBJECTIVE);
+    for (UUID uuid : belowNameUsers) {
+      Player viewer = Bukkit.getPlayer(uuid);
+      if (viewer == null || !viewer.isOnline() || !viewer.getWorld().equals(player.getWorld())) {
+        continue;
+      }
 
-    Objective objective = scoreboard.getObjective(BELOW_NAME_OBJECTIVE);
-    if (objective == null) {
-      objective =
-          scoreboard.registerNewObjective(
-              BELOW_NAME_OBJECTIVE, Criteria.DUMMY, Component.empty(), RenderType.INTEGER);
-      objective.setDisplaySlot(DisplaySlot.BELOW_NAME);
+      double playerHealth = PlayerUtil.getPlayerHealth(player);
+      Packet.sendUpdateBelowName(
+          viewer,
+          player.getName(),
+          BELOW_NAME_OBJECTIVE,
+          (int) Math.ceil(playerHealth),
+          formatHealth(player, playerHealth));
+
+      if (!viewer.equals(player)) {
+        double viewerHealth = PlayerUtil.getPlayerHealth(viewer);
+        Packet.sendUpdateBelowName(
+            player,
+            viewer.getName(),
+            BELOW_NAME_OBJECTIVE,
+            (int) Math.ceil(viewerHealth),
+            formatHealth(viewer, viewerHealth));
+      }
     }
   }
 
@@ -548,37 +570,35 @@ public class NametagManager {
       return;
     }
 
+    belowNameUsers.remove(player.getUniqueId());
+
     if (PermanentConfig.NAMETAG_MANAGEMENT_ENABLED) {
-      belowNameUsers.remove(player.getUniqueId());
       clearBelowNameLine(player);
       return;
     }
 
-    Scoreboard scoreboard = player.getScoreboard();
-    Objective objective = scoreboard.getObjective(BELOW_NAME_OBJECTIVE);
-    if (objective != null) {
-      objective.unregister();
-    }
+    Packet.sendRemoveBelowName(player, BELOW_NAME_OBJECTIVE);
   }
 
   private void updateBelowNameHealthLines() {
     if (!PermanentConfig.NAMETAG_MANAGEMENT_ENABLED) {
-      for (Player player : Bukkit.getOnlinePlayers()) {
-        Scoreboard scoreboard = player.getScoreboard();
-        Objective objective = scoreboard.getObjective(BELOW_NAME_OBJECTIVE);
-
-        if (objective == null) {
+      for (UUID uuid : belowNameUsers) {
+        Player target = Bukkit.getPlayer(uuid);
+        if (target == null || !target.isOnline()) {
+          belowNameUsers.remove(uuid);
           continue;
         }
 
-        for (Player otherPlayer : player.getWorld().getPlayers()) {
-          double health = PlayerUtil.getPlayerHealth(otherPlayer);
-          int hp = (int) Math.ceil(health);
+        double health = PlayerUtil.getPlayerHealth(target);
+        int hp = (int) Math.ceil(health);
+        Component formatted = formatHealth(target, health);
 
-          Score score = objective.getScore(otherPlayer.getName());
-          score.setScore(hp);
-          score.customName(null);
-          score.numberFormat(NumberFormat.fixed(formatHealth(otherPlayer, health)));
+        for (UUID viewerUuid : belowNameUsers) {
+          Player viewer = Bukkit.getPlayer(viewerUuid);
+          if (viewer != null && viewer.isOnline() && viewer.getWorld().equals(target.getWorld())) {
+            Packet.sendUpdateBelowName(
+                viewer, target.getName(), BELOW_NAME_OBJECTIVE, hp, formatted);
+          }
         }
       }
       return;
@@ -601,14 +621,14 @@ public class NametagManager {
       heartColor = NamedTextColor.YELLOW;
     }
 
-    double scale = Math.clamp(configScale == 0 ? 20.0 : configScale, 10.0, 100.0);
+    double scale = Math.clamp(configScale <= 0 ? 20.0 : configScale, 10.0, 100.0);
+    AttributeInstance maxHealthAttr = player.getAttribute(Attribute.MAX_HEALTH);
     double maxHealth =
-        java.util.Objects.requireNonNull(player.getAttribute(Attribute.MAX_HEALTH)).getValue();
+        maxHealthAttr != null && maxHealthAttr.getValue() > 0 ? maxHealthAttr.getValue() : 20.0;
     double displayHealth = (health / maxHealth) * scale;
 
     if (decimalAlwaysShow || (lowHealthRatio && health < lowHealthThreshold)) {
-      return Component.text(
-              String.format(java.util.Locale.US, "%.1f", displayHealth), NamedTextColor.WHITE)
+      return Component.text(String.format(Locale.US, "%.1f", displayHealth), NamedTextColor.WHITE)
           .append(Component.text(healthSymbol, heartColor));
     }
 
@@ -665,10 +685,6 @@ public class NametagManager {
   }
 
   private void ensureHideTeam() {
-    if (Bukkit.getScoreboardManager() == null) {
-      return;
-    }
-
     for (Player viewer : Bukkit.getOnlinePlayers()) {
       Scoreboard scoreboard = viewer.getScoreboard();
       Team team = scoreboard.getTeam(HIDE_TEAM_NAME);
@@ -693,24 +709,22 @@ public class NametagManager {
   }
 
   private void addToHideTeam(Player player) {
-    if (Bukkit.getScoreboardManager() == null || player == null) {
-      return;
-    }
-
-    for (Player viewer : Bukkit.getOnlinePlayers()) {
-      Scoreboard scoreboard = viewer.getScoreboard();
-      Team team = scoreboard.getTeam(HIDE_TEAM_NAME);
-      if (team == null) {
-        team = scoreboard.registerNewTeam(HIDE_TEAM_NAME);
-        team.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);
-        team.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
-        team.setCanSeeFriendlyInvisibles(false);
+    if (player != null) {
+      for (Player viewer : Bukkit.getOnlinePlayers()) {
+        Scoreboard scoreboard = viewer.getScoreboard();
+        Team team = scoreboard.getTeam(HIDE_TEAM_NAME);
+        if (team == null) {
+          team = scoreboard.registerNewTeam(HIDE_TEAM_NAME);
+          team.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);
+          team.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
+          team.setCanSeeFriendlyInvisibles(false);
+        }
+        team.addEntry(player.getName());
       }
-      team.addEntry(player.getName());
-    }
 
-    if (hideVanillaTeam != null) {
-      hideVanillaTeam.addEntry(player.getName());
+      if (hideVanillaTeam != null) {
+        hideVanillaTeam.addEntry(player.getName());
+      }
     }
   }
 
@@ -720,7 +734,6 @@ public class NametagManager {
       if (profile == null) {
         return;
       }
-
       InventoryUtil.LobbyNametag lobbyNametag =
           InventoryUtil.getLobbyNametag(profile, player.getName(), player);
 

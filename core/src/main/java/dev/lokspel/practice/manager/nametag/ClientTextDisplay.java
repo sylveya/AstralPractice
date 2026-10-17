@@ -3,6 +3,7 @@ package dev.lokspel.practice.manager.nametag;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import com.github.retrooper.packetevents.util.Vector3f;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -21,7 +22,7 @@ public final class ClientTextDisplay {
   private static final Vector3f DEFAULT_TRANSLATION = new Vector3f(0.0F, 0.25F, 0.0F);
   private static final Vector3f DEFAULT_SCALE = new Vector3f(1.0F, 1.0F, 1.0F);
 
-  private final UUID ownerUuid;
+  @Getter private final UUID ownerUuid;
   @Getter private final UUID entityUuid;
   @Getter private final int entityId;
   private final Set<UUID> viewers = ConcurrentHashMap.newKeySet();
@@ -76,7 +77,7 @@ public final class ClientTextDisplay {
   }
 
   public List<EntityData<?>> createMetadata() {
-    List<EntityData<?>> data = new java.util.ArrayList<>();
+    List<EntityData<?>> data = new ArrayList<>();
     data.add(new EntityData<>(11, EntityDataTypes.VECTOR3F, DEFAULT_TRANSLATION));
     data.add(new EntityData<>(12, EntityDataTypes.VECTOR3F, DEFAULT_SCALE));
     data.add(new EntityData<>(15, EntityDataTypes.BYTE, (byte) 3));

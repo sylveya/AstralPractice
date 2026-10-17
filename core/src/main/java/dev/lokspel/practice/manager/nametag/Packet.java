@@ -2,13 +2,18 @@ package dev.lokspel.practice.manager.nametag;
 
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes;
+import com.github.retrooper.packetevents.protocol.score.ScoreFormat;
 import com.github.retrooper.packetevents.util.Vector3d;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDestroyEntities;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDisplayScoreboard;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerScoreboardObjective;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSetPassengers;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSpawnEntity;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerUpdateScore;
 import java.util.Optional;
 import java.util.UUID;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
@@ -49,6 +54,56 @@ public final class Packet {
       Player viewer, int vehicleEntityId, int[] passengerEntityIds) {
     WrapperPlayServerSetPassengers packet =
         new WrapperPlayServerSetPassengers(vehicleEntityId, passengerEntityIds);
+    PacketEvents.getAPI().getPlayerManager().sendPacket(viewer, packet);
+  }
+
+  public static void sendCreateBelowName(Player player, String objectiveName) {
+    if (player == null || !player.isOnline()) {
+      return;
+    }
+    sendRemoveBelowName(player, objectiveName);
+
+    WrapperPlayServerScoreboardObjective objective =
+        new WrapperPlayServerScoreboardObjective(
+            objectiveName,
+            WrapperPlayServerScoreboardObjective.ObjectiveMode.CREATE,
+            Component.empty(),
+            WrapperPlayServerScoreboardObjective.RenderType.INTEGER);
+    WrapperPlayServerDisplayScoreboard display =
+        new WrapperPlayServerDisplayScoreboard(2, objectiveName);
+
+    PacketEvents.getAPI().getPlayerManager().sendPacket(player, objective);
+    PacketEvents.getAPI().getPlayerManager().sendPacket(player, display);
+  }
+
+  public static void sendRemoveBelowName(Player player, String objectiveName) {
+    if (player == null || !player.isOnline()) {
+      return;
+    }
+    WrapperPlayServerScoreboardObjective objective =
+        new WrapperPlayServerScoreboardObjective(
+            objectiveName,
+            WrapperPlayServerScoreboardObjective.ObjectiveMode.REMOVE,
+            Component.empty(),
+            WrapperPlayServerScoreboardObjective.RenderType.INTEGER);
+
+    PacketEvents.getAPI().getPlayerManager().sendPacket(player, objective);
+  }
+
+  public static void sendUpdateBelowName(
+      Player viewer, String targetName, String objectiveName, int score, Component formatted) {
+    if (viewer == null || !viewer.isOnline()) {
+      return;
+    }
+    WrapperPlayServerUpdateScore packet =
+        new WrapperPlayServerUpdateScore(
+            targetName,
+            WrapperPlayServerUpdateScore.Action.CREATE_OR_UPDATE_ITEM,
+            objectiveName,
+            score,
+            null,
+            ScoreFormat.fixedScore(formatted));
+
     PacketEvents.getAPI().getPlayerManager().sendPacket(viewer, packet);
   }
 }

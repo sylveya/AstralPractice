@@ -89,12 +89,7 @@ public class PartySplit extends PlayersVsPlayers {
     this.teams.get(team).add(player);
     this.originalTeams.get(team).add(player); // Track original team members
     NametagManager.getInstance()
-        .setNametag(
-            player,
-            team.getPrefix(),
-            team.getNameColor(),
-            team.getSuffix(),
-            team == TeamEnum.TEAM1 ? 20 : 21);
+        .setNametag(player, team.getPrefix(), team.getNameColor(), team.getSuffix());
   }
 
   @Override

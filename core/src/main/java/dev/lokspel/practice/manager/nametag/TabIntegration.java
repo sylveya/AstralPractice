@@ -34,10 +34,8 @@ public class TabIntegration {
 
     try {
       api = TabAPI.getInstance();
-      if (api != null) {
-        nametags = api.getNameTagManager();
-        tabList = api.getTabListFormatManager();
-      }
+      nametags = api.getNameTagManager();
+      tabList = api.getTabListFormatManager();
     } catch (NoClassDefFoundError | Exception ignored) {
       // This best-effort operation may fail without interrupting its caller.
 
@@ -113,7 +111,7 @@ public class TabIntegration {
 
       eventBus.register(
           TabLoadEvent.class,
-          event -> {
+          _ -> {
             refreshManagers();
             // TAB rebuilds its managers on reload, so re-apply our per-player overrides immediately
             // after.

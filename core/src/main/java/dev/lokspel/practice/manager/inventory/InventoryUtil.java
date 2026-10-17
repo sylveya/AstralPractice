@@ -27,10 +27,6 @@ public enum InventoryUtil {
 
     LobbyNametag nametag = getLobbyNametag(profile, player.getName(), player);
 
-    if (!PermanentConfig.NAMETAG_MANAGEMENT_ENABLED) {
-      return;
-    }
-
     Component prefix = nametag.getPrefix();
     Component name = nametag.getName();
     Component suffix = nametag.getSuffix();
@@ -43,9 +39,10 @@ public enum InventoryUtil {
     }
 
     // Above-head nametag
-    NametagManager.getInstance()
-        .setNametag(
-            player, prefix, nametag.getScoreboardNameColor(), suffix, nametag.getSortPriority());
+    if (PermanentConfig.NAMETAG_MANAGEMENT_ENABLED) {
+      NametagManager.getInstance()
+          .setNametag(player, prefix, nametag.getScoreboardNameColor(), suffix);
+    }
   }
 
   /**
