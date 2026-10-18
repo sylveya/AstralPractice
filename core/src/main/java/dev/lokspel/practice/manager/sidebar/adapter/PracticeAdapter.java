@@ -1485,8 +1485,7 @@ public class PracticeAdapter implements SidebarAdapter {
       for (String rawLine : group.getSidebarExtensionRaw()) {
         Component extensionLine =
             AdapterUtil.replaceArenaPlaceholders(PapiUtil.runThroughFormat(player, rawLine));
-        sidebar.add(
-            NameFormatUtil.applyPlaceholders(extensionLine, profile, player.getName()));
+        sidebar.add(NameFormatUtil.applyPlaceholders(extensionLine, profile, player.getName()));
       }
     }
 

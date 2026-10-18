@@ -12,7 +12,6 @@ import dev.lokspel.practice.manager.fight.match.enums.TeamEnum;
 import dev.lokspel.practice.manager.fight.match.interfaces.Team;
 import dev.lokspel.practice.manager.fight.util.PlayerUtil;
 import dev.lokspel.practice.manager.fight.util.stats.Statistic;
-import dev.lokspel.practice.util.LobbyNametagUtil;
 import dev.lokspel.practice.manager.ladder.LadderManager;
 import dev.lokspel.practice.manager.ladder.abstraction.normal.NormalLadder;
 import dev.lokspel.practice.manager.leaderboard.Leaderboard;
@@ -24,6 +23,7 @@ import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.manager.profile.group.Group;
 import dev.lokspel.practice.manager.profile.statistics.FfaStats;
 import dev.lokspel.practice.manager.queue.QueueManager;
+import dev.lokspel.practice.util.LobbyNametagUtil;
 import java.util.ArrayList;
 import java.util.Map;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
@@ -727,7 +727,8 @@ public class PlayerExpansion extends PlaceholderExpansion implements Relational 
 
     String playerName = offlinePlayer.getName() == null ? "" : offlinePlayer.getName();
     NamedTextColor lobbyColor =
-        LobbyNametagUtil.getLobbyNametag(profile, playerName, onlinePlayer).getScoreboardNameColor();
+        LobbyNametagUtil.getLobbyNametag(profile, playerName, onlinePlayer)
+            .getScoreboardNameColor();
     return "<" + lobbyColor.toString().toLowerCase() + ">";
   }
 

@@ -97,10 +97,7 @@ public final class NameFormatUtil {
                 .replacement(divisionShort)
                 .build())
         .replaceText(
-            TextReplacementConfig.builder()
-                .match(DIVISION_PATTERN)
-                .replacement(division)
-                .build());
+            TextReplacementConfig.builder().match(DIVISION_PATTERN).replacement(division).build());
   }
 
   public static Component applyPlaceholders(
@@ -215,8 +212,7 @@ public final class NameFormatUtil {
     String groupTemplate = group != null ? group.getPrefixTemplate() : null;
     Component groupPrefix = group != null ? group.getPrefix() : null;
 
-    return resolveAffix(
-        profile, player, visible, groupTemplate, groupPrefix, profile.getPrefix());
+    return resolveAffix(profile, player, visible, groupTemplate, groupPrefix, profile.getPrefix());
   }
 
   public static Component resolveSuffix(Profile profile) {
@@ -231,8 +227,7 @@ public final class NameFormatUtil {
     String groupTemplate = group != null ? group.getSuffixTemplate() : null;
     Component groupSuffix = group != null ? group.getSuffix() : null;
 
-    return resolveAffix(
-        profile, player, visible, groupTemplate, groupSuffix, profile.getSuffix());
+    return resolveAffix(profile, player, visible, groupTemplate, groupSuffix, profile.getSuffix());
   }
 
   public static Component resolveName(Profile profile, String playerName) {
