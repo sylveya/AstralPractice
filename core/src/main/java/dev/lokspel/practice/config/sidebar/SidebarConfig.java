@@ -374,7 +374,14 @@ public class SidebarConfig {
 
   @Getter
   public static class Ffa {
-    @Comment("Other placeholders: %ping%")
+    @Comment({
+      "Available session placeholders:",
+      "  %ffa_session_kills%, %ffa_session_deaths%, %ffa_session_streak%,"
+          + " %ffa_session_best_streak%",
+      "Available global placeholders:",
+      "  %ffa_global_kills%, %ffa_global_deaths%, %ffa_global_kdr%",
+      "Other placeholders: %players%, %spectators%, %arena%, %ladder%, %nextReset%, %ping%"
+    })
     @JsonProperty("GAME")
     private Game game = new Game();
 
@@ -387,16 +394,20 @@ public class SidebarConfig {
       private List<String> build =
           List.of(
               "<gray><st>---------------------",
+              "<gold><b>Session",
+              "  <white>Kills: <green>%ffa_session_kills% <gray>| "
+                  + "<white>Deaths: <red>%ffa_session_deaths%",
+              "  <white>Streak: <yellow>%ffa_session_streak% <gray>(Best: "
+                  + "<yellow>%ffa_session_best_streak%<gray>)",
+              "",
+              "<gold><b>Global",
+              "  <white>Kills: <green>%ffa_global_kills% <gray>| "
+                  + "<white>Deaths: <red>%ffa_global_deaths%",
+              "  <white>KDR: <yellow>%ffa_global_kdr%",
+              "",
               "<gold><b>FFA Info",
-              "  <white>Player: <yellow>%players%",
+              "  <white>Players: <yellow>%players%",
               "  <white>Next Reset: <yellow>%nextReset%",
-              "",
-              "  <white>K<gray>/<white>D: <green>%kills%<gray>/<red>%deaths%",
-              "  <white>Streak: <green>%killStreak%",
-              "  <white>Best Streak: <yellow>%bestKillStreak%",
-              "",
-              "  <white>Ladder: <green>%ladder%",
-              "  <white>Arena: <green>%arena%",
               "",
               "<gold>play.astralpractice.com",
               "<gray><st>---------------------");
@@ -405,15 +416,19 @@ public class SidebarConfig {
       private List<String> nonBuild =
           List.of(
               "<gray><st>---------------------",
+              "<gold><b>Session",
+              "  <white>Kills: <green>%ffa_session_kills% <gray>| "
+                  + "<white>Deaths: <red>%ffa_session_deaths%",
+              "  <white>Streak: <yellow>%ffa_session_streak% <gray>(Best: "
+                  + "<yellow>%ffa_session_best_streak%<gray>)",
+              "",
+              "<gold><b>Global",
+              "  <white>Kills: <green>%ffa_global_kills% <gray>| "
+                  + "<white>Deaths: <red>%ffa_global_deaths%",
+              "  <white>KDR: <yellow>%ffa_global_kdr%",
+              "",
               "<gold><b>FFA Info",
-              "  <white>Player: <yellow>%players%",
-              "  <white>Spectators: <yellow>%spectators%",
-              "",
-              "  <white>K<gray>/<white>D: <green>%kills%<gray>/<red>%deaths%",
-              "  <white>Streak: <green>%killStreak%",
-              "  <white>Best Streak: <yellow>%bestKillStreak%",
-              "",
-              "  <white>Ladder: <green>%ladder%",
+              "  <white>Players: <yellow>%players%",
               "  <white>Arena: <green>%arena%",
               "",
               "<gold>play.astralpractice.com",

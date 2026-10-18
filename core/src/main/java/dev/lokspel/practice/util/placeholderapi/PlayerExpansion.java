@@ -12,7 +12,6 @@ import dev.lokspel.practice.manager.fight.match.enums.TeamEnum;
 import dev.lokspel.practice.manager.fight.match.interfaces.Team;
 import dev.lokspel.practice.manager.fight.util.PlayerUtil;
 import dev.lokspel.practice.manager.fight.util.stats.Statistic;
-import dev.lokspel.practice.manager.inventory.InventoryUtil;
 import dev.lokspel.practice.manager.ladder.LadderManager;
 import dev.lokspel.practice.manager.ladder.abstraction.normal.NormalLadder;
 import dev.lokspel.practice.manager.leaderboard.Leaderboard;
@@ -22,7 +21,9 @@ import dev.lokspel.practice.manager.leaderboard.types.LbSecondaryType;
 import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.manager.profile.group.Group;
+import dev.lokspel.practice.manager.profile.statistics.FfaStats;
 import dev.lokspel.practice.manager.queue.QueueManager;
+import dev.lokspel.practice.util.LobbyNametagUtil;
 import java.util.ArrayList;
 import java.util.Map;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
@@ -462,6 +463,68 @@ public class PlayerExpansion extends PlaceholderExpansion implements Relational 
                 break;
             }
             break;
+          case "ffa", "ffa_global":
+            String statType;
+            String rankStr;
+            String kvStr;
+
+            if (input[1].equals("ffa") && input.length == 6 && input[2].equals("global")) {
+              // %ap_lb_ffa_global_<type>_<rank>_<k|v>%
+              statType = input[3];
+              rankStr = input[4];
+              kvStr = input[5];
+            } else if (input.length == 5) {
+              // %ap_lb_ffa_<type>_<rank>_<k|v>% or %ap_lb_ffa_global_<type>_<rank>_<k|v>%
+              statType = input[2];
+              rankStr = input[3];
+              kvStr = input[4];
+            } else {
+              return null;
+            }
+
+            try {
+              rank = Integer.parseInt(rankStr);
+              if (rank < 1 || rank > 10) {
+                return null;
+              }
+            } catch (NumberFormatException e) {
+              return null;
+            }
+
+            leaderboard =
+                switch (statType) {
+                  case "kills" ->
+                      LeaderboardManager.getInstance()
+                          .searchLb(LbMainType.FFA_GLOBAL, LbSecondaryType.KILLS, null);
+                  case "deaths" ->
+                      LeaderboardManager.getInstance()
+                          .searchLb(LbMainType.FFA_GLOBAL, LbSecondaryType.DEATHS, null);
+                  case "streak", "best_streak", "killstreak", "kill_streak" ->
+                      LeaderboardManager.getInstance()
+                          .searchLb(LbMainType.FFA_GLOBAL, LbSecondaryType.BEST_WIN_STREAK, null);
+                  default -> null;
+                };
+
+            if (leaderboard == null) {
+              return null;
+            }
+            list = leaderboard.getList();
+            if (list.size() < rank) {
+              return null;
+            }
+
+            lbPlayer = new ArrayList<>(list.keySet()).get(rank - 1);
+
+            switch (kvStr) {
+              case "k":
+                return lbPlayer.getName();
+              case "v":
+                return String.valueOf(list.get(lbPlayer));
+
+              default:
+                break;
+            }
+            break;
           case "ladder":
             if (input.length != 6) {
               return null;
@@ -539,6 +602,64 @@ public class PlayerExpansion extends PlaceholderExpansion implements Relational 
                 return String.valueOf(statistic.getBestKillStreak());
               }
               break;
+            // ffa_session_...
+            case "session":
+              if (input.length == 3) {
+                switch (input[2]) {
+                  case "kills" -> {
+                    return String.valueOf(statistic.getKills());
+                  }
+                  case "deaths" -> {
+                    return String.valueOf(statistic.getDeaths());
+                  }
+                  case "streak" -> {
+                    return String.valueOf(statistic.getKillStreak());
+                  }
+                  default -> {}
+                }
+              } else if (input.length == 4
+                  && input[2].equals("best")
+                  && input[3].equals("streak")) {
+                return String.valueOf(statistic.getBestKillStreak());
+              }
+              break;
+
+            default:
+              break;
+          }
+        }
+
+        Profile ffaProfile =
+            player != null ? ProfileManager.getInstance().getProfile(player) : null;
+        if (ffaProfile != null) {
+          FfaStats ffaStats = ffaProfile.getStats().getFfaStats();
+          switch (input[1]) {
+            // ffa_global_... or ffa_lifetime_...
+            case "global", "lifetime":
+              if (input.length == 3) {
+                switch (input[2]) {
+                  case "kills" -> {
+                    return String.valueOf(ffaStats.getKills());
+                  }
+                  case "deaths" -> {
+                    return String.valueOf(ffaStats.getDeaths());
+                  }
+                  case "kdr" -> {
+                    return String.valueOf(ffaStats.getKdr());
+                  }
+                  case "streak", "best_streak" -> {
+                    return String.valueOf(ffaStats.getBestKillStreak());
+                  }
+                  default -> {}
+                }
+              }
+              break;
+            // ffa_kdr
+            case "kdr":
+              if (input.length == 2) {
+                return String.valueOf(ffaStats.getKdr());
+              }
+              break;
 
             default:
               break;
@@ -606,7 +727,8 @@ public class PlayerExpansion extends PlaceholderExpansion implements Relational 
 
     String playerName = offlinePlayer.getName() == null ? "" : offlinePlayer.getName();
     NamedTextColor lobbyColor =
-        InventoryUtil.getLobbyNametag(profile, playerName, onlinePlayer).getScoreboardNameColor();
+        LobbyNametagUtil.getLobbyNametag(profile, playerName, onlinePlayer)
+            .getScoreboardNameColor();
     return "<" + lobbyColor.toString().toLowerCase() + ">";
   }
 

@@ -217,6 +217,9 @@ public class ArenaMainGui extends Gui {
                 "%corner1%", Common.mmToNormal(ArenaUtil.convertLocation(ffaArena.getCorner1())))
             .replace(
                 "%corner2%", Common.mmToNormal(ArenaUtil.convertLocation(ffaArena.getCorner2())))
+            .replace(
+                "%spectatorPosition%",
+                Common.mmToNormal(ArenaUtil.convertLocation(ffaArena.getSpectatorPosition())))
             .replace("%ffa_pos_num%", String.valueOf(ffaArena.getFfaPositions().size()))
             .get());
 

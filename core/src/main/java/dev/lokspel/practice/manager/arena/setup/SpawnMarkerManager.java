@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import lombok.Getter;
+import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -21,6 +22,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Mannequin;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -94,46 +96,35 @@ public class SpawnMarkerManager {
       }
     }
 
+    if (arena.getSpectatorPosition() != null) {
+      markers.add(createSpectatorMarker(arena.getSpectatorPosition()));
+    }
+
     if (!markers.isEmpty()) {
       arenaMarkers.put(arena, markers);
     }
   }
 
+  /** Creates a mannequin marker for spectator spawn. */
+  private Mannequin createSpectatorMarker(@NotNull Location location) {
+    Mannequin mannequin = spawnBaseMannequin(location, "<aqua><bold>Spectator Spawn", false);
+
+    mannequin.getEquipment().setHelmet(new ItemStack(Material.PLAYER_HEAD));
+    mannequin.getEquipment().setChestplate(new ItemStack(Material.ELYTRA));
+    mannequin.getEquipment().setBoots(createDyedBoots(Color.AQUA));
+
+    return mannequin;
+  }
+
   /** Creates a mannequin marker at the specified location. */
   private Mannequin createMarker(@NotNull Location location, @NotNull String name) {
-    // Spawn mannequin at exact player spawn position
-    Location markerLoc = location.clone();
-    Mannequin mannequin =
-        (Mannequin) markerLoc.getWorld().spawnEntity(markerLoc, EntityType.MANNEQUIN);
+    Mannequin mannequin = spawnBaseMannequin(location, name, false);
 
-    // Configure mannequin to look like a player marker while staying static.
-    mannequin.setInvisible(false); // Show body to represent player
-    mannequin.setGravity(false);
-    mannequin.setCanPickupItems(false);
-    mannequin.setCustomNameVisible(true);
-    mannequin.customName(Common.deserializeMiniMessage(name));
-    mannequin.setAI(false);
-    mannequin.setCollidable(false);
-    mannequin.setSilent(true);
-    mannequin.setImmovable(true);
-
-    // Make it invulnerable and prevent interaction
-    ArenaUtil.setMannequinInvulnerable(mannequin);
-
-    // Give diamond sword to right hand
+    // Give fighter spawn marker standard combat gear
     ItemStack sword = new ItemStack(Material.DIAMOND_SWORD);
     ArenaUtil.setMannequinItemInHand(mannequin, sword, true);
-
-    // Set player head (Steve head) for helmet
-    ItemStack playerHead = new ItemStack(Material.PLAYER_HEAD);
-    mannequin.getEquipment().setHelmet(playerHead);
-
-    // Set red boots for visibility
-    ItemStack boots = ItemCreateUtil.getRedBoots();
-    mannequin.getEquipment().setBoots(boots);
-
-    // Track this mannequin
-    markerStandIds.add(mannequin.getUniqueId());
+    mannequin.getEquipment().setHelmet(new ItemStack(Material.PLAYER_HEAD));
+    mannequin.getEquipment().setBoots(ItemCreateUtil.getRedBoots());
 
     return mannequin;
   }
@@ -145,28 +136,40 @@ public class SpawnMarkerManager {
     if (location == null || location.getWorld() == null) {
       return null;
     }
+    return spawnBaseMannequin(location, REMOVE_INSTRUCTION, true);
+  }
 
-    Mannequin labelStand =
-        (Mannequin) location.getWorld().spawnEntity(location, EntityType.MANNEQUIN);
+  /** Spawns and configures a base mannequin with common setup marker properties. */
+  private Mannequin spawnBaseMannequin(
+      @NotNull Location location, @NotNull String name, boolean invisible) {
+    Location markerLoc = location.clone();
+    Mannequin mannequin =
+        (Mannequin) markerLoc.getWorld().spawnEntity(markerLoc, EntityType.MANNEQUIN);
 
-    // Configure as invisible text-only display
-    labelStand.setInvisible(true); // Invisible
-    labelStand.setGravity(false);
-    labelStand.setCanPickupItems(false);
-    labelStand.setCustomNameVisible(true);
-    labelStand.customName(Common.deserializeMiniMessage(REMOVE_INSTRUCTION));
-    labelStand.setAI(false);
-    labelStand.setCollidable(false);
-    labelStand.setSilent(true);
-    labelStand.setImmovable(true);
+    mannequin.setInvisible(invisible);
+    mannequin.setGravity(false);
+    mannequin.setCanPickupItems(false);
+    mannequin.setCustomNameVisible(true);
+    mannequin.customName(Common.deserializeMiniMessage(name));
+    mannequin.setAI(false);
+    mannequin.setCollidable(false);
+    mannequin.setSilent(true);
+    mannequin.setImmovable(true);
 
-    // Make it invulnerable
-    ArenaUtil.setMannequinInvulnerable(labelStand);
+    ArenaUtil.setMannequinInvulnerable(mannequin);
+    markerStandIds.add(mannequin.getUniqueId());
 
-    // Track this mannequin too
-    markerStandIds.add(labelStand.getUniqueId());
+    return mannequin;
+  }
 
-    return labelStand;
+  private static ItemStack createDyedBoots(Color color) {
+    ItemStack boots = new ItemStack(Material.LEATHER_BOOTS);
+    LeatherArmorMeta meta = (LeatherArmorMeta) boots.getItemMeta();
+    if (meta != null) {
+      meta.setColor(color);
+      boots.setItemMeta(meta);
+    }
+    return boots;
   }
 
   /** Clears all markers for a specific arena. */

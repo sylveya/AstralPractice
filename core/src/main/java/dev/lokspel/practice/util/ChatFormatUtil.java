@@ -7,10 +7,15 @@ import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.manager.profile.group.Group;
 import java.util.ArrayList;
 import java.util.List;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextReplacementConfig;
 import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public final class ChatFormatUtil {
+
+  public static final String MESSAGE_PLACEHOLDER = "<ap-message>";
 
   private ChatFormatUtil() {}
 
@@ -27,7 +32,8 @@ public final class ChatFormatUtil {
         PracticeConfig.language()
             .getGeneralChat()
             .getPartyChat()
-            .replace("%%player%%", playerName));
+            .replace("%%player%%", playerName)
+            .replace("%player%", playerName));
   }
 
   public static String buildStaffChatMessage(Player player) {
@@ -43,7 +49,8 @@ public final class ChatFormatUtil {
         PracticeConfig.language()
             .getGeneralChat()
             .getStaffChat()
-            .replace("%%player%%", playerName));
+            .replace("%%player%%", playerName)
+            .replace("%player%", playerName));
   }
 
   public static String buildServerChatMessage(Profile profile, Player player) {
@@ -65,7 +72,40 @@ public final class ChatFormatUtil {
         AstralPractice.getMiniMessage()
             .serialize(NameFormatUtil.resolveFullName(profile, player.getName()));
 
-    return StringUtil.normalizeSpaces(format.replace("%%player%%", decoratedPlayer));
+    return StringUtil.normalizeSpaces(
+        format.replace("%%player%%", decoratedPlayer).replace("%player%", decoratedPlayer));
+  }
+
+  public static Component formatChatMessage(
+      CommandSender viewer, String formatString, Component message) {
+    if (formatString == null) {
+      return message != null ? message : Component.empty();
+    }
+
+    String format =
+        formatString
+            .replace("%%message%%", MESSAGE_PLACEHOLDER)
+            .replace("%message%", MESSAGE_PLACEHOLDER);
+
+    Component component;
+    if (SoftDependUtil.isPAPI_ENABLED && viewer instanceof Player viewerPlayer) {
+      component = PapiUtil.runThroughFormat(viewerPlayer, format);
+    } else {
+      component =
+          AstralPractice.getMiniMessage().deserialize(StringUtil.legacyToMiniMessage(format));
+    }
+
+    return component.replaceText(
+        TextReplacementConfig.builder()
+            .matchLiteral(MESSAGE_PLACEHOLDER)
+            .replacement(message != null ? message : Component.empty())
+            .build());
+  }
+
+  public static Component formatChatMessage(
+      CommandSender viewer, String formatString, String rawMessage) {
+    return formatChatMessage(
+        viewer, formatString, Component.text(rawMessage != null ? rawMessage : ""));
   }
 
   public static List<Player> getStaffRecipients() {

@@ -5,10 +5,10 @@ import dev.lokspel.practice.config.PracticeConfig;
 import dev.lokspel.practice.config.settings.MatchSettings;
 import dev.lokspel.practice.config.settings.SettingsConfig;
 import dev.lokspel.practice.manager.fight.util.PlayerUtil;
-import dev.lokspel.practice.manager.inventory.InventoryUtil;
 import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.manager.profile.enums.ProfileStatus;
+import dev.lokspel.practice.util.LobbyNametagUtil;
 import dev.lokspel.practice.util.PapiUtil;
 import dev.lokspel.practice.util.PermanentConfig;
 import java.util.ArrayList;
@@ -418,8 +418,10 @@ public class NametagManager {
 
   private Component buildNametagComponent(Player player) {
     Profile profile = ProfileManager.getInstance().getProfile(player);
-    InventoryUtil.LobbyNametag listing =
-        profile != null ? InventoryUtil.getLobbyNametag(profile, player.getName(), player) : null;
+    LobbyNametagUtil.LobbyNametag listing =
+        profile != null
+            ? LobbyNametagUtil.getLobbyNametag(profile, player.getName(), player)
+            : null;
 
     Component basePrefix = listing != null ? listing.getPrefix() : Component.empty();
     Component baseName =
@@ -691,8 +693,8 @@ public class NametagManager {
       if (profile == null) {
         return;
       }
-      InventoryUtil.LobbyNametag lobbyNametag =
-          InventoryUtil.getLobbyNametag(profile, player.getName(), player);
+      LobbyNametagUtil.LobbyNametag lobbyNametag =
+          LobbyNametagUtil.getLobbyNametag(profile, player.getName(), player);
 
       NametagOverride override = customNametags.get(player.getUniqueId());
       Component prefix =
@@ -725,8 +727,8 @@ public class NametagManager {
       return Component.text(player.getName(), NamedTextColor.GRAY);
     }
 
-    InventoryUtil.LobbyNametag lobbyNametag =
-        InventoryUtil.getLobbyNametag(profile, player.getName(), player);
+    LobbyNametagUtil.LobbyNametag lobbyNametag =
+        LobbyNametagUtil.getLobbyNametag(profile, player.getName(), player);
 
     NametagOverride override = customNametags.get(player.getUniqueId());
 

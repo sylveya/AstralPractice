@@ -76,7 +76,7 @@ public class SettingsConfig {
   @JsonProperty("ARENA")
   private Arena arena = new Arena();
 
-  @Comment({"DAMAGE: 4 # You can set the damage to the material as well.", "", "Event settings"})
+  @Comment("Event settings")
   @JsonProperty("EVENT")
   private Event event = new Event();
 
@@ -691,6 +691,9 @@ public class SettingsConfig {
     @JsonProperty("DEFAULT-ICON")
     private DefaultIcon defaultIcon = new DefaultIcon();
 
+    @JsonProperty("WORLDS")
+    private Worlds worlds = new Worlds();
+
     @Getter
     public static class FastCopy {
       @JsonProperty("USE-FAWE")
@@ -711,6 +714,17 @@ public class SettingsConfig {
 
       @JsonProperty("ICON")
       private ItemConfig icon = ItemConfig.of("FIREWORK_STAR").name("<gold>%arena%");
+    }
+
+    @Getter
+    public static class Worlds {
+      @Comment("Automatically create and manage the default empty \"arenas\" world.")
+      @JsonProperty("CREATE-DEFAULT")
+      private boolean createDefault = true;
+
+      @Comment("The world where arena copies are created for matches.")
+      @JsonProperty("COPY-WORLD")
+      private String copyWorld = "arenas_copy";
     }
   }
 

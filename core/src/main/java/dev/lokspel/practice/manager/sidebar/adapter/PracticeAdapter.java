@@ -82,7 +82,7 @@ public class PracticeAdapter implements SidebarAdapter {
       case "NAME_SUFFIX" ->
           NameFormatUtil.resolveName(targetProfile, target.getName(), target, null)
               .append(NameFormatUtil.resolveSuffix(targetProfile, target));
-      default -> NameFormatUtil.resolveFullName(targetProfile, target, target.getName());
+      default -> NameFormatUtil.resolveFullName(targetProfile, target.getName(), target);
     };
   }
 
@@ -1485,10 +1485,7 @@ public class PracticeAdapter implements SidebarAdapter {
       for (String rawLine : group.getSidebarExtensionRaw()) {
         Component extensionLine =
             AdapterUtil.replaceArenaPlaceholders(PapiUtil.runThroughFormat(player, rawLine));
-        sidebar.add(
-            NameFormatUtil.applyPlayerPlaceholders(
-                NameFormatUtil.applyDivisionPlaceholders(extensionLine, profile),
-                player.getName()));
+        sidebar.add(NameFormatUtil.applyPlaceholders(extensionLine, profile, player.getName()));
       }
     }
 

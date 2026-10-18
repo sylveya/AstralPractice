@@ -6,6 +6,7 @@ import dev.lokspel.practice.manager.gui.GuiManager;
 import dev.lokspel.practice.manager.gui.GuiType;
 import dev.lokspel.practice.manager.gui.setup.hologram.HologramSetupManager;
 import dev.lokspel.practice.manager.ladder.abstraction.normal.NormalLadder;
+import dev.lokspel.practice.manager.leaderboard.hologram.holograms.FfaGlobalHologram;
 import dev.lokspel.practice.manager.leaderboard.hologram.holograms.GlobalHologram;
 import dev.lokspel.practice.manager.leaderboard.hologram.holograms.LadderDynamicHologram;
 import dev.lokspel.practice.manager.leaderboard.hologram.holograms.LadderStaticHologram;
@@ -110,6 +111,7 @@ public class HologramManager {
   private Hologram createHologramByType(String name, HologramType type) {
     return switch (type) {
       case GLOBAL -> new GlobalHologram(name);
+      case FFA_GLOBAL -> new FfaGlobalHologram(name);
       case LADDER_STATIC -> new LadderStaticHologram(name);
       case LADDER_DYNAMIC -> new LadderDynamicHologram(name);
     };
@@ -182,6 +184,26 @@ public class HologramManager {
             }
           }
         });
+  }
+
+  /** Gets the secondary leaderboard types supported by the given hologram type. */
+  public List<LbSecondaryType> getLbSecondaryTypes(HologramType hologramType) {
+    if (hologramType == HologramType.FFA_GLOBAL) {
+      return List.of(
+          LbSecondaryType.KILLS, LbSecondaryType.DEATHS, LbSecondaryType.BEST_WIN_STREAK);
+    }
+    return lbSecondaryTypes;
+  }
+
+  /** Gets the next leaderboard type in the cycle for a specific hologram. */
+  public LbSecondaryType getNextType(Hologram hologram) {
+    List<LbSecondaryType> types = getLbSecondaryTypes(hologram.getHologramType());
+    if (hologram.getLeaderboardType() == null || !types.contains(hologram.getLeaderboardType())) {
+      return types.get(0);
+    }
+
+    int index = types.indexOf(hologram.getLeaderboardType());
+    return types.get((index + 1) % types.size());
   }
 
   /** Gets the next leaderboard type in the cycle. */

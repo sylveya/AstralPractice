@@ -4,7 +4,6 @@ import dev.lokspel.practice.AstralPractice;
 import dev.lokspel.practice.manager.arena.arenas.Arena;
 import dev.lokspel.practice.manager.arena.arenas.FfaArena;
 import dev.lokspel.practice.manager.arena.arenas.interfaces.DisplayArena;
-import dev.lokspel.practice.manager.arena.util.ArenaWorldUtil;
 import dev.lokspel.practice.util.Common;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,6 +13,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -62,10 +62,10 @@ public class ArenaSetupManager {
 
     if (arena.getCuboid() != null && !arena.getCuboid().contains(player.getLocation())) {
       arena.teleport(player);
-    } else if (!player.getWorld().equals(ArenaWorldUtil.getArenasWorld())) {
+    } else {
       player.setAllowFlight(true);
       player.setFlying(true);
-      player.teleport(ArenaWorldUtil.getArenasWorld().getSpawnLocation());
+      player.setGameMode(GameMode.CREATIVE);
     }
 
     updateWand(player);
@@ -153,6 +153,7 @@ public class ArenaSetupManager {
 
     if (arena instanceof FfaArena a) {
       modes.add(SetupMode.FFA_POSITIONS);
+      modes.add(SetupMode.SPECTATOR_POSITION);
       modes.add(SetupMode.DEAD_ZONE);
 
       if (a.isBuild()) {
@@ -160,6 +161,7 @@ public class ArenaSetupManager {
       }
     } else if (arena instanceof Arena a) {
       modes.add(SetupMode.POSITIONS);
+      modes.add(SetupMode.SPECTATOR_POSITION);
       modes.add(SetupMode.DEAD_ZONE);
 
       if (a.isBuild()) {

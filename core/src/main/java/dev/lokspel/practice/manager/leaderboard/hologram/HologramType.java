@@ -6,6 +6,8 @@ import lombok.Getter;
 @Getter
 public enum HologramType {
   GLOBAL("Global", "Global", "This hologram shows global stats.", LbMainType.GLOBAL),
+  FFA_GLOBAL(
+      "FFA Global", "FFA Global", "This hologram shows global FFA stats.", LbMainType.FFA_GLOBAL),
   LADDER_STATIC(
       "Ladder Static",
       "Ladder Static",

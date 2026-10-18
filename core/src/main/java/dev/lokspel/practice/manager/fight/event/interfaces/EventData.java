@@ -250,6 +250,13 @@ public abstract class EventData {
       throw new IllegalStateException("Cannot change cuboid while event is enabled");
     }
 
+    if (this.cuboidLoc2 != null
+        && cuboidLoc1 != null
+        && !this.cuboidLoc2.getWorld().equals(cuboidLoc1.getWorld())) {
+      this.cuboidLoc2 = null;
+      this.cuboid = null;
+    }
+
     this.cuboidLoc1 = cuboidLoc1;
     createCuboid();
   }
@@ -259,12 +266,22 @@ public abstract class EventData {
       throw new IllegalStateException("Cannot change cuboid while event is enabled");
     }
 
+    if (this.cuboidLoc1 != null
+        && cuboidLoc2 != null
+        && !this.cuboidLoc1.getWorld().equals(cuboidLoc2.getWorld())) {
+      throw new IllegalArgumentException("Both corners must be located in the same world");
+    }
+
     this.cuboidLoc2 = cuboidLoc2;
     createCuboid();
   }
 
   private void createCuboid() {
     if (cuboidLoc1 != null && cuboidLoc2 != null) {
+      if (!cuboidLoc1.getWorld().equals(cuboidLoc2.getWorld())) {
+        this.cuboid = null;
+        return;
+      }
       this.cuboid = new Cuboid(cuboidLoc1, cuboidLoc2);
 
       spawns.removeIf(spawn -> !cuboid.contains(spawn));

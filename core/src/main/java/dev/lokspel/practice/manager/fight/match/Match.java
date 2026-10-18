@@ -507,6 +507,8 @@ public abstract class Match extends BukkitRunnable
 
     if (target != null) {
       player.teleport(target);
+    } else if (arena.getSpectatorPosition() != null) {
+      player.teleport(arena.getSpectatorPosition());
     } else {
       player.teleport(players.get(random.nextInt(players.size())));
     }

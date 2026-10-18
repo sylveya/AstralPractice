@@ -29,6 +29,9 @@ public abstract class NormalArena extends BasicArena implements DisplayName {
   // Optional shared spawn point used by Party FFA style modes.
   protected Location partyFfaCenter;
 
+  // Spectator position
+  protected Location spectatorPosition;
+
   protected NormalArena(String name) {
     super(name);
   }
@@ -82,6 +85,7 @@ public abstract class NormalArena extends BasicArena implements DisplayName {
             portalLoc1 != null ? portalLoc1.getCenter() : null,
             portalLoc2 != null ? portalLoc2.getCenter() : null));
     data.setPartyFfaCenter(partyFfaCenter);
+    data.setSpectatorPosition(spectatorPosition);
   }
 
   /** Reads the places and limits of this arena from its file's model. */
@@ -140,6 +144,10 @@ public abstract class NormalArena extends BasicArena implements DisplayName {
 
     if (data.getPartyFfaCenter() != null) {
       partyFfaCenter = data.getPartyFfaCenter();
+    }
+
+    if (data.getSpectatorPosition() != null) {
+      spectatorPosition = data.getSpectatorPosition();
     }
   }
 

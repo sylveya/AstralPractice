@@ -82,7 +82,8 @@ public class ArenaSetupListener implements Listener {
         (currentMode == SetupMode.BUILD_MAX
             || currentMode == SetupMode.DEAD_ZONE
             || currentMode == SetupMode.TOGGLE_STATUS
-            || currentMode == SetupMode.FFA_POSITIONS);
+            || currentMode == SetupMode.FFA_POSITIONS
+            || currentMode == SetupMode.SPECTATOR_POSITION);
 
     if (!isAirAllowed) {
       if (action != Action.LEFT_CLICK_BLOCK && action != Action.RIGHT_CLICK_BLOCK) {
@@ -98,6 +99,7 @@ public class ArenaSetupListener implements Listener {
       case CORNERS -> handleCornerSelection(player, displayArena, action, event);
       case POSITIONS -> handleStandardPositions(player, (Arena) displayArena, action, event);
       case FFA_POSITIONS -> handleFfaPositions(player, (FfaArena) displayArena, action, event);
+      case SPECTATOR_POSITION -> handleSpectatorPosition(player, displayArena, action);
       case BUILD_MAX -> handleBuildMax(player, displayArena, action);
       case DEAD_ZONE -> handleDeadZone(player, displayArena, action);
       case BED_LOCATIONS -> handleBedLocations(player, (Arena) displayArena, action, event);
@@ -289,6 +291,53 @@ public class ArenaSetupListener implements Listener {
     }
   }
 
+  private void handleSpectatorPosition(Player player, DisplayArena arena, Action action) {
+    if (isEditBlocked(player, arena)) {
+      return;
+    }
+
+    if (action.name().contains("LEFT")) {
+      if (arena.getSpectatorPosition() == null) {
+        Common.sendMmMessage(
+            player,
+            "<red>No spectator position set for arena <yellow>" + arena.getName() + "<red>.");
+        return;
+      }
+      arena.setSpectatorPosition(null);
+      arena.setData();
+      SpawnMarkerManager.getInstance().updateMarkers(arena);
+      updateGui(arena);
+      Common.sendMmMessage(
+          player,
+          "<red>Spectator position removed for arena <yellow>" + arena.getName() + "<red>.");
+      return;
+    }
+
+    // Set (RIGHT CLICK)
+    if (isRegionMissing(player, arena)) {
+      return;
+    }
+
+    Location loc = player.getLocation().clone();
+    if (isOutsideRegion(player, arena, loc)) {
+      return;
+    }
+
+    if (arena.isDeadZone() && loc.getY() <= arena.getDeadZoneValue()) {
+      Common.sendMmMessage(player, "<red>Spectator position cannot be at or below the dead zone!");
+      return;
+    }
+
+    arena.setSpectatorPosition(loc);
+    arena.setData();
+    SpawnMarkerManager.getInstance().updateMarkers(arena);
+    updateGui(arena);
+
+    Common.sendMmMessage(
+        player,
+        "<green>You set the spectator position for arena <yellow>" + arena.getName() + "<green>.");
+  }
+
   private void handleCornerSelection(
       Player player, DisplayArena arena, Action action, PlayerInteractEvent event) {
     if (isEditBlocked(player, arena)) {
@@ -309,22 +358,26 @@ public class ArenaSetupListener implements Listener {
     }
 
     Location cornerLocation = targetBlock.getLocation();
-    if (!cornerLocation.getWorld().equals(ArenaWorldUtil.getArenasWorld())) {
+    if (ArenaWorldUtil.getArenasCopyWorld() != null
+        && cornerLocation.getWorld().equals(ArenaWorldUtil.getArenasCopyWorld())) {
       Common.sendMmMessage(
-          player,
-          PracticeConfig.language()
-              .getCommand()
-              .getArena()
-              .getArguments()
-              .getCorner()
-              .getCornerWorld());
+          player, "<red>You cannot set arena corners inside the arena copy world!");
       return;
     }
 
     int cornerId = (action == Action.LEFT_CLICK_BLOCK) ? 1 : 2;
     if (cornerId == 1) {
+      if (arena.getCorner2() != null
+          && !arena.getCorner2().getWorld().equals(cornerLocation.getWorld())) {
+        arena.setCorner2(null);
+      }
       arena.setCorner1(cornerLocation);
     } else {
+      if (arena.getCorner1() != null
+          && !arena.getCorner1().getWorld().equals(cornerLocation.getWorld())) {
+        Common.sendMmMessage(player, "<red>Both corners must be located in the same world!");
+        return;
+      }
       arena.setCorner2(cornerLocation);
     }
 
@@ -598,6 +651,9 @@ public class ArenaSetupListener implements Listener {
     } else if (arena instanceof FfaArena f) {
       spawnPositions.addAll(f.getFfaPositions());
     }
+    if (arena.getSpectatorPosition() != null) {
+      spawnPositions.add(arena.getSpectatorPosition());
+    }
 
     for (Location spawnPosition : spawnPositions) {
       if ((spawnPosition.getY() - 1) <= deadZoneY) {
@@ -805,6 +861,15 @@ public class ArenaSetupListener implements Listener {
     // Clean FFA Positions
     if (!arena.getFfaPositions().isEmpty()) {
       arena.getFfaPositions().removeIf(location -> !cuboid.contains(location));
+    }
+    // Clean Spectator Position
+    if (arena.getSpectatorPosition() != null && !cuboid.contains(arena.getSpectatorPosition())) {
+      arena.setSpectatorPosition(null);
+      Common.sendMmMessage(
+          player,
+          "<red>Spectator position for arena <yellow>"
+              + arena.getName()
+              + " <red>was removed because it was outside the new region bounds.");
     }
     // Adjust BuildMax if outside cuboid bounds
     if (arena.isBuildMax()) {
@@ -1024,14 +1089,27 @@ public class ArenaSetupListener implements Listener {
       return;
     }
 
-    // ONLY allow left-click removal for FFA arenas
-    if (!(arena instanceof FfaArena ffaArena)) {
-      return;
-    }
-
     // Check if player is setting up this arena
     ArenaSetupManager.SetupSession session = setupManager.getSession(player);
     if (session == null || !session.getArena().equals(arena)) {
+      return;
+    }
+
+    if (session.getCurrentMode() == SetupMode.SPECTATOR_POSITION) {
+      if (arena.getSpectatorPosition() != null) {
+        arena.setSpectatorPosition(null);
+        arena.setData();
+        SpawnMarkerManager.getInstance().updateMarkers(arena);
+        updateGui(arena);
+        Common.sendMmMessage(
+            player,
+            "<red>Spectator position removed for arena <yellow>" + arena.getName() + "<red>.");
+      }
+      return;
+    }
+
+    // ONLY allow left-click removal for FFA arenas
+    if (!(arena instanceof FfaArena ffaArena)) {
       return;
     }
 

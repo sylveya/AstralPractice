@@ -25,6 +25,13 @@ public enum SetupMode {
         "<aqua> Left Click (Anywhere): <white>Remove Last Spawn"
       }),
 
+  SPECTATOR_POSITION(
+      "Spectator Position",
+      new String[] {
+        "<aqua> Right Click: <white>Set to Current Position",
+        "<aqua> Left Click: <white>Remove Spectator Position"
+      }),
+
   BUILD_MAX(
       "Build Height Limit",
       new String[] {

@@ -24,6 +24,7 @@ public class ProfileStat {
   private final ProfileFile profileFile;
 
   @Getter private final Map<NormalLadder, LadderStats> ladderStats = new HashMap<>();
+  @Getter private final FfaStats ffaStats = new FfaStats();
 
   @Getter @Setter private int winStreak = 0;
   @Getter @Setter private int bestWinStreak = 0;
@@ -137,6 +138,11 @@ public class ProfileStat {
       getLadderStat(ladder).setData(ladderData, ladder.isRanked());
     }
 
+    if (data.getStats().getFfaStats() == null) {
+      data.getStats().setFfaStats(new FfaStatsData());
+    }
+    ffaStats.setData(data.getStats().getFfaStats());
+
     if (save) {
       profileFile.saveFile();
     }
@@ -163,6 +169,9 @@ public class ProfileStat {
           stored != null ? stored.get(ladder.getName().toLowerCase()) : null, ladder.isRanked());
       ladderStats.put(ladder, ladderStat);
     }
+
+    FfaStatsData ffaData = data.getStats() != null ? data.getStats().getFfaStats() : null;
+    ffaStats.getData(ffaData);
   }
 
   private static int valueOf(Integer value) {

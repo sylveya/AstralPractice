@@ -89,6 +89,21 @@ final class Schema {
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
       """;
 
+  private static final String FFA_GLOBAL_STATS =
+      """
+      CREATE TABLE IF NOT EXISTS ffa_global_stats (
+          id INT NOT NULL AUTO_INCREMENT,
+          username VARCHAR(100) NOT NULL,
+          uuid VARCHAR(36) NOT NULL,
+          kills INT DEFAULT 0,
+          deaths INT DEFAULT 0,
+          bestKillStreak INT DEFAULT 0,
+
+          PRIMARY KEY (id),
+          UNIQUE KEY uk_ffa_global_stats_uuid (uuid)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+      """;
+
   static void apply(DataSource dataSource) throws SQLException {
     try (Connection connection = dataSource.getConnection();
         Statement statement = connection.createStatement()) {
@@ -96,6 +111,7 @@ final class Schema {
       statement.executeUpdate(GLOBAL_STATS);
       statement.executeUpdate(LADDER_STATS);
       statement.executeUpdate(MATCH_HISTORY);
+      statement.executeUpdate(FFA_GLOBAL_STATS);
     }
   }
 }

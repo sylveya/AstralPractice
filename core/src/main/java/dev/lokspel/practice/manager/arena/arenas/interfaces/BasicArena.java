@@ -20,8 +20,8 @@ public abstract class BasicArena {
 
   protected final String name;
 
-  @Setter protected Location corner1;
-  @Setter protected Location corner2;
+  protected Location corner1;
+  protected Location corner2;
   @Setter protected Cuboid cuboid;
 
   @Setter protected Location position1;
@@ -42,8 +42,36 @@ public abstract class BasicArena {
     this.name = name;
   }
 
+  public void setCorner1(Location corner1) {
+    if (this.corner2 != null
+        && corner1 != null
+        && !this.corner2.getWorld().equals(corner1.getWorld())) {
+      this.corner2 = null;
+      if (this.cuboid != null) {
+        ArenaManager.getInstance().getArenaCuboids().remove(this.cuboid);
+        this.cuboid = null;
+      }
+    }
+    this.corner1 = corner1;
+  }
+
+  public void setCorner2(Location corner2) {
+    if (this.corner1 != null
+        && corner2 != null
+        && !this.corner1.getWorld().equals(corner2.getWorld())) {
+      throw new IllegalArgumentException("Both corners must be located in the same world");
+    }
+    this.corner2 = corner2;
+  }
+
   public void createCuboid() {
     if (corner1 != null && corner2 != null) {
+      if (!corner1.getWorld().equals(corner2.getWorld())) {
+        return;
+      }
+      if (cuboid != null) {
+        ArenaManager.getInstance().getArenaCuboids().remove(cuboid);
+      }
       cuboid = new Cuboid(corner1, corner2);
       ArenaManager.getInstance().getArenaCuboids().put(cuboid, this);
     }

@@ -7,6 +7,7 @@ import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.util.ChatFormatUtil;
 import dev.lokspel.practice.util.Common;
+import java.util.Arrays;
 import org.bukkit.entity.Player;
 
 public final class PartyChatArg {
@@ -61,12 +62,11 @@ public final class PartyChatArg {
       return;
     }
 
-    StringBuilder message = new StringBuilder();
-    for (int i = 1; i < args.length; i++) {
-      message.append(args[i]).append(" ");
-    }
+    String message = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
+    String format = ChatFormatUtil.buildPartyChatMessage(player);
 
-    party.sendMessage(
-        ChatFormatUtil.buildPartyChatMessage(player).replace("%%message%%", message.toString()));
+    for (Player member : party.getMembers()) {
+      Common.send(member, ChatFormatUtil.formatChatMessage(member, format, message));
+    }
   }
 }

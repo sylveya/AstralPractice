@@ -129,6 +129,12 @@ public class ArenaCopyUtilListener implements Listener {
         arenaCopy.getFfaPositions().add(translateLocation(ffaPosCopy, reference, newLocation));
       }
 
+      if (arena.getSpectatorPosition() != null) {
+        Location spectatorPos = arena.getSpectatorPosition().clone();
+        spectatorPos.setWorld(copyWorld);
+        arenaCopy.setSpectatorPosition(translateLocation(spectatorPos, reference, newLocation));
+      }
+
       if (arena.isBuildMax()) {
         int difference = arena.getCorner1().getBlockY() - arena.getBuildMaxValue();
         arenaCopy.setBuildMax(true);
@@ -250,7 +256,7 @@ public class ArenaCopyUtilListener implements Listener {
       Cuboid copyFrom,
       Location reference,
       Location newLocation) {
-    final World copyWorld = ArenaWorldUtil.getArenasCopyWorld();
+    final World copyWorld = newLocation.getWorld();
 
     final Iterator<Block> blockIterator = copyFrom.iterator();
     final int maxSize = copyFrom.getSizeX() * copyFrom.getSizeY() * copyFrom.getSizeZ();
@@ -423,6 +429,10 @@ public class ArenaCopyUtilListener implements Listener {
 
   @EventHandler
   public void onBlockPhysic(BlockPhysicsEvent e) {
+    World copyWorld = ArenaWorldUtil.getArenasCopyWorld();
+    if (copyWorld == null || !e.getBlock().getWorld().equals(copyWorld)) {
+      return;
+    }
     // OPTIMIZATION: O(1) chunk-based lookup instead of O(n) cuboid iteration
     int chunkX = e.getBlock().getX() >> 4;
     int chunkZ = e.getBlock().getZ() >> 4;

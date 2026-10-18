@@ -344,14 +344,19 @@ public class EventSetupListener implements Listener {
     }
 
     Location cornerLocation = targetBlock.getLocation();
-    if (!cornerLocation.getWorld().equals(ArenaWorldUtil.getArenasWorld())) {
+    if (ArenaWorldUtil.getArenasCopyWorld() != null
+        && cornerLocation.getWorld().equals(ArenaWorldUtil.getArenasCopyWorld())) {
       Common.sendMmMessage(
-          player, PracticeConfig.language().getCommand().getSetup().getEvent().getArenasWorld());
+          player, "<red>You cannot set event corners inside the arena copy world!");
       return;
     }
 
     int cornerId = (action == Action.LEFT_CLICK_BLOCK) ? 1 : 2;
     if (cornerId == 1) {
+      if (eventData.getCuboidLoc2() != null
+          && !eventData.getCuboidLoc2().getWorld().equals(cornerLocation.getWorld())) {
+        eventData.setCuboidLoc2(null);
+      }
       eventData.setCuboidLoc1(cornerLocation);
       Common.sendMmMessage(
           player,
@@ -362,6 +367,11 @@ public class EventSetupListener implements Listener {
               .getSetFirstCorner()
               .replace("%event%", eventData.getType().getName()));
     } else {
+      if (eventData.getCuboidLoc1() != null
+          && !eventData.getCuboidLoc1().getWorld().equals(cornerLocation.getWorld())) {
+        Common.sendMmMessage(player, "<red>Both corners must be located in the same world!");
+        return;
+      }
       eventData.setCuboidLoc2(cornerLocation);
       Common.sendMmMessage(
           player,

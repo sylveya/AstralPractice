@@ -119,8 +119,7 @@ public class HologramMainGui extends Gui {
         break;
       case 10:
         if (!hologram.isEnabled()) {
-          hologram.setLeaderboardType(
-              HologramManager.getInstance().getNextType(hologram.getLeaderboardType()));
+          hologram.setLeaderboardType(HologramManager.getInstance().getNextType(hologram));
 
           if (hologram.getLeaderboardType().isRankedRelated()) {
             if (hologram instanceof LadderStaticHologram staticHologram) {
@@ -151,7 +150,8 @@ public class HologramMainGui extends Gui {
         break;
       case 12:
         if (hologram.getHologramType() != null
-            && !hologram.getHologramType().equals(HologramType.GLOBAL)) {
+            && !hologram.getHologramType().equals(HologramType.GLOBAL)
+            && !hologram.getHologramType().equals(HologramType.FFA_GLOBAL)) {
           HologramSetupManager.getInstance()
               .getHologramSetupGuis()
               .get(hologram)
@@ -213,7 +213,8 @@ public class HologramMainGui extends Gui {
 
   private static ItemStack getTypeItem(Hologram hologram) {
     List<String> typeExtension = new ArrayList<>();
-    for (LbSecondaryType hologramType : HologramManager.getInstance().getLbSecondaryTypes()) {
+    for (LbSecondaryType hologramType :
+        HologramManager.getInstance().getLbSecondaryTypes(hologram.getHologramType())) {
       typeExtension.add(
           (hologramType.equals(hologram.getLeaderboardType()) ? "<green>" : "<red>")
               + " <bold>► <yellow>"
@@ -242,7 +243,8 @@ public class HologramMainGui extends Gui {
   }
 
   private static ItemStack getLadderItem(Hologram hologram) {
-    if (hologram.getHologramType().equals(HologramType.GLOBAL)) {
+    if (hologram.getHologramType().equals(HologramType.GLOBAL)
+        || hologram.getHologramType().equals(HologramType.FFA_GLOBAL)) {
       return BackendUtil.getGuiItem(
               PracticeConfig.guis()
                   .getGuis()

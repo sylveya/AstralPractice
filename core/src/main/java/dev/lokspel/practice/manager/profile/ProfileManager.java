@@ -4,12 +4,14 @@ import dev.lokspel.api.event.NewPlayerJoin;
 import dev.lokspel.practice.AstralPractice;
 import dev.lokspel.practice.data.DataFiles;
 import dev.lokspel.practice.manager.backend.database.Database;
+import dev.lokspel.practice.manager.backend.database.model.FfaGlobalStatsRow;
 import dev.lokspel.practice.manager.backend.database.model.GlobalStatsRow;
 import dev.lokspel.practice.manager.backend.database.model.LadderStatsRow;
 import dev.lokspel.practice.manager.division.DivisionManager;
 import dev.lokspel.practice.manager.gui.guis.profile.ProfileSettingsGui;
 import dev.lokspel.practice.manager.ladder.LadderManager;
 import dev.lokspel.practice.manager.ladder.abstraction.normal.NormalLadder;
+import dev.lokspel.practice.manager.profile.statistics.FfaStats;
 import dev.lokspel.practice.manager.profile.statistics.LadderStats;
 import dev.lokspel.practice.manager.profile.statistics.ProfileStat;
 import dev.lokspel.practice.util.Common;
@@ -146,7 +148,10 @@ public class ProfileManager {
               .thenAccept(row -> applyGlobalStats(row, profile))
               .thenCompose(
                   ignored -> database.getLadderStatsRepository().getStats(profile.getUuid()))
-              .thenAccept(rows -> applyLadderStats(rows, profile));
+              .thenAccept(rows -> applyLadderStats(rows, profile))
+              .thenCompose(
+                  ignored -> database.getFfaGlobalStatsRepository().getStats(profile.getUuid()))
+              .thenAccept(row -> applyFfaStats(row, profile));
 
       futures.add(future);
     }
@@ -196,6 +201,17 @@ public class ProfileManager {
       stats.setKills(row.getKills());
       stats.setDeaths(row.getDeaths());
     }
+  }
+
+  private static void applyFfaStats(FfaGlobalStatsRow row, Profile profile) {
+    if (row == null) {
+      return;
+    }
+
+    FfaStats stats = profile.getStats().getFfaStats();
+    stats.setKills(row.getKills());
+    stats.setDeaths(row.getDeaths());
+    stats.setBestKillStreak(row.getBestKillStreak());
   }
 
   /** Iterates all .yml files in /profiles/ and loads each into the cache. */
@@ -293,7 +309,8 @@ public class ProfileManager {
     return database
         .getGlobalStatsRepository()
         .saveAll(present)
-        .thenCompose(ignored -> database.getLadderStatsRepository().saveAll(present));
+        .thenCompose(ignored -> database.getLadderStatsRepository().saveAll(present))
+        .thenCompose(ignored -> database.getFfaGlobalStatsRepository().saveAll(present));
   }
 
   public void saveProfileToDatabase(Profile profile) {
@@ -305,7 +322,8 @@ public class ProfileManager {
     database
         .getGlobalStatsRepository()
         .save(profile)
-        .thenCompose(ignored -> database.getLadderStatsRepository().save(profile));
+        .thenCompose(ignored -> database.getLadderStatsRepository().save(profile))
+        .thenCompose(ignored -> database.getFfaGlobalStatsRepository().save(profile));
   }
 
   public void deleteProfileFromDatabase(UUID uuid) {
@@ -318,6 +336,7 @@ public class ProfileManager {
         .getGlobalStatsRepository()
         .delete(uuid)
         .thenCompose(ignored -> database.getLadderStatsRepository().delete(uuid))
+        .thenCompose(ignored -> database.getFfaGlobalStatsRepository().delete(uuid))
         .thenCompose(ignored -> database.getMatchHistoryRepository().delete(uuid));
   }
 

@@ -4,10 +4,10 @@ import dev.lokspel.api.enums.DivisionName;
 import dev.lokspel.api.enums.PlayerState;
 import dev.lokspel.api.player.PlayerApi;
 import dev.lokspel.api.utilities.PlayerNametag;
-import dev.lokspel.practice.manager.inventory.InventoryUtil;
 import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.manager.profile.group.Group;
+import dev.lokspel.practice.util.LobbyNametagUtil;
 import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -44,7 +44,7 @@ public class PlayerApiImpl implements PlayerApi {
     if (profile == null) {
       return null;
     }
-    return InventoryUtil.getLobbyNametag(profile);
+    return LobbyNametagUtil.getLobbyNametag(profile);
   }
 
   @Override

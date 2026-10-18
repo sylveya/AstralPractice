@@ -1,10 +1,10 @@
 package dev.lokspel.practice.command.practice.arguments;
 
 import dev.lokspel.practice.config.PracticeConfig;
-import dev.lokspel.practice.manager.inventory.InventoryUtil;
 import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.util.Common;
+import dev.lokspel.practice.util.LobbyNametagUtil;
 import dev.lokspel.practice.util.NameFormatUtil;
 import java.util.ArrayList;
 import java.util.List;
@@ -82,7 +82,7 @@ public final class NametagArg {
         String prefix = joinArgs(args, 3);
 
         targetProfile.setPrefix(NameFormatUtil.parseConfiguredComponent(prefix));
-        InventoryUtil.setLobbyNametag(target, targetProfile);
+        LobbyNametagUtil.setLobbyNametag(target, targetProfile);
 
         Common.sendMmMessage(
             player,
@@ -109,7 +109,7 @@ public final class NametagArg {
         String suffix = joinArgs(args, 3);
 
         targetProfile.setSuffix(NameFormatUtil.parseConfiguredComponent(suffix));
-        InventoryUtil.setLobbyNametag(target, targetProfile);
+        LobbyNametagUtil.setLobbyNametag(target, targetProfile);
 
         Common.sendMmMessage(
             player,
@@ -141,8 +141,8 @@ public final class NametagArg {
           return;
         }
 
-        targetProfile.setNameTemplate(NameFormatUtil.normalizePlayerNameTemplate(nameTemplate));
-        InventoryUtil.setLobbyNametag(target, targetProfile);
+        targetProfile.setNameTemplate(NameFormatUtil.normalizeTemplate(nameTemplate));
+        LobbyNametagUtil.setLobbyNametag(target, targetProfile);
 
         Common.sendMmMessage(
             player,
@@ -205,7 +205,7 @@ public final class NametagArg {
       targetProfile.setSuffix(null);
       targetProfile.setNameTemplate(null);
 
-      InventoryUtil.setLobbyNametag(target, targetProfile);
+      LobbyNametagUtil.setLobbyNametag(target, targetProfile);
 
       Common.sendMmMessage(
           player,
@@ -269,7 +269,7 @@ public final class NametagArg {
         String prefix = joinArgs(args, 3);
 
         targetProfile.setPrefix(NameFormatUtil.parseConfiguredComponent(prefix));
-        InventoryUtil.setLobbyNametag(target, targetProfile);
+        LobbyNametagUtil.setLobbyNametag(target, targetProfile);
 
         Common.sendConsoleMmMessage(
             PracticeConfig.language()
@@ -295,7 +295,7 @@ public final class NametagArg {
         String suffix = joinArgs(args, 3);
 
         targetProfile.setSuffix(NameFormatUtil.parseConfiguredComponent(suffix));
-        InventoryUtil.setLobbyNametag(target, targetProfile);
+        LobbyNametagUtil.setLobbyNametag(target, targetProfile);
 
         Common.sendConsoleMmMessage(
             PracticeConfig.language()
@@ -320,8 +320,8 @@ public final class NametagArg {
       } else if (args[1].equalsIgnoreCase("name")) {
         String nameTemplate = joinArgs(args, 3);
 
-        targetProfile.setNameTemplate(NameFormatUtil.normalizePlayerNameTemplate(nameTemplate));
-        InventoryUtil.setLobbyNametag(target, targetProfile);
+        targetProfile.setNameTemplate(NameFormatUtil.normalizeTemplate(nameTemplate));
+        LobbyNametagUtil.setLobbyNametag(target, targetProfile);
 
         Common.sendConsoleMmMessage(
             PracticeConfig.language()
@@ -363,7 +363,7 @@ public final class NametagArg {
       targetProfile.setSuffix(null);
       targetProfile.setNameTemplate(null);
 
-      InventoryUtil.setLobbyNametag(target, targetProfile);
+      LobbyNametagUtil.setLobbyNametag(target, targetProfile);
 
       Common.sendConsoleMmMessage(
           PracticeConfig.language()

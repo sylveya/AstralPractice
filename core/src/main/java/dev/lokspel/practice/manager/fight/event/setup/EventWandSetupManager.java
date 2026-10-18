@@ -1,7 +1,6 @@
 package dev.lokspel.practice.manager.fight.event.setup;
 
 import dev.lokspel.practice.AstralPractice;
-import dev.lokspel.practice.manager.arena.util.ArenaWorldUtil;
 import dev.lokspel.practice.manager.fight.event.interfaces.EventData;
 import dev.lokspel.practice.util.Common;
 import java.util.ArrayList;
@@ -68,11 +67,10 @@ public class EventWandSetupManager {
         player.setFlying(true);
         player.setGameMode(GameMode.CREATIVE);
       }
-    } else if (!player.getWorld().equals(ArenaWorldUtil.getArenasWorld())) {
+    } else {
       player.setAllowFlight(true);
       player.setFlying(true);
       player.setGameMode(GameMode.CREATIVE);
-      player.teleport(ArenaWorldUtil.getArenasWorld().getSpawnLocation());
     }
 
     updateWand(player);

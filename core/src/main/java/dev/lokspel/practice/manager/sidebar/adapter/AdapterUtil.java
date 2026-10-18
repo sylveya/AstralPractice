@@ -17,6 +17,7 @@ import dev.lokspel.practice.manager.fight.util.PlayerUtil;
 import dev.lokspel.practice.manager.fight.util.stats.Statistic;
 import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
+import dev.lokspel.practice.manager.profile.statistics.FfaStats;
 import dev.lokspel.practice.util.Common;
 import dev.lokspel.practice.util.NameFormatUtil;
 import net.kyori.adventure.text.Component;
@@ -146,7 +147,7 @@ public enum AdapterUtil {
       case "NAME_SUFFIX" ->
           NameFormatUtil.resolveName(profile, player.getName(), player, null)
               .append(NameFormatUtil.resolveSuffix(profile, player));
-      default -> NameFormatUtil.resolveFullName(profile, player, player.getName());
+      default -> NameFormatUtil.resolveFullName(profile, player.getName(), player);
     };
   }
 
@@ -326,6 +327,17 @@ public enum AdapterUtil {
 
   public static Component replaceFfaPlaceholders(Player player, Component line, Ffa ffa) {
     Statistic statistic = ffa.getStatistics().get(player);
+    int sessionKills = statistic != null ? statistic.getKills() : 0;
+    int sessionDeaths = statistic != null ? statistic.getDeaths() : 0;
+    int sessionStreak = statistic != null ? statistic.getKillStreak() : 0;
+    int sessionBestStreak = statistic != null ? statistic.getBestKillStreak() : 0;
+
+    Profile profile = ProfileManager.getInstance().getProfile(player);
+    FfaStats ffaStats = profile != null ? profile.getStats().getFfaStats() : null;
+    int globalKills = ffaStats != null ? ffaStats.getKills() : 0;
+    int globalDeaths = ffaStats != null ? ffaStats.getDeaths() : 0;
+    int globalBestStreak = ffaStats != null ? ffaStats.getBestKillStreak() : 0;
+    double kdr = ffaStats != null ? ffaStats.getKdr() : 0.0;
 
     return line.replaceText(replace("%players%", String.valueOf(ffa.getPlayers().size())))
         .replaceText(replace("%spectators%", String.valueOf(ffa.getSpectators().size())))
@@ -340,10 +352,35 @@ public enum AdapterUtil {
                 Common.deserializeMiniMessage(ffa.getPlayers().get(player).getDisplayName())))
         .replaceText(
             replace("%arena%", Common.deserializeMiniMessage(ffa.getArena().getDisplayName())))
-        .replaceText(replace("%kills%", String.valueOf(statistic.getKills())))
-        .replaceText(replace("%deaths%", String.valueOf(statistic.getDeaths())))
-        .replaceText(replace("%killStreak%", String.valueOf(statistic.getKillStreak())))
-        .replaceText(replace("%bestKillStreak%", String.valueOf(statistic.getBestKillStreak())));
+        // Session placeholders
+        .replaceText(replace("%ffa_session_kills%", String.valueOf(sessionKills)))
+        .replaceText(replace("%session_kills%", String.valueOf(sessionKills)))
+        .replaceText(replace("%kills%", String.valueOf(sessionKills)))
+        .replaceText(replace("%ffa_session_deaths%", String.valueOf(sessionDeaths)))
+        .replaceText(replace("%session_deaths%", String.valueOf(sessionDeaths)))
+        .replaceText(replace("%deaths%", String.valueOf(sessionDeaths)))
+        .replaceText(replace("%ffa_session_streak%", String.valueOf(sessionStreak)))
+        .replaceText(replace("%session_streak%", String.valueOf(sessionStreak)))
+        .replaceText(replace("%killStreak%", String.valueOf(sessionStreak)))
+        .replaceText(replace("%killstreak%", String.valueOf(sessionStreak)))
+        .replaceText(replace("%streak%", String.valueOf(sessionStreak)))
+        .replaceText(replace("%ffa_session_best_streak%", String.valueOf(sessionBestStreak)))
+        .replaceText(replace("%session_best_streak%", String.valueOf(sessionBestStreak)))
+        .replaceText(replace("%bestKillStreak%", String.valueOf(sessionBestStreak)))
+        .replaceText(replace("%best_killstreak%", String.valueOf(sessionBestStreak)))
+        .replaceText(replace("%best_streak%", String.valueOf(sessionBestStreak)))
+        // Global FFA placeholders
+        .replaceText(replace("%ffa_global_kills%", String.valueOf(globalKills)))
+        .replaceText(replace("%ffa_lifetime_kills%", String.valueOf(globalKills)))
+        .replaceText(replace("%ffa_global_deaths%", String.valueOf(globalDeaths)))
+        .replaceText(replace("%ffa_lifetime_deaths%", String.valueOf(globalDeaths)))
+        .replaceText(replace("%ffa_global_streak%", String.valueOf(globalBestStreak)))
+        .replaceText(replace("%ffa_global_best_streak%", String.valueOf(globalBestStreak)))
+        .replaceText(replace("%ffa_lifetime_streak%", String.valueOf(globalBestStreak)))
+        .replaceText(replace("%ffa_lifetime_best_streak%", String.valueOf(globalBestStreak)))
+        .replaceText(replace("%ffa_global_kdr%", String.valueOf(kdr)))
+        .replaceText(replace("%ffa_kdr%", String.valueOf(kdr)))
+        .replaceText(replace("%ffa_lifetime_kdr%", String.valueOf(kdr)));
   }
 
   public static Component replaceFfaSpecPlaceholders(Component line, Ffa ffa) {

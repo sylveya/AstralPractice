@@ -1,4 +1,4 @@
-package dev.lokspel.practice.manager.inventory;
+package dev.lokspel.practice.util;
 
 import dev.lokspel.api.utilities.PlayerNametag;
 import dev.lokspel.practice.config.PracticeConfig;
@@ -7,15 +7,14 @@ import dev.lokspel.practice.manager.nametag.NametagManager;
 import dev.lokspel.practice.manager.nametag.TabIntegration;
 import dev.lokspel.practice.manager.nametag.TeamPacketBlocker;
 import dev.lokspel.practice.manager.profile.Profile;
-import dev.lokspel.practice.util.NameFormatUtil;
-import dev.lokspel.practice.util.PermanentConfig;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.entity.Player;
 
-public enum InventoryUtil {
-  ;
+public final class LobbyNametagUtil {
+
+  private LobbyNametagUtil() {}
 
   public static void setLobbyNametag(Player player, Profile profile) {
     if (!PracticeConfig.settings().getPlayer().getLobbyNametag().isEnabled()) {

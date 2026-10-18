@@ -1,10 +1,10 @@
 package dev.lokspel.practice.util;
 
 import dev.lokspel.practice.AstralPractice;
-import dev.lokspel.practice.manager.inventory.InventoryUtil;
 import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.enums.ProfilePrefixVisibility;
 import dev.lokspel.practice.manager.profile.group.Group;
+import java.util.regex.Pattern;
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextReplacementConfig;
@@ -13,14 +13,21 @@ import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.entity.Player;
 
+/**
+ * Utility for resolving, formatting, and placeholder-injecting player names, prefixes, suffixes,
+ * and scoreboard colors based on profile and group configurations.
+ */
 public final class NameFormatUtil {
-
-  private NameFormatUtil() {}
 
   private static final PlainTextComponentSerializer PLAIN_TEXT_SERIALIZER =
       PlainTextComponentSerializer.plainText();
 
-  // Color helpers
+  private static final Pattern PLAYER_PATTERN = Pattern.compile("%%?player%%?");
+  private static final Pattern DIVISION_SHORT_PATTERN = Pattern.compile("%%?division_short%%?");
+  private static final Pattern DIVISION_PATTERN = Pattern.compile("%%?division%%?");
+
+  private NameFormatUtil() {}
+
   private static TextColor findFirstExplicitColor(Component component) {
     if (component == null) {
       return null;
@@ -45,25 +52,24 @@ public final class NameFormatUtil {
     if (component == null) {
       return null;
     }
-    TextColor last = component.color(); // own color is the starting value
+    TextColor last = component.color();
     for (Component child : component.children()) {
       TextColor childLast = findLastExplicitColor(child);
       if (childLast != null) {
         last = childLast;
-      } // later children override
+      }
     }
     return last;
   }
 
   /**
-   * Public wrapper — used by {@link InventoryUtil} to extract the trailing prefix color so it can
-   * be inherited by the name component.
+   * Public wrapper used to extract the trailing prefix color so it can be inherited by the name
+   * component.
    */
   public static TextColor extractTrailingColor(Component component) {
     return findLastExplicitColor(component);
   }
 
-  // Template / placeholder helpers
   public static Component parseConfiguredComponent(String raw) {
     if (raw == null || raw.isEmpty()) {
       return Component.empty();
@@ -71,68 +77,50 @@ public final class NameFormatUtil {
     return AstralPractice.getMiniMessage().deserialize(StringUtil.legacyToMiniMessage(raw));
   }
 
-  public static Component applyDivisionPlaceholders(Component template, Profile profile) {
+  public static Component applyPlaceholders(Component template, Profile profile) {
     if (template == null) {
       return Component.empty();
     }
+    if (profile == null) {
+      return template;
+    }
+    var divisionStat = profile.getStats().getDivision();
     Component division =
-        profile.getStats().getDivision() != null
-            ? profile.getStats().getDivision().getComponentFullName()
-            : Component.empty();
+        divisionStat != null ? divisionStat.getComponentFullName() : Component.empty();
     Component divisionShort =
-        profile.getStats().getDivision() != null
-            ? profile.getStats().getDivision().getComponentShortName()
-            : Component.empty();
+        divisionStat != null ? divisionStat.getComponentShortName() : Component.empty();
+
     return template
         .replaceText(
             TextReplacementConfig.builder()
-                .matchLiteral("%division%")
-                .replacement(division)
+                .match(DIVISION_SHORT_PATTERN)
+                .replacement(divisionShort)
                 .build())
         .replaceText(
-            TextReplacementConfig.builder()
-                .matchLiteral("%division_short%")
-                .replacement(divisionShort)
-                .build());
+            TextReplacementConfig.builder().match(DIVISION_PATTERN).replacement(division).build());
   }
 
-  public static Component applyPlayerPlaceholders(Component template, String playerName) {
+  public static Component applyPlaceholders(
+      Component template, Profile profile, String playerName) {
     if (template == null) {
       return Component.empty();
     }
-    Component player = Component.text(playerName == null ? "" : playerName);
-    return template
-        .replaceText(
-            TextReplacementConfig.builder().matchLiteral("%player%").replacement(player).build())
-        .replaceText(
-            TextReplacementConfig.builder().matchLiteral("%%player%%").replacement(player).build());
+    Component resolved = applyPlaceholders(template, profile);
+    if (playerName == null) {
+      return resolved;
+    }
+    return resolved.replaceText(
+        TextReplacementConfig.builder()
+            .match(PLAYER_PATTERN)
+            .replacement(Component.text(playerName))
+            .build());
   }
 
-  /**
-   * Applies any PlaceholderAPI placeholders present in {@code component} by serializing to
-   * MiniMessage, running PAPI, then reparsing. PAPI expansions may inject legacy {@code &} codes —
-   * these are converted to MiniMessage via the Adventure legacy serializer. Returns {@code
-   * component} unchanged if PAPI is not installed or {@code player} is null.
-   */
-  public static Component applyPapiPlaceholders(Component component, Player player) {
-    if (component == null || player == null) {
-      return component;
-    }
-    if (!SoftDependUtil.isPAPI_ENABLED) {
-      return component;
-    }
-    String serialized = AstralPractice.getMiniMessage().serialize(component);
-    String resolved = PlaceholderAPI.setPlaceholders(player, serialized);
-    return AstralPractice.getMiniMessage().deserialize(StringUtil.legacyToMiniMessage(resolved));
-  }
-
-  public static String normalizePlayerNameTemplate(String rawTemplate) {
+  public static String normalizeTemplate(String rawTemplate) {
     if (rawTemplate == null || rawTemplate.isEmpty()) {
       return rawTemplate;
     }
-    boolean hasPlayerPlaceholder =
-        rawTemplate.contains("%player%") || rawTemplate.contains("%%player%%");
-    if (hasPlayerPlaceholder) {
+    if (rawTemplate.contains("%player%") || rawTemplate.contains("%%player%%")) {
       return rawTemplate;
     }
     String plainText =
@@ -147,19 +135,11 @@ public final class NameFormatUtil {
     return rawTemplate + "%player%";
   }
 
-  /**
-   * Renders a raw config template string into a {@link Component}.
-   *
-   * <p>Processing order:
-   *
-   * <ol>
-   *   <li>PAPI placeholders resolved on the raw string (when {@code player} is provided)
-   *   <li>Legacy / hex color codes translated to MiniMessage tags
-   *   <li>Internal {@code %division%} and {@code %player%} tokens substituted
-   *   <li>MiniMessage deserialization
-   * </ol>
-   */
-  private static Component renderTemplate(
+  public static Component renderTemplate(String rawTemplate, String playerName) {
+    return renderTemplate(rawTemplate, null, playerName, null);
+  }
+
+  public static Component renderTemplate(
       String rawTemplate, Profile profile, String playerName, Player player) {
     if (rawTemplate == null || rawTemplate.isEmpty()) {
       return Component.empty();
@@ -173,23 +153,22 @@ public final class NameFormatUtil {
 
     normalized = StringUtil.legacyToMiniMessage(normalized);
 
+    var divisionStat = profile.getStats().getDivision();
     String division =
-        profile.getStats().getDivision() != null
-            ? AstralPractice.getMiniMessage()
-                .serialize(profile.getStats().getDivision().getComponentFullName())
+        divisionStat != null
+            ? AstralPractice.getMiniMessage().serialize(divisionStat.getComponentFullName())
             : "";
     String divisionShort =
-        profile.getStats().getDivision() != null
-            ? AstralPractice.getMiniMessage()
-                .serialize(profile.getStats().getDivision().getComponentShortName())
+        divisionStat != null
+            ? AstralPractice.getMiniMessage().serialize(divisionStat.getComponentShortName())
             : "";
 
     normalized =
         normalized
-            .replace("%division%", division)
-            .replace("%%division%%", division)
+            .replace("%%division_short%%", divisionShort)
             .replace("%division_short%", divisionShort)
-            .replace("%%division_short%%", divisionShort);
+            .replace("%%division%%", division)
+            .replace("%division%", division);
 
     if (playerName != null) {
       normalized = normalized.replace("%%player%%", playerName).replace("%player%", playerName);
@@ -198,100 +177,77 @@ public final class NameFormatUtil {
     return AstralPractice.getMiniMessage().deserialize(normalized);
   }
 
-  // Public resolution API
-  public static Component resolvePrefix(Profile profile) {
-    return resolvePrefix(profile, null);
-  }
-
-  /**
-   * Resolves the group/profile prefix for {@code profile}. When {@code player} is provided, PAPI
-   * placeholders (e.g. {@code %luckperms_prefix%}) are resolved on the raw template string before
-   * MiniMessage parsing so that hex/legacy colors injected by expansions render correctly.
-   */
-  public static Component resolvePrefix(Profile profile, Player player) {
-    ProfilePrefixVisibility visibility = profile.getPrefixVisibility();
-    if (visibility == null || !visibility.isShowPrefix()) {
+  private static Component resolveAffix(
+      Profile profile,
+      Player player,
+      boolean visible,
+      String groupTemplate,
+      Component groupComponent,
+      Component customOverride) {
+    if (!visible) {
       return Component.empty();
     }
 
+    Component affix = Component.empty();
+
+    if (groupComponent != null) {
+      affix =
+          groupTemplate != null
+              ? renderTemplate(groupTemplate, profile, null, player)
+              : PapiUtil.format(player, groupComponent);
+    }
+
+    if (customOverride != null) {
+      affix = PapiUtil.format(player, customOverride);
+    }
+
+    return applyPlaceholders(affix, profile);
+  }
+
+  public static Component resolvePrefix(Profile profile, Player player) {
+    ProfilePrefixVisibility visibility = profile.getPrefixVisibility();
+    boolean visible = visibility != null && visibility.isShowPrefix();
     Group group = profile.getGroup();
-    Component prefix = Component.empty();
 
-    if (group != null && group.getPrefix() != null) {
-      prefix =
-          group.getPrefixTemplate() != null
-              ? renderTemplate(group.getPrefixTemplate(), profile, null, player)
-              : applyPapiPlaceholders(group.getPrefix(), player);
-    }
+    String groupTemplate = group != null ? group.getPrefixTemplate() : null;
+    Component groupPrefix = group != null ? group.getPrefix() : null;
 
-    if (profile.getPrefix() != null) {
-      prefix = applyPapiPlaceholders(profile.getPrefix(), player);
-    }
-
-    return applyDivisionPlaceholders(prefix, profile);
+    return resolveAffix(profile, player, visible, groupTemplate, groupPrefix, profile.getPrefix());
   }
 
   public static Component resolveSuffix(Profile profile) {
     return resolveSuffix(profile, null);
   }
 
-  /**
-   * Resolves the group/profile suffix for {@code profile} — see {@link #resolvePrefix(Profile,
-   * Player)} for PAPI behaviour.
-   */
   public static Component resolveSuffix(Profile profile, Player player) {
     ProfilePrefixVisibility visibility = profile.getPrefixVisibility();
-    if (visibility == null || !visibility.isShowSuffix()) {
-      return Component.empty();
-    }
-
+    boolean visible = visibility != null && visibility.isShowSuffix();
     Group group = profile.getGroup();
-    Component suffix = Component.empty();
 
-    if (group != null && group.getSuffix() != null) {
-      suffix =
-          group.getSuffixTemplate() != null
-              ? renderTemplate(group.getSuffixTemplate(), profile, null, player)
-              : applyPapiPlaceholders(group.getSuffix(), player);
-    }
+    String groupTemplate = group != null ? group.getSuffixTemplate() : null;
+    Component groupSuffix = group != null ? group.getSuffix() : null;
 
-    if (profile.getSuffix() != null) {
-      suffix = applyPapiPlaceholders(profile.getSuffix(), player);
-    }
-
-    return applyDivisionPlaceholders(suffix, profile);
+    return resolveAffix(profile, player, visible, groupTemplate, groupSuffix, profile.getSuffix());
   }
 
   public static Component resolveName(Profile profile, String playerName) {
     return resolveName(profile, playerName, null, null);
   }
 
-  /**
-   * Resolves the display name component for {@code profile} with full PlaceholderAPI support. When
-   * {@code player} is non-null, PAPI expansions present in the name template (e.g. {@code
-   * %luckperms_prefix%}) are resolved on the raw string before MiniMessage parsing, matching the
-   * behaviour of {@link #resolvePrefix(Profile, Player)} and {@link #resolveSuffix(Profile,
-   * Player)}.
-   *
-   * @param player Online player used for PAPI resolution; may be {@code null}.
-   * @param prefixColor When non-null, applied as the name color if the resolved name has no
-   *     explicit color, letting the name inherit the trailing prefix colour.
-   */
   public static Component resolveName(
       Profile profile, String playerName, Player player, TextColor prefixColor) {
     Group group = profile.getGroup();
+    String safeName = playerName != null ? playerName : "";
 
     Component nameComponent;
     if (profile.getNameTemplate() != null && !profile.getNameTemplate().isEmpty()) {
-      nameComponent = renderTemplate(profile.getNameTemplate(), profile, playerName, player);
+      nameComponent = renderTemplate(profile.getNameTemplate(), profile, safeName, player);
     } else if (group != null && group.getNameTemplate() != null) {
-      nameComponent = renderTemplate(group.getNameTemplate(), profile, playerName, player);
+      nameComponent = renderTemplate(group.getNameTemplate(), profile, safeName, player);
     } else if (group != null && group.getNameFormat() != null) {
-      nameComponent =
-          applyPlayerPlaceholders(
-              applyDivisionPlaceholders(group.getNameFormat(), profile), playerName);
+      nameComponent = applyPlaceholders(group.getNameFormat(), profile, safeName);
     } else {
-      nameComponent = Component.text(playerName == null ? "" : playerName, NamedTextColor.GRAY);
+      nameComponent = Component.text(safeName, NamedTextColor.GRAY);
     }
 
     if (prefixColor != null && findFirstExplicitColor(nameComponent) == null) {
@@ -302,17 +258,10 @@ public final class NameFormatUtil {
   }
 
   public static Component resolveFullName(Profile profile, String playerName) {
-    return resolvePrefix(profile)
-        .append(resolveName(profile, playerName))
-        .append(resolveSuffix(profile));
+    return resolveFullName(profile, playerName, null);
   }
 
-  /**
-   * Resolves the full display name with PlaceholderAPI support. PAPI is applied to prefix, name,
-   * and suffix templates when {@code player} is non-null. The name component inherits the trailing
-   * prefix color when it has no explicit color.
-   */
-  public static Component resolveFullName(Profile profile, Player player, String playerName) {
+  public static Component resolveFullName(Profile profile, String playerName, Player player) {
     Component prefix = resolvePrefix(profile, player);
     Component name = resolveName(profile, playerName, player, extractTrailingColor(prefix));
     Component suffix = resolveSuffix(profile, player);
