@@ -22,6 +22,7 @@ import dev.lokspel.practice.manager.leaderboard.types.LbSecondaryType;
 import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.manager.profile.group.Group;
+import dev.lokspel.practice.manager.profile.statistics.FfaStats;
 import dev.lokspel.practice.manager.queue.QueueManager;
 import java.util.ArrayList;
 import java.util.Map;
@@ -537,6 +538,61 @@ public class PlayerExpansion extends PlaceholderExpansion implements Relational 
             case "best":
               if (input.length == 3 && input[2].equals("killstreak")) {
                 return String.valueOf(statistic.getBestKillStreak());
+              }
+              break;
+            // ffa_session_...
+            case "session":
+              if (input.length == 3) {
+                switch (input[2]) {
+                  case "kills" -> {
+                    return String.valueOf(statistic.getKills());
+                  }
+                  case "deaths" -> {
+                    return String.valueOf(statistic.getDeaths());
+                  }
+                  case "streak" -> {
+                    return String.valueOf(statistic.getKillStreak());
+                  }
+                  default -> {}
+                }
+              } else if (input.length == 4
+                  && input[2].equals("best")
+                  && input[3].equals("streak")) {
+                return String.valueOf(statistic.getBestKillStreak());
+              }
+              break;
+
+            default:
+              break;
+          }
+        }
+
+        Profile ffaProfile =
+            player != null ? ProfileManager.getInstance().getProfile(player) : null;
+        if (ffaProfile != null) {
+          FfaStats ffaStats = ffaProfile.getStats().getFfaStats();
+          switch (input[1]) {
+            // ffa_lifetime_...
+            case "lifetime":
+              if (input.length == 3) {
+                switch (input[2]) {
+                  case "kills" -> {
+                    return String.valueOf(ffaStats.getKills());
+                  }
+                  case "deaths" -> {
+                    return String.valueOf(ffaStats.getDeaths());
+                  }
+                  case "kdr" -> {
+                    return String.valueOf(ffaStats.getKdr());
+                  }
+                  default -> {}
+                }
+              }
+              break;
+            // ffa_kdr
+            case "kdr":
+              if (input.length == 2) {
+                return String.valueOf(ffaStats.getKdr());
               }
               break;
 

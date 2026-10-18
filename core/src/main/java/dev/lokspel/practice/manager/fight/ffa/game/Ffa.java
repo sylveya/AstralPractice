@@ -291,13 +291,19 @@ public class Ffa implements Spectatable, dev.lokspel.api.interfaces.Ffa {
     fightPlayers.get(player).die(deathMessage, statistics.get(player));
     Profile deadProfile = fightPlayers.get(player).getProfile();
     deadProfile.getStats().getLadderStat(players.get(player)).increaseDeaths();
+    deadProfile.getStats().getFfaStats().increaseDeaths();
     this.clearFfaCombat(player);
 
     if (killer != null && !killer.equals(player)) {
       Profile killerProfile = fightPlayers.get(killer).getProfile();
       killerProfile.getStats().getLadderStat(players.get(killer)).increaseKills();
+      killerProfile.getStats().getFfaStats().increaseKills();
 
       increaseFfaSessionKills(killer);
+      Statistic killerStat = statistics.get(killer);
+      if (killerStat != null) {
+        killerProfile.getStats().getFfaStats().updateBestKillStreak(killerStat.getBestKillStreak());
+      }
 
       playDeathEffect(killer, player);
 
@@ -312,7 +318,11 @@ public class Ffa implements Spectatable, dev.lokspel.api.interfaces.Ffa {
       if (CombatLogUtil.getInstance().isClearOnKill()) {
         this.clearFfaCombat(killer);
       }
+
+      SidebarManager.getInstance().updatePlayerSidebar(killer);
     }
+
+    SidebarManager.getInstance().updatePlayerSidebar(player);
 
     if (arena.isLobbyAfterDeath()) {
       this.removePlayer(player);
@@ -429,11 +439,17 @@ public class Ffa implements Spectatable, dev.lokspel.api.interfaces.Ffa {
 
     Profile deadProfile = fightPlayers.get(player).getProfile();
     deadProfile.getStats().getLadderStat(players.get(player)).increaseDeaths();
+    deadProfile.getStats().getFfaStats().increaseDeaths();
 
     Profile killerProfile = fightPlayers.get(attacker).getProfile();
     killerProfile.getStats().getLadderStat(players.get(attacker)).increaseKills();
+    killerProfile.getStats().getFfaStats().increaseKills();
 
     increaseFfaSessionKills(attacker);
+    Statistic attackerStat = statistics.get(attacker);
+    if (attackerStat != null) {
+      killerProfile.getStats().getFfaStats().updateBestKillStreak(attackerStat.getBestKillStreak());
+    }
 
     // Finalize the quitter's session stats.
     Statistic deadStatistic = statistics.get(player);

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.lokspel.practice.manager.ladder.abstraction.playercustom.CustomLadderData;
+import dev.lokspel.practice.manager.profile.statistics.FfaStatsData;
 import dev.lokspel.practice.manager.profile.statistics.LadderStatsData;
 import dev.lokspel.practice.util.KitFileData;
 import java.util.LinkedHashMap;
@@ -271,7 +272,7 @@ public class ProfileData {
     }
   }
 
-  /** Per-ladder statistics. */
+  /** Per-ladder and FFA statistics. */
   @Getter
   @Setter
   public static class Stats {
@@ -279,5 +280,9 @@ public class ProfileData {
     /** Statistics per ladder name (lower case). */
     @JsonProperty("ladder-stats")
     private Map<String, LadderStatsData> ladderStats;
+
+    /** Statistics for FFA. */
+    @JsonProperty("ffa-stats")
+    private FfaStatsData ffaStats;
   }
 }
