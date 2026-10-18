@@ -5,7 +5,7 @@ import dev.lokspel.practice.manager.fight.match.MatchManager;
 import dev.lokspel.practice.manager.fight.util.PlayerUtil;
 import dev.lokspel.practice.manager.inventory.Inventory;
 import dev.lokspel.practice.manager.inventory.InventoryManager;
-import dev.lokspel.practice.manager.inventory.InventoryUtil;
+import dev.lokspel.practice.util.LobbyNametagUtil;
 import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.manager.profile.enums.ProfileStatus;
@@ -39,9 +39,9 @@ public final class InventoryTransitionService {
     if (AstralPractice.getInstance().isEnabled()) {
       Bukkit.getScheduler()
           .runTask(
-              AstralPractice.getInstance(), () -> InventoryUtil.setLobbyNametag(player, profile));
+              AstralPractice.getInstance(), () -> LobbyNametagUtil.setLobbyNametag(player, profile));
     } else {
-      InventoryUtil.setLobbyNametag(player, profile);
+      LobbyNametagUtil.setLobbyNametag(player, profile);
     }
 
     if (teleport) {

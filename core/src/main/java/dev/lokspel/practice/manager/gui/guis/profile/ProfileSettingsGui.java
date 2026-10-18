@@ -5,7 +5,8 @@ import dev.lokspel.practice.manager.backend.BackendUtil;
 import dev.lokspel.practice.manager.gui.Gui;
 import dev.lokspel.practice.manager.gui.GuiManager;
 import dev.lokspel.practice.manager.gui.GuiType;
-import dev.lokspel.practice.manager.inventory.InventoryUtil;
+import dev.lokspel.practice.util.InventoryUtil;
+import dev.lokspel.practice.util.LobbyNametagUtil;
 import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.manager.profile.enums.ProfilePrefixVisibility;
@@ -32,7 +33,7 @@ public class ProfileSettingsGui extends Gui {
     super(GuiType.Profile_Settings);
     this.gui.put(
         1,
-        dev.lokspel.practice.util.InventoryUtil.createInventory(
+        InventoryUtil.createInventory(
             PracticeConfig.guis()
                 .getGuis()
                 .getPlayerSettings()
@@ -307,7 +308,7 @@ public class ProfileSettingsGui extends Gui {
             ProfilePrefixVisibility newVisibility =
                 ProfilePrefixVisibility.getNext(profile.getPrefixVisibility());
             profile.setPrefixVisibility(newVisibility);
-            InventoryUtil.setLobbyNametag(player, profile);
+            LobbyNametagUtil.setLobbyNametag(player, profile);
 
             update();
             if (!player.hasPermission("ap.bypass.cooldown")) {

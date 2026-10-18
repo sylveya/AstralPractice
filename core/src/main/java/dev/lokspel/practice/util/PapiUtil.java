@@ -10,6 +10,10 @@ public final class PapiUtil {
   private PapiUtil() {}
 
   public static Component runThroughFormat(Player player, String line) {
+    return format(player, line);
+  }
+
+  public static Component format(Player player, String line) {
     if (line == null || line.isEmpty()) {
       return Component.empty();
     }
@@ -21,5 +25,14 @@ public final class PapiUtil {
     }
 
     return AstralPractice.getMiniMessage().deserialize(StringUtil.legacyToMiniMessage(line));
+  }
+
+  public static Component format(Player player, Component component) {
+    if (component == null || player == null || !SoftDependUtil.isPAPI_ENABLED) {
+      return component != null ? component : Component.empty();
+    }
+    String serialized = AstralPractice.getMiniMessage().serialize(component);
+    String resolved = PlaceholderAPI.setPlaceholders(player, serialized);
+    return AstralPractice.getMiniMessage().deserialize(StringUtil.legacyToMiniMessage(resolved));
   }
 }

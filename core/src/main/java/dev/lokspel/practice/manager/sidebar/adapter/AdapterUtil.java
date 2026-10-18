@@ -147,7 +147,7 @@ public enum AdapterUtil {
       case "NAME_SUFFIX" ->
           NameFormatUtil.resolveName(profile, player.getName(), player, null)
               .append(NameFormatUtil.resolveSuffix(profile, player));
-      default -> NameFormatUtil.resolveFullName(profile, player, player.getName());
+      default -> NameFormatUtil.resolveFullName(profile, player.getName(), player);
     };
   }
 

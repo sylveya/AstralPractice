@@ -2,7 +2,7 @@ package dev.lokspel.practice.command.singlecommands;
 
 import dev.lokspel.practice.AstralPractice;
 import dev.lokspel.practice.config.PracticeConfig;
-import dev.lokspel.practice.manager.inventory.InventoryUtil;
+import dev.lokspel.practice.util.LobbyNametagUtil;
 import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.util.Common;
@@ -39,36 +39,24 @@ public class NickCommand implements CommandExecutor, TabCompleter {
 
   private static void applyNameTemplate(Player target, String nameTemplate) {
     Profile targetProfile = ProfileManager.getInstance().getProfile(target);
-    targetProfile.setNameTemplate(NameFormatUtil.normalizePlayerNameTemplate(nameTemplate));
-    InventoryUtil.setLobbyNametag(target, targetProfile);
+    targetProfile.setNameTemplate(NameFormatUtil.normalizeTemplate(nameTemplate));
+    LobbyNametagUtil.setLobbyNametag(target, targetProfile);
   }
 
   private static boolean isTemplateKeepingRealName(Player player, String rawTemplate) {
-    String normalizedTemplate = NameFormatUtil.normalizePlayerNameTemplate(rawTemplate);
-    String plainName =
-        PLAIN_TEXT_SERIALIZER
-            .serialize(
-                NameFormatUtil.applyPlayerPlaceholders(
-                    NameFormatUtil.parseConfiguredComponent(normalizedTemplate), player.getName()))
-            .trim();
-
-    return plainName.equals(player.getName());
+    return getPlainName(rawTemplate, player.getName()).equals(player.getName());
   }
 
   private static String renderNamePreview(Player target, String rawTemplate) {
-    String normalizedTemplate = NameFormatUtil.normalizePlayerNameTemplate(rawTemplate);
+    String normalizedTemplate = NameFormatUtil.normalizeTemplate(rawTemplate);
     return AstralPractice.getMiniMessage()
-        .serialize(
-            NameFormatUtil.applyPlayerPlaceholders(
-                NameFormatUtil.parseConfiguredComponent(normalizedTemplate), target.getName()));
+        .serialize(NameFormatUtil.renderTemplate(normalizedTemplate, target.getName()));
   }
 
   private static String getPlainName(String rawTemplate, String playerName) {
-    String normalizedTemplate = NameFormatUtil.normalizePlayerNameTemplate(rawTemplate);
+    String normalizedTemplate = NameFormatUtil.normalizeTemplate(rawTemplate);
     return PLAIN_TEXT_SERIALIZER
-        .serialize(
-            NameFormatUtil.applyPlayerPlaceholders(
-                NameFormatUtil.parseConfiguredComponent(normalizedTemplate), playerName))
+        .serialize(NameFormatUtil.renderTemplate(normalizedTemplate, playerName))
         .trim();
   }
 
@@ -116,7 +104,7 @@ public class NickCommand implements CommandExecutor, TabCompleter {
       if (args.length == 1) {
         Profile profile = ProfileManager.getInstance().getProfile(player);
         profile.setNameTemplate(null);
-        InventoryUtil.setLobbyNametag(player, profile);
+        LobbyNametagUtil.setLobbyNametag(player, profile);
         Common.sendMmMessage(
             player, PracticeConfig.language().getCommand().getNick().getResetSelf());
         return true;
@@ -142,7 +130,7 @@ public class NickCommand implements CommandExecutor, TabCompleter {
 
       Profile targetProfile = ProfileManager.getInstance().getProfile(target);
       targetProfile.setNameTemplate(null);
-      InventoryUtil.setLobbyNametag(target, targetProfile);
+      LobbyNametagUtil.setLobbyNametag(target, targetProfile);
 
       Common.sendMmMessage(
           player,
