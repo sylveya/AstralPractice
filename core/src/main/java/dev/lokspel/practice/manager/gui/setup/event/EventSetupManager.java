@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 import lombok.Getter;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -114,15 +115,21 @@ public class EventSetupManager implements Listener {
       return;
     }
 
-    if (!player.getWorld().equals(ArenaWorldUtil.getArenasWorld())) {
+    Location blockLocation = block.getLocation();
+    if (ArenaWorldUtil.getArenasCopyWorld() != null
+        && blockLocation.getWorld().equals(ArenaWorldUtil.getArenasCopyWorld())) {
       Common.sendMmMessage(
-          player, PracticeConfig.language().getCommand().getSetup().getEvent().getArenasWorld());
+          player, "<red>You cannot set event corners inside the arena copy world!");
       return;
     }
 
     try {
       if (action.equals(Action.LEFT_CLICK_BLOCK)) {
-        eventData.setCuboidLoc1(block.getLocation());
+        if (eventData.getCuboidLoc2() != null
+            && !eventData.getCuboidLoc2().getWorld().equals(blockLocation.getWorld())) {
+          eventData.setCuboidLoc2(null);
+        }
+        eventData.setCuboidLoc1(blockLocation);
         Common.sendMmMessage(
             player,
             PracticeConfig.language()
@@ -132,7 +139,12 @@ public class EventSetupManager implements Listener {
                 .getSetFirstCorner()
                 .replace("%event%", eventData.getType().getName()));
       } else {
-        eventData.setCuboidLoc2(block.getLocation());
+        if (eventData.getCuboidLoc1() != null
+            && !eventData.getCuboidLoc1().getWorld().equals(blockLocation.getWorld())) {
+          Common.sendMmMessage(player, "<red>Both corners must be located in the same world!");
+          return;
+        }
+        eventData.setCuboidLoc2(blockLocation);
         Common.sendMmMessage(
             player,
             PracticeConfig.language()

@@ -37,9 +37,11 @@ public class ArenaListener implements Listener {
     Player player = e.getPlayer();
     World world = player.getWorld();
 
-    if (world.equals(ArenaWorldUtil.getArenasCopyWorld())) {
+    if (ArenaWorldUtil.getArenasCopyWorld() != null
+        && world.equals(ArenaWorldUtil.getArenasCopyWorld())) {
       e.setCancelled(true);
-    } else if (world.equals(ArenaWorldUtil.getArenasWorld())) {
+    } else if (ArenaWorldUtil.getArenasWorld() != null
+        && world.equals(ArenaWorldUtil.getArenasWorld())) {
       e.setCancelled(true);
     }
   }
@@ -87,35 +89,38 @@ public class ArenaListener implements Listener {
     World playerWorld = player.getWorld();
     boolean cancelled = false;
 
-    if (playerWorld.equals(ArenaWorldUtil.getArenasCopyWorld())) {
+    if (ArenaWorldUtil.getArenasCopyWorld() != null
+        && playerWorld.equals(ArenaWorldUtil.getArenasCopyWorld())) {
       Common.sendMmMessage(player, PracticeConfig.language().getArena().getCantEditCopies());
       return true;
-    } else if (playerWorld.equals(ArenaWorldUtil.getArenasWorld())) {
-      for (Cuboid cuboid : ArenaManager.getInstance().getArenaCuboids().keySet()) {
-        if (cuboid.contains(blockLoc)) {
-          BasicArena arena = ArenaManager.getInstance().getArenaCuboids().get(cuboid);
-          Arena mainArena = ArenaUtil.getArena(arena);
-          if (mainArena == null) {
-            return cancelled;
-          }
+    }
 
-          if (mainArena.isBuild() && !mainArena.getCopies().isEmpty()) {
-            cancelled = true;
-            Common.sendMmMessage(
-                player,
-                PracticeConfig.language()
-                    .getArena()
-                    .getCantEditArenaWithCopies()
-                    .replace("%arena%", mainArena.getDisplayName()));
-          } else if (!MatchManager.getInstance().getLiveMatchesByArena(arena).isEmpty()) {
-            cancelled = true;
-            Common.sendMmMessage(
-                player,
-                PracticeConfig.language()
-                    .getArena()
-                    .getCantEditArenaWithMatch()
-                    .replace("%arena%", mainArena.getDisplayName()));
-          }
+    for (Cuboid cuboid : ArenaManager.getInstance().getArenaCuboids().keySet()) {
+      if (cuboid.contains(blockLoc)) {
+        BasicArena arena = ArenaManager.getInstance().getArenaCuboids().get(cuboid);
+        Arena mainArena = ArenaUtil.getArena(arena);
+        if (mainArena == null) {
+          continue;
+        }
+
+        if (mainArena.isBuild() && !mainArena.getCopies().isEmpty()) {
+          cancelled = true;
+          Common.sendMmMessage(
+              player,
+              PracticeConfig.language()
+                  .getArena()
+                  .getCantEditArenaWithCopies()
+                  .replace("%arena%", mainArena.getDisplayName()));
+          break;
+        } else if (!MatchManager.getInstance().getLiveMatchesByArena(arena).isEmpty()) {
+          cancelled = true;
+          Common.sendMmMessage(
+              player,
+              PracticeConfig.language()
+                  .getArena()
+                  .getCantEditArenaWithMatch()
+                  .replace("%arena%", mainArena.getDisplayName()));
+          break;
         }
       }
     }
@@ -138,17 +143,13 @@ public class ArenaListener implements Listener {
 
   @EventHandler
   public void onWorldUnload(WorldUnloadEvent e) {
-    if (e.getWorld() == ArenaWorldUtil.getArenasWorld()) {
+    World world = e.getWorld();
+    if (ArenaWorldUtil.isArenaOrEventWorld(world)) {
       e.setCancelled(true);
       return;
     }
 
-    if (e.getWorld() == ArenaWorldUtil.getArenasCopyWorld()) {
-      e.setCancelled(true);
-      return;
-    }
-
-    if (ServerManager.getLobby() != null && ServerManager.getLobby().getWorld() == e.getWorld()) {
+    if (ServerManager.getLobby() != null && ServerManager.getLobby().getWorld() == world) {
       e.setCancelled(true);
     }
   }

@@ -18,6 +18,11 @@ public final class ArenasArg {
       return;
     }
 
+    if (ArenaWorldUtil.getArenasWorld() == null) {
+      Common.sendMmMessage(player, "<red>The default arenas world is disabled or not loaded.");
+      return;
+    }
+
     PlayerUtil.clearInventory(player);
     player.setGameMode(GameMode.CREATIVE);
     player.setAllowFlight(true);

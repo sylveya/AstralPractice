@@ -201,6 +201,15 @@ public class Cuboid implements Iterable<Block>, Cloneable, ConfigurationSerializ
   }
 
   /**
+   * Get the Cuboid's world name.
+   *
+   * @return The name of this Cuboid's world
+   */
+  public String getWorldName() {
+    return this.worldName;
+  }
+
+  /**
    * Get the size of this Cuboid along the X axis.
    *
    * @return Size of Cuboid along the X axis

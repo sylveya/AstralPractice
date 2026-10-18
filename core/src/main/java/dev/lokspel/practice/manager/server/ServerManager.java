@@ -236,8 +236,7 @@ public class ServerManager implements Listener {
       }
 
       inWorld.put(uuid, WorldEnum.LOBBY);
-    } else if (to.equals(ArenaWorldUtil.getArenasWorld())
-        || to.equals(ArenaWorldUtil.getArenasCopyWorld())) {
+    } else if (ArenaWorldUtil.isArenaOrEventWorld(to)) {
       inWorld.put(uuid, WorldEnum.ARENA);
     } else {
       if (from != null && !from.equals(WorldEnum.OTHER)) {

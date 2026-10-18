@@ -35,17 +35,16 @@ public enum FaweUtil {
     int targetX = copyFrom.getLowerX() - reference.getBlockX() + newLocation.getBlockX();
     int targetY = copyFrom.getLowerY() - reference.getBlockY() + newLocation.getBlockY();
     int targetZ = copyFrom.getLowerZ() - reference.getBlockZ() + newLocation.getBlockZ();
-    Location destination =
-        new Location(ArenaWorldUtil.getArenasCopyWorld(), targetX, targetY, targetZ);
+    Location destination = new Location(newLocation.getWorld(), targetX, targetY, targetZ);
 
     try {
       ForwardExtentCopy forwardExtentCopy =
           new ForwardExtentCopy(
-              BukkitAdapter.adapt(ArenaWorldUtil.getArenasWorld()),
+              BukkitAdapter.adapt(copyFrom.getWorld()),
               new CuboidRegion(
                   BukkitAdapter.adapt(copyFrom.getLowerNe()).toBlockPoint(),
                   BukkitAdapter.adapt(copyFrom.getUpperSw()).toBlockPoint()),
-              BukkitAdapter.adapt(ArenaWorldUtil.getArenasCopyWorld()),
+              BukkitAdapter.adapt(newLocation.getWorld()),
               BukkitAdapter.adapt(destination).toBlockPoint());
 
       forwardExtentCopy.setCopyingEntities(true);
@@ -54,7 +53,7 @@ public enum FaweUtil {
       return true;
 
     } catch (Exception e) {
-      Common.sendConsoleMmMessage("<red>" + "Error during copy-paste operation: " + e.getMessage());
+      Common.sendConsoleMmMessage("<red>Error during copy-paste operation: " + e.getMessage());
       return false;
     }
   }

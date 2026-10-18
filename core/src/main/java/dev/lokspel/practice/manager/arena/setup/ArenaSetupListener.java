@@ -358,22 +358,26 @@ public class ArenaSetupListener implements Listener {
     }
 
     Location cornerLocation = targetBlock.getLocation();
-    if (!cornerLocation.getWorld().equals(ArenaWorldUtil.getArenasWorld())) {
+    if (ArenaWorldUtil.getArenasCopyWorld() != null
+        && cornerLocation.getWorld().equals(ArenaWorldUtil.getArenasCopyWorld())) {
       Common.sendMmMessage(
-          player,
-          PracticeConfig.language()
-              .getCommand()
-              .getArena()
-              .getArguments()
-              .getCorner()
-              .getCornerWorld());
+          player, "<red>You cannot set arena corners inside the arena copy world!");
       return;
     }
 
     int cornerId = (action == Action.LEFT_CLICK_BLOCK) ? 1 : 2;
     if (cornerId == 1) {
+      if (arena.getCorner2() != null
+          && !arena.getCorner2().getWorld().equals(cornerLocation.getWorld())) {
+        arena.setCorner2(null);
+      }
       arena.setCorner1(cornerLocation);
     } else {
+      if (arena.getCorner1() != null
+          && !arena.getCorner1().getWorld().equals(cornerLocation.getWorld())) {
+        Common.sendMmMessage(player, "<red>Both corners must be located in the same world!");
+        return;
+      }
       arena.setCorner2(cornerLocation);
     }
 

@@ -40,8 +40,14 @@ public final class LobbyArg {
     } else if (args.length == 2 && args[1].equalsIgnoreCase("set")) {
       Location lobbyLocation = player.getLocation();
 
-      if (!lobbyLocation.getWorld().equals(ArenaWorldUtil.getArenasWorld())
-          && !lobbyLocation.getWorld().equals(ArenaWorldUtil.getArenasCopyWorld())) {
+      boolean inArenas =
+          ArenaWorldUtil.getArenasWorld() != null
+              && lobbyLocation.getWorld().equals(ArenaWorldUtil.getArenasWorld());
+      boolean inCopy =
+          ArenaWorldUtil.getArenasCopyWorld() != null
+              && lobbyLocation.getWorld().equals(ArenaWorldUtil.getArenasCopyWorld());
+
+      if (!inArenas && !inCopy) {
         ServerManager.getInstance().setLobby(player, lobbyLocation);
 
         Common.sendMmMessage(
