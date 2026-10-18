@@ -76,7 +76,7 @@ public class SettingsConfig {
   @JsonProperty("ARENA")
   private Arena arena = new Arena();
 
-  @Comment({"DAMAGE: 4 # You can set the damage to the material as well.", "", "Event settings"})
+  @Comment("Event settings")
   @JsonProperty("EVENT")
   private Event event = new Event();
 
