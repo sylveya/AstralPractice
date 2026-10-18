@@ -83,10 +83,12 @@ Ladder placeholders use the ladder name instead of the type:
 | %ap_ffa_session_best_streak%    | Player's best killstreak in session          |
 | %ap_ffa_killstreak%            | Player's current FFA kill streak             |
 | %ap_ffa_best_killstreak%       | Player's best FFA kill streak in the session |
-| %ap_ffa_lifetime_kills%         | Player's lifetime FFA kills                  |
-| %ap_ffa_lifetime_deaths%        | Player's lifetime FFA deaths                 |
-| %ap_ffa_lifetime_kdr%           | Player's lifetime FFA kill/death ratio       |
-| %ap_ffa_kdr%                    | Player's lifetime FFA kill/death ratio       |
+| %ap_ffa_global_kills%           | Player's global FFA kills                    |
+| %ap_ffa_global_deaths%          | Player's global FFA deaths                   |
+| %ap_ffa_global_streak%          | Player's global best FFA kill streak         |
+| %ap_ffa_global_best_streak%     | Player's global best FFA kill streak         |
+| %ap_ffa_global_kdr%             | Player's global FFA kill/death ratio         |
+| %ap_ffa_kdr%                    | Player's global FFA kill/death ratio         |
 
 ## Leaderboards
 
@@ -111,3 +113,14 @@ Format: `%ap_lb_ladder_<ladder>_<type>_<position>_<name|value>%`
 | %ap_lb_ladder_Boxing_wins_1_v%      | Win count of the #1 player in Boxing      |
 | %ap_lb_ladder_Axe_elo_3_k%          | Player name ranked #3 in elo for Axe      |
 | %ap_lb_ladder_Axe_elo_3_v%          | Elo of the #3 player in Axe               |
+
+Format: `%ap_lb_ffa_global_<type>_<position>_<name|value>%`
+
+**Available types:** `kills`, `deaths`, `streak`
+
+| PlaceholderAPI                | Description                                       |
+|-------------------------------|---------------------------------------------------|
+| %ap_lb_ffa_global_kills_1_k%  | Player name with the most FFA kills (#1)          |
+| %ap_lb_ffa_global_kills_1_v%  | Kills count of the #1 FFA player                  |
+| %ap_lb_ffa_global_streak_1_k% | Player name with the highest FFA streak (#1)      |
+| %ap_lb_ffa_global_streak_1_v% | Best streak of the #1 FFA player                  |

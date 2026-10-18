@@ -19,7 +19,6 @@ import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.manager.profile.statistics.LadderStats;
 import dev.lokspel.practice.util.StartUpCallback;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -72,6 +71,12 @@ public class LeaderboardManager implements Listener {
             if (ladder.isEnabled()) {
               updateLb(lbMainType, lbSecondaryType, ladder);
             }
+          }
+        } else if (lbMainType.equals(LbMainType.FFA_GLOBAL)) {
+          if (lbSecondaryType == LbSecondaryType.KILLS
+              || lbSecondaryType == LbSecondaryType.DEATHS
+              || lbSecondaryType == LbSecondaryType.BEST_WIN_STREAK) {
+            updateLb(lbMainType, lbSecondaryType, null);
           }
         } else {
           updateLb(lbMainType, lbSecondaryType, null);
@@ -140,8 +145,7 @@ public class LeaderboardManager implements Listener {
               if (extractor == null) {
                 Bukkit.getScheduler()
                     .runTask(
-                        AstralPractice.getInstance(),
-                        () -> callback.onLeaderboardBuildDone(Collections.emptyMap()));
+                        AstralPractice.getInstance(), () -> callback.onLeaderboardBuildDone(null));
                 return;
               }
 
@@ -203,6 +207,15 @@ public class LeaderboardManager implements Listener {
               LadderStats stat = profile.getStats().getLadderStat(ladder);
               return stat.getUnRankedBestLoseStreak() + stat.getRankedBestLoseStreak();
             };
+      };
+    }
+
+    if (mainType == LbMainType.FFA_GLOBAL) {
+      return switch (secondaryType) {
+        case KILLS -> profile -> profile.getStats().getFfaStats().getKills();
+        case DEATHS -> profile -> profile.getStats().getFfaStats().getDeaths();
+        case BEST_WIN_STREAK -> profile -> profile.getStats().getFfaStats().getBestKillStreak();
+        default -> null;
       };
     }
 
@@ -270,12 +283,15 @@ public class LeaderboardManager implements Listener {
 
   @EventHandler
   public void onFfaRemovePlayer(FfaRemovePlayerEvent e) {
-    Ffa ffa = (Ffa) e.getFfa();
-
     updateLb(LbMainType.GLOBAL, LbSecondaryType.KILLS, null);
     updateLb(LbMainType.GLOBAL, LbSecondaryType.DEATHS, null);
 
+    updateLb(LbMainType.FFA_GLOBAL, LbSecondaryType.KILLS, null);
+    updateLb(LbMainType.FFA_GLOBAL, LbSecondaryType.DEATHS, null);
+    updateLb(LbMainType.FFA_GLOBAL, LbSecondaryType.BEST_WIN_STREAK, null);
+
     // It's important to call this before the player gets removed from the FFA
+    final Ffa ffa = (Ffa) e.getFfa();
     updateLb(LbMainType.LADDER, LbSecondaryType.KILLS, ffa.getPlayers().get(e.getPlayer()));
     updateLb(LbMainType.LADDER, LbSecondaryType.DEATHS, ffa.getPlayers().get(e.getPlayer()));
   }

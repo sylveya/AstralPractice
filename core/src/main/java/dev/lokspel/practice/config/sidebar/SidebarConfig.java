@@ -378,8 +378,8 @@ public class SidebarConfig {
       "Available session placeholders:",
       "  %ffa_session_kills%, %ffa_session_deaths%, %ffa_session_streak%,"
           + " %ffa_session_best_streak%",
-      "Available lifetime placeholders:",
-      "  %ffa_lifetime_kills%, %ffa_lifetime_deaths%, %ffa_kdr%",
+      "Available global placeholders:",
+      "  %ffa_global_kills%, %ffa_global_deaths%, %ffa_global_kdr%",
       "Other placeholders: %players%, %spectators%, %arena%, %ladder%, %nextReset%, %ping%"
     })
     @JsonProperty("GAME")
@@ -400,10 +400,10 @@ public class SidebarConfig {
               "  <white>Streak: <yellow>%ffa_session_streak% <gray>(Best: "
                   + "<yellow>%ffa_session_best_streak%<gray>)",
               "",
-              "<gold><b>Lifetime",
-              "  <white>Kills: <green>%ffa_lifetime_kills% <gray>| "
-                  + "<white>Deaths: <red>%ffa_lifetime_deaths%",
-              "  <white>KDR: <yellow>%ffa_kdr%",
+              "<gold><b>Global",
+              "  <white>Kills: <green>%ffa_global_kills% <gray>| "
+                  + "<white>Deaths: <red>%ffa_global_deaths%",
+              "  <white>KDR: <yellow>%ffa_global_kdr%",
               "",
               "<gold><b>FFA Info",
               "  <white>Players: <yellow>%players%",
@@ -422,10 +422,10 @@ public class SidebarConfig {
               "  <white>Streak: <yellow>%ffa_session_streak% <gray>(Best: "
                   + "<yellow>%ffa_session_best_streak%<gray>)",
               "",
-              "<gold><b>Lifetime",
-              "  <white>Kills: <green>%ffa_lifetime_kills% <gray>| "
-                  + "<white>Deaths: <red>%ffa_lifetime_deaths%",
-              "  <white>KDR: <yellow>%ffa_kdr%",
+              "<gold><b>Global",
+              "  <white>Kills: <green>%ffa_global_kills% <gray>| "
+                  + "<white>Deaths: <red>%ffa_global_deaths%",
+              "  <white>KDR: <yellow>%ffa_global_kdr%",
               "",
               "<gold><b>FFA Info",
               "  <white>Players: <yellow>%players%",

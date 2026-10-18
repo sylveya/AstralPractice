@@ -2,6 +2,7 @@ package dev.lokspel.practice.manager.backend.database;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import dev.lokspel.practice.manager.backend.database.repository.FfaGlobalStatsRepository;
 import dev.lokspel.practice.manager.backend.database.repository.GlobalStatsRepository;
 import dev.lokspel.practice.manager.backend.database.repository.LadderStatsRepository;
 import dev.lokspel.practice.manager.backend.database.repository.MatchHistoryRepository;
@@ -21,6 +22,7 @@ public class Database {
   private final GlobalStatsRepository globalStatsRepository;
   private final LadderStatsRepository ladderStatsRepository;
   private final MatchHistoryRepository matchHistoryRepository;
+  private final FfaGlobalStatsRepository ffaGlobalStatsRepository;
 
   private Database(HikariDataSource dataSource) throws SQLException {
     this.dataSource = dataSource;
@@ -31,6 +33,7 @@ public class Database {
     this.globalStatsRepository = new GlobalStatsRepository(dataSource, executor);
     this.ladderStatsRepository = new LadderStatsRepository(dataSource, executor);
     this.matchHistoryRepository = new MatchHistoryRepository(dataSource, executor);
+    this.ffaGlobalStatsRepository = new FfaGlobalStatsRepository(dataSource, executor);
   }
 
   public static Database forMariaDb(

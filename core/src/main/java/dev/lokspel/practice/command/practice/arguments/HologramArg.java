@@ -9,6 +9,7 @@ import dev.lokspel.practice.manager.leaderboard.hologram.Hologram;
 import dev.lokspel.practice.manager.leaderboard.hologram.HologramManager;
 import dev.lokspel.practice.manager.leaderboard.hologram.HologramType;
 import dev.lokspel.practice.manager.leaderboard.hologram.SetupHologramType;
+import dev.lokspel.practice.manager.leaderboard.hologram.holograms.FfaGlobalHologram;
 import dev.lokspel.practice.manager.leaderboard.hologram.holograms.GlobalHologram;
 import dev.lokspel.practice.manager.leaderboard.hologram.holograms.LadderDynamicHologram;
 import dev.lokspel.practice.manager.leaderboard.hologram.holograms.LadderStaticHologram;
@@ -120,6 +121,9 @@ public final class HologramArg {
       case "global":
         hologramType = HologramType.GLOBAL;
         break;
+      case "ffa_global", "ffa":
+        hologramType = HologramType.FFA_GLOBAL;
+        break;
       case "ladder_static":
         hologramType = HologramType.LADDER_STATIC;
         break;
@@ -154,6 +158,7 @@ public final class HologramArg {
     Hologram hologram =
         switch (hologramType) {
           case GLOBAL -> new GlobalHologram(name, player.getLocation());
+          case FFA_GLOBAL -> new FfaGlobalHologram(name, player.getLocation());
           case LADDER_STATIC -> new LadderStaticHologram(name, player.getLocation());
           case LADDER_DYNAMIC -> new LadderDynamicHologram(name, player.getLocation());
         };
@@ -202,6 +207,7 @@ public final class HologramArg {
 
     if (args.length == 4 && args[1].equalsIgnoreCase("create")) {
       arguments.add("global");
+      arguments.add("ffa_global");
       arguments.add("ladder_static");
       arguments.add("ladder_dynamic");
       return StringUtil.copyPartialMatches(args[3], arguments, new ArrayList<>());

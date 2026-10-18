@@ -319,6 +319,15 @@ public abstract class Hologram {
     List<String> lines =
         switch (leaderboard.getMainType()) {
           case GLOBAL -> new ArrayList<>(leaderboard.getSecondaryType().getGlobalLines());
+          case FFA_GLOBAL -> {
+            List<String> ffaLines =
+                new ArrayList<>(leaderboard.getSecondaryType().getGlobalLines());
+            ffaLines.replaceAll(
+                line ->
+                    line.replace("<gold>", "<gold>FFA Global ")
+                        .replace("Win Streak", "Kill Streak"));
+            yield ffaLines;
+          }
           case LADDER -> {
             List<String> ladderLines =
                 new ArrayList<>(leaderboard.getSecondaryType().getLadderLines());

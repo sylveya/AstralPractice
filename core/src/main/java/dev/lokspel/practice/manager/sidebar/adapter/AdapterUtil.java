@@ -334,8 +334,9 @@ public enum AdapterUtil {
 
     Profile profile = ProfileManager.getInstance().getProfile(player);
     FfaStats ffaStats = profile != null ? profile.getStats().getFfaStats() : null;
-    int lifetimeKills = ffaStats != null ? ffaStats.getKills() : 0;
-    int lifetimeDeaths = ffaStats != null ? ffaStats.getDeaths() : 0;
+    int globalKills = ffaStats != null ? ffaStats.getKills() : 0;
+    int globalDeaths = ffaStats != null ? ffaStats.getDeaths() : 0;
+    int globalBestStreak = ffaStats != null ? ffaStats.getBestKillStreak() : 0;
     double kdr = ffaStats != null ? ffaStats.getKdr() : 0.0;
 
     return line.replaceText(replace("%players%", String.valueOf(ffa.getPlayers().size())))
@@ -368,15 +369,18 @@ public enum AdapterUtil {
         .replaceText(replace("%bestKillStreak%", String.valueOf(sessionBestStreak)))
         .replaceText(replace("%best_killstreak%", String.valueOf(sessionBestStreak)))
         .replaceText(replace("%best_streak%", String.valueOf(sessionBestStreak)))
-        // Lifetime placeholders
-        .replaceText(replace("%ffa_lifetime_kills%", String.valueOf(lifetimeKills)))
-        .replaceText(replace("%lifetime_kills%", String.valueOf(lifetimeKills)))
-        .replaceText(replace("%ffa_lifetime_deaths%", String.valueOf(lifetimeDeaths)))
-        .replaceText(replace("%lifetime_deaths%", String.valueOf(lifetimeDeaths)))
+        // Global FFA placeholders
+        .replaceText(replace("%ffa_global_kills%", String.valueOf(globalKills)))
+        .replaceText(replace("%ffa_lifetime_kills%", String.valueOf(globalKills)))
+        .replaceText(replace("%ffa_global_deaths%", String.valueOf(globalDeaths)))
+        .replaceText(replace("%ffa_lifetime_deaths%", String.valueOf(globalDeaths)))
+        .replaceText(replace("%ffa_global_streak%", String.valueOf(globalBestStreak)))
+        .replaceText(replace("%ffa_global_best_streak%", String.valueOf(globalBestStreak)))
+        .replaceText(replace("%ffa_lifetime_streak%", String.valueOf(globalBestStreak)))
+        .replaceText(replace("%ffa_lifetime_best_streak%", String.valueOf(globalBestStreak)))
+        .replaceText(replace("%ffa_global_kdr%", String.valueOf(kdr)))
         .replaceText(replace("%ffa_kdr%", String.valueOf(kdr)))
-        .replaceText(replace("%ffa_lifetime_kdr%", String.valueOf(kdr)))
-        .replaceText(replace("%lifetime_kdr%", String.valueOf(kdr)))
-        .replaceText(replace("%kdr%", String.valueOf(kdr)));
+        .replaceText(replace("%ffa_lifetime_kdr%", String.valueOf(kdr)));
   }
 
   public static Component replaceFfaSpecPlaceholders(Component line, Ffa ffa) {
