@@ -50,8 +50,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.entity.ThrownExpBottle;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -300,6 +302,18 @@ public class LadderTypeListener implements Listener {
               || item.getType().equals(Material.SPLASH_POTION)
               || item.getType().isEdible())) {
         e.setCancelled(false);
+      }
+    }
+
+    if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+      Block clicked = e.getClickedBlock();
+      ItemStack item = e.getItem();
+
+      if (clicked != null
+          && clicked.getType().name().contains("COPPER")
+          && item != null
+          && item.getType().name().endsWith("_AXE")) {
+        e.setUseItemInHand(Event.Result.DENY);
       }
     }
 

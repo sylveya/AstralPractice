@@ -33,6 +33,7 @@ import org.bukkit.entity.EnderCrystal;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -54,6 +55,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.inventory.ItemStack;
 
 /**
  * FFA-specific event listener.
@@ -125,6 +127,13 @@ public class FfaListener implements Listener {
 
     Block clickedBlock = e.getClickedBlock();
     if (action.equals(Action.RIGHT_CLICK_BLOCK) && clickedBlock != null) {
+      ItemStack item = e.getItem();
+      if (clickedBlock.getType().name().contains("COPPER")
+          && item != null
+          && item.getType().name().endsWith("_AXE")) {
+        e.setUseItemInHand(Event.Result.DENY);
+      }
+
       if (ffa.isBuild()) {
         SpectatorCrystalPlacementUtil.clearSpectatorsBlockingCrystalPlacement(
             e, ffa.getArena().getCuboid());
