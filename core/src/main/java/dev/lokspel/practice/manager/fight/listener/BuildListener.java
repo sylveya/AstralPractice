@@ -627,15 +627,12 @@ public class BuildListener implements Listener {
   @EventHandler
   public void onEntityExplode(EntityExplodeEvent e) {
     Spectatable spectatable = getByExplosion(e.getLocation(), e.blockList());
+    if (spectatable == null || !spectatable.isBuild()) {
+      e.blockList().clear();
+      return;
+    }
 
     if (e.getEntity() instanceof Creeper) {
-      if (spectatable == null) {
-        return;
-      }
-      if (!spectatable.isBuild()) {
-        e.blockList().clear();
-        return;
-      }
       // For matches: only allow creeper damage during a LIVE round
       if (spectatable instanceof Match match) {
         if (!match.getCurrentRound().getRoundStatus().equals(RoundStatus.LIVE)) {
@@ -648,9 +645,6 @@ public class BuildListener implements Listener {
       return;
     }
 
-    if (spectatable == null) {
-      return;
-    }
     handleExplosion(e, e.blockList(), spectatable);
   }
 
@@ -1390,6 +1384,10 @@ public class BuildListener implements Listener {
   @EventHandler
   public void onBlockExplode(BlockExplodeEvent e) {
     Spectatable spectatable = getByExplosion(e.getBlock().getLocation(), e.blockList());
+    if (spectatable == null || !spectatable.isBuild()) {
+      e.blockList().clear();
+      return;
+    }
     handleExplosion(e, e.blockList(), spectatable);
   }
 }

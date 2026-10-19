@@ -7,9 +7,6 @@ import com.destroystokyo.paper.event.player.PlayerPickupExperienceEvent;
 import dev.lokspel.practice.AstralPractice;
 import dev.lokspel.practice.config.PracticeConfig;
 import dev.lokspel.practice.manager.arena.arenas.interfaces.BasicArena;
-import dev.lokspel.practice.manager.fight.event.EventManager;
-import dev.lokspel.practice.manager.fight.event.events.duel.brackets.Brackets;
-import dev.lokspel.practice.manager.fight.event.interfaces.Event;
 import dev.lokspel.practice.manager.fight.match.Match;
 import dev.lokspel.practice.manager.fight.match.MatchManager;
 import dev.lokspel.practice.manager.fight.match.enums.RoundStatus;
@@ -53,7 +50,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.entity.ThrownExpBottle;
-import org.bukkit.entity.WindCharge;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -235,12 +231,8 @@ public class LadderTypeListener implements Listener {
         Profile profile = ProfileManager.getInstance().getProfile(player);
         if (profile.getStatus().equals(ProfileStatus.MATCH)) {
           Match match = MatchManager.getInstance().getLiveMatchByPlayer(player);
-          if (match != null) {
-            if (!match.getLadder().isBuild()) {
-              Common.sendMmMessage(
-                  player, PracticeConfig.language().getMatch().getOnlyThrowExpBottles());
-              e.setCancelled(true);
-            }
+          if (match != null && !match.getCurrentRound().getRoundStatus().equals(RoundStatus.LIVE)) {
+            e.setCancelled(true);
           }
         }
       }
@@ -979,37 +971,6 @@ public class LadderTypeListener implements Listener {
 
         default -> {}
       }
-    }
-  }
-
-  @EventHandler
-  public void onWindCharge(ProjectileLaunchEvent e) {
-    if (!(e.getEntity() instanceof WindCharge)) {
-      return;
-    }
-
-    if (!(e.getEntity().getShooter() instanceof Player player)) {
-      return;
-    }
-
-    Profile profile = ProfileManager.getInstance().getProfile(player);
-    switch (profile.getStatus()) {
-      case MATCH -> {
-        Match match = MatchManager.getInstance().getLiveMatchByPlayer(player);
-        if (match != null && !match.getLadder().isBuild()) {
-          Common.sendMmMessage(player, PracticeConfig.language().getMatch().getOnlyChargeWind());
-          e.setCancelled(true);
-        }
-      }
-      case EVENT -> {
-        Event event = EventManager.getInstance().getEventByPlayer(player);
-        if (event instanceof Brackets) {
-          Common.sendMmMessage(player, PracticeConfig.language().getMatch().getOnlyChargeWind());
-          e.setCancelled(true);
-        }
-      }
-
-      default -> {}
     }
   }
 
