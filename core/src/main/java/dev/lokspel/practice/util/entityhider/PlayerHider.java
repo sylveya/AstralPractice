@@ -19,7 +19,7 @@ import dev.lokspel.practice.manager.profile.enums.ProfileStatus;
 import dev.lokspel.practice.manager.server.ServerManager;
 import dev.lokspel.practice.manager.server.WorldEnum;
 import dev.lokspel.practice.util.Common;
-import dev.lokspel.practice.util.NameFormatUtil;
+import dev.lokspel.practice.util.format.NameFormatUtil;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;

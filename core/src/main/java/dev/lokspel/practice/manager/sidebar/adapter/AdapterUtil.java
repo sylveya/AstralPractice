@@ -19,7 +19,7 @@ import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.manager.profile.statistics.FfaStats;
 import dev.lokspel.practice.util.Common;
-import dev.lokspel.practice.util.NameFormatUtil;
+import dev.lokspel.practice.util.format.NameFormatUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.format.NamedTextColor;

@@ -5,8 +5,8 @@ import dev.lokspel.practice.manager.party.Party;
 import dev.lokspel.practice.manager.party.PartyManager;
 import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
-import dev.lokspel.practice.util.ChatFormatUtil;
 import dev.lokspel.practice.util.Common;
+import dev.lokspel.practice.util.format.ChatFormatUtil;
 import java.util.Arrays;
 import org.bukkit.entity.Player;
 

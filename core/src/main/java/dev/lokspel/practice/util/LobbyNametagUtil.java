@@ -7,6 +7,7 @@ import dev.lokspel.practice.manager.nametag.NametagManager;
 import dev.lokspel.practice.manager.nametag.TabIntegration;
 import dev.lokspel.practice.manager.nametag.TeamPacketBlocker;
 import dev.lokspel.practice.manager.profile.Profile;
+import dev.lokspel.practice.util.format.NameFormatUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;

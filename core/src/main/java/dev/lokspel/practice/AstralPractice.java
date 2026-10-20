@@ -91,12 +91,12 @@ import dev.lokspel.practice.manager.profile.cosmetics.CosmeticsPermissionManager
 import dev.lokspel.practice.manager.server.ServerManager;
 import dev.lokspel.practice.manager.sidebar.SidebarManager;
 import dev.lokspel.practice.util.Common;
-import dev.lokspel.practice.util.MiniMessageTagResolver;
 import dev.lokspel.practice.util.SoftDependUtil;
 import dev.lokspel.practice.util.StartUpTypes;
 import dev.lokspel.practice.util.StartUpUtil;
 import dev.lokspel.practice.util.UpdateChecker;
 import dev.lokspel.practice.util.VersionChecker;
+import dev.lokspel.practice.util.minimessage.MiniMessageUtil;
 import dev.lokspel.practice.util.placeholderapi.PlayerExpansion;
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
 import java.io.File;
@@ -155,7 +155,7 @@ public final class AstralPractice extends JavaPlugin {
   private final Map<StartUpTypes, Boolean> startUpProgress = new EnumMap<>(StartUpTypes.class);
 
   @Getter private static AstralPractice instance;
-  @Getter private static MiniMessage miniMessage = MiniMessageTagResolver.createMiniMessage();
+  @Getter private static MiniMessage miniMessage = MiniMessageUtil.createMiniMessage();
   @Getter private static EntityHider entityHider;
   @Getter private static ArenaCopyUtilListener arenaCopyUtilListener;
 
@@ -189,7 +189,7 @@ public final class AstralPractice extends JavaPlugin {
   public void onEnable() {
     instance = this;
 
-    miniMessage = MiniMessageTagResolver.createMiniMessage();
+    miniMessage = MiniMessageUtil.createMiniMessage();
     entityHider = new EntityHider(this, EntityHider.Policy.BLACKLIST);
     arenaCopyUtilListener = new ArenaCopyUtilListener();
 

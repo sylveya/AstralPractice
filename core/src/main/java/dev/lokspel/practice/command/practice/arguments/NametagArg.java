@@ -5,7 +5,7 @@ import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.util.Common;
 import dev.lokspel.practice.util.LobbyNametagUtil;
-import dev.lokspel.practice.util.NameFormatUtil;
+import dev.lokspel.practice.util.format.NameFormatUtil;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.Bukkit;
