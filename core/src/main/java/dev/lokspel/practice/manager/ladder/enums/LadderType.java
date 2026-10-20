@@ -4,6 +4,7 @@ import dev.lokspel.practice.config.PracticeConfig;
 import dev.lokspel.practice.config.language.LadderTypeMessages;
 import dev.lokspel.practice.config.language.LanguageConfig.Ladder.LadderTypes;
 import dev.lokspel.practice.manager.gui.setup.ladder.laddersettings.settings.SettingType;
+import dev.lokspel.practice.manager.ladder.abstraction.normal.NormalLadder;
 import dev.lokspel.practice.manager.ladder.type.Basic;
 import dev.lokspel.practice.manager.ladder.type.BattleRush;
 import dev.lokspel.practice.manager.ladder.type.BedWars;
@@ -20,6 +21,7 @@ import dev.lokspel.practice.manager.ladder.type.Spleef;
 import dev.lokspel.practice.manager.ladder.type.Sumo;
 import dev.lokspel.practice.manager.ladder.type.TntSumo;
 import dev.lokspel.practice.util.Common;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.function.Function;
 import lombok.Getter;
@@ -192,7 +194,7 @@ public enum LadderType {
   @Getter private final Material icon;
   @Getter private final boolean build;
   @Getter private final boolean isPartyFfaSupported;
-  @Getter private final Class<?> classInstance;
+  @Getter private final Class<? extends NormalLadder> classInstance;
   @Getter private final List<SettingType> settingTypes;
   @Getter private final boolean bed;
   @Getter private final boolean portal;
@@ -214,6 +216,23 @@ public enum LadderType {
 
   public List<String> getDescription() {
     return Common.mmToNormal(getMessages().getDescription());
+  }
+
+  /**
+   * Creates an instance of this type, loading its {@code ladders/<name>.yml} file when it exists.
+   *
+   * @param name the ladder's name
+   * @return the created ladder
+   */
+  public NormalLadder create(String name) {
+    try {
+      return classInstance.getConstructor(String.class, LadderType.class).newInstance(name, this);
+    } catch (NoSuchMethodException
+        | InvocationTargetException
+        | InstantiationException
+        | IllegalAccessException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   private LadderTypeMessages getMessages() {

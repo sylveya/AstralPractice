@@ -12,6 +12,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 import me.whereareiam.configura.Configura;
 import me.whereareiam.configura.exception.ConfigException;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -99,7 +100,7 @@ public enum DataFiles {
    * @param empty creates the model of a missing file
    * @return the bound or new model
    */
-  public static <T> T readOrCreate(String file, Class<T> type, Supplier<T> empty) {
+  public static <T> @NotNull T readOrCreate(String file, Class<T> type, Supplier<T> empty) {
     T data = read(file, type);
     return data != null ? data : empty.get();
   }

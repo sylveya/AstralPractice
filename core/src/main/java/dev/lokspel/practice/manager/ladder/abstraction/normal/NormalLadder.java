@@ -68,6 +68,10 @@ public abstract class NormalLadder extends Ladder {
     ladderFile.delete();
   }
 
+  public void copyData(String name) {
+    ladderFile.copyTo(name);
+  }
+
   public boolean isReadyToEnable() {
     return icon != null && kitData.isSet();
   }

@@ -24,11 +24,12 @@ public class AsyncPlayerPreLogin implements Listener {
       return;
     }
 
-    boolean nameTakenByOther = Bukkit.getOnlinePlayers().stream()
-        .anyMatch(
-            p ->
-                p.getName().equalsIgnoreCase(event.getName())
-                    && !p.getUniqueId().equals(event.getUniqueId()));
+    boolean nameTakenByOther =
+        Bukkit.getOnlinePlayers().stream()
+            .anyMatch(
+                p ->
+                    p.getName().equalsIgnoreCase(event.getName())
+                        && !p.getUniqueId().equals(event.getUniqueId()));
     if (nameTakenByOther) {
       event.disallow(
           AsyncPlayerPreLoginEvent.Result.KICK_OTHER,

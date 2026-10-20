@@ -3,6 +3,7 @@ package dev.lokspel.practice.manager.ladder.enums;
 import dev.lokspel.practice.config.language.LadderTypeMessages;
 import dev.lokspel.practice.config.language.LanguageConfig;
 import dev.lokspel.practice.manager.gui.setup.ladder.laddersettings.settings.SettingType;
+import dev.lokspel.practice.manager.ladder.abstraction.normal.NormalLadder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -19,7 +20,7 @@ public class LadderTypeConfig {
 
   private final Function<LanguageConfig.Ladder.LadderTypes, LadderTypeMessages> messages;
   private final Material icon;
-  private final Class<?> classInstance;
+  private final Class<? extends NormalLadder> classInstance;
 
   private boolean build = false;
   private boolean isPartyFfaSupported = true;
@@ -31,7 +32,7 @@ public class LadderTypeConfig {
   private LadderTypeConfig(
       Function<LanguageConfig.Ladder.LadderTypes, LadderTypeMessages> messages,
       Material icon,
-      Class<?> classInstance) {
+      Class<? extends NormalLadder> classInstance) {
     this.messages = messages;
     this.icon = icon;
     this.classInstance = classInstance;
@@ -48,7 +49,7 @@ public class LadderTypeConfig {
   public static LadderTypeConfig builder(
       Function<LanguageConfig.Ladder.LadderTypes, LadderTypeMessages> messages,
       Material icon,
-      Class<?> classInstance) {
+      Class<? extends NormalLadder> classInstance) {
     return new LadderTypeConfig(messages, icon, classInstance);
   }
 

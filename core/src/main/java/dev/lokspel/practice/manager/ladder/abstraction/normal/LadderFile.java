@@ -355,6 +355,13 @@ public class LadderFile {
     DataFiles.delete(file);
   }
 
+  /** Writes the ladder's file again under another name, disabled. */
+  public void copyTo(String name) {
+    data.setEnabled(false);
+    data.setName(name);
+    DataFiles.write("ladders/" + name.toLowerCase() + ".yml", data);
+  }
+
   private void writeKit(KitData kitData) {
     // Like before, a part of the kit that is not set leaves the file's value as it is.
     if (kitData.getStorage() != null) {

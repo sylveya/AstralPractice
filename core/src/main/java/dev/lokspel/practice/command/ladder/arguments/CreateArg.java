@@ -11,8 +11,6 @@ public final class CreateArg {
 
   private CreateArg() {}
 
-  private static final int MAX_LADDERS = PracticeConfig.settings().getSetup().getMaxLadders();
-
   public static void run(Player player, String label, String[] args) {
     if (!player.hasPermission("ap.setup")) {
       Common.sendMmMessage(
@@ -33,7 +31,7 @@ public final class CreateArg {
       return;
     }
 
-    if (MAX_LADDERS > 0 && LadderManager.getInstance().getLadders().size() >= MAX_LADDERS) {
+    if (LadderManager.getInstance().isFull()) {
       Common.sendMmMessage(
           player,
           PracticeConfig.language()
@@ -42,7 +40,8 @@ public final class CreateArg {
               .getArguments()
               .getCreate()
               .getReachedMax()
-              .replace("%max%", String.valueOf(MAX_LADDERS)));
+              .replace(
+                  "%max%", String.valueOf(PracticeConfig.settings().getSetup().getMaxLadders())));
       return;
     }
 
@@ -56,7 +55,7 @@ public final class CreateArg {
     new LadderCreateGui(name).open(player);
   }
 
-  private static String checkName(String input) {
+  public static String checkName(String input) {
     if (input.isEmpty()) {
       return PracticeConfig.language().getLadder().getCreate().getNoName();
     } else if (input.contains(" ")) {
