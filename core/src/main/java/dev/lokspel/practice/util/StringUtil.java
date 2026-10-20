@@ -129,7 +129,7 @@ public final class StringUtil {
     return containsPattern(text, blockedPattern);
   }
 
-  public static boolean containsPattern(String text, String regex) {
+  private static boolean containsPattern(String text, String regex) {
     if (text == null || text.isEmpty() || regex == null || regex.isEmpty()) {
       return false;
     }

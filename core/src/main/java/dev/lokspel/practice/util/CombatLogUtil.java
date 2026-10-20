@@ -200,7 +200,7 @@ public class CombatLogUtil {
    * Returns the remaining combat time in seconds for {@code player}, rounded up, or {@code 0} if
    * not in combat.
    */
-  public int getRemainingSeconds(Player player) {
+  private int getRemainingSeconds(Player player) {
     Long expiry = getUnexpiredExpiry(player);
     if (expiry == null) {
       return 0;

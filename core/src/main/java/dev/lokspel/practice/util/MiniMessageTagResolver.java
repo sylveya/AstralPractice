@@ -47,7 +47,7 @@ public final class MiniMessageTagResolver {
   }
 
   /** Creates a resolver for custom player-head tags. */
-  public static TagResolver createResolver() {
+  private static TagResolver createResolver() {
     return new HeadTagResolver();
   }
 

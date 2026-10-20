@@ -120,7 +120,7 @@ public class PracticeAdapter implements SidebarAdapter {
 
   @Override
   public Component getTitle(Player player) {
-    return PapiUtil.runThroughFormat(player, PracticeConfig.sidebar().getTitle());
+    return PapiUtil.format(player, PracticeConfig.sidebar().getTitle());
   }
 
   @Override
@@ -159,7 +159,7 @@ public class PracticeAdapter implements SidebarAdapter {
     if (party == null) {
       for (String line : orEmpty(config.getLobby().getNormal())) {
         Component component =
-            PapiUtil.runThroughFormat(player, line)
+            PapiUtil.format(player, line)
                 .replaceText(
                     TextReplacementConfig.builder()
                         .match("%onlinePlayers%")
@@ -197,7 +197,7 @@ public class PracticeAdapter implements SidebarAdapter {
     } else {
       for (String line : orEmpty(config.getLobby().getParty())) {
         Component component =
-            PapiUtil.runThroughFormat(player, line)
+            PapiUtil.format(player, line)
                 .replaceText(
                     TextReplacementConfig.builder()
                         .match("%onlinePlayers%")
@@ -297,7 +297,7 @@ public class PracticeAdapter implements SidebarAdapter {
               : config.getLobby().getDuelQueue();
       for (String line : orEmpty(duelQueueLines)) {
         sidebar.add(
-            PapiUtil.runThroughFormat(player, line)
+            PapiUtil.format(player, line)
                 .replaceText(
                     TextReplacementConfig.builder()
                         .match("%onlinePlayers%")
@@ -363,7 +363,7 @@ public class PracticeAdapter implements SidebarAdapter {
     } else if (hostedCustomKitQueue != null) {
       for (String line : orEmpty(config.getLobby().getCustomKitQueue().getHosting())) {
         sidebar.add(
-            PapiUtil.runThroughFormat(player, line)
+            PapiUtil.format(player, line)
                 .replaceText(
                     TextReplacementConfig.builder()
                         .match("%onlinePlayers%")
@@ -420,7 +420,7 @@ public class PracticeAdapter implements SidebarAdapter {
     } else if (customKitJoinSearch != null) {
       for (String line : orEmpty(config.getLobby().getCustomKitQueue().getJoinSearch())) {
         sidebar.add(
-            PapiUtil.runThroughFormat(player, line)
+            PapiUtil.format(player, line)
                 .replaceText(
                     TextReplacementConfig.builder()
                         .match("%onlinePlayers%")
@@ -481,7 +481,7 @@ public class PracticeAdapter implements SidebarAdapter {
       if (eventQueueTimeLeft != null) {
         for (String line : orEmpty(config.getLobby().getEventQueue().getStarting())) {
           sidebar.add(
-              PapiUtil.runThroughFormat(player, line)
+              PapiUtil.format(player, line)
                   .replaceText(
                       TextReplacementConfig.builder()
                           .match("%eventName%")
@@ -522,7 +522,7 @@ public class PracticeAdapter implements SidebarAdapter {
       } else {
         for (String line : orEmpty(config.getLobby().getEventQueue().getIdle())) {
           sidebar.add(
-              PapiUtil.runThroughFormat(player, line)
+              PapiUtil.format(player, line)
                   .replaceText(
                       TextReplacementConfig.builder()
                           .match("%eventName%")
@@ -592,8 +592,7 @@ public class PracticeAdapter implements SidebarAdapter {
                 case PARTY_VS_PARTY -> config.getMatch().getPartyVsParty();
               })) {
         sidebar.add(
-            AdapterUtil.replaceMatchPlaceholders(
-                player, PapiUtil.runThroughFormat(player, line), match));
+            AdapterUtil.replaceMatchPlaceholders(player, PapiUtil.format(player, line), match));
       }
     }
   }
@@ -610,8 +609,7 @@ public class PracticeAdapter implements SidebarAdapter {
 
     for (String line : ladderLines(config.getMatch().getLadder(), match)) {
       Component component =
-          AdapterUtil.replaceMatchPlaceholders(
-              player, PapiUtil.runThroughFormat(player, line), duel);
+          AdapterUtil.replaceMatchPlaceholders(player, PapiUtil.format(player, line), duel);
 
       switch (ladderType) {
         case BOXING:
@@ -709,8 +707,7 @@ public class PracticeAdapter implements SidebarAdapter {
 
     for (String line : ladderLines(config.getMatch().getLadder(), match)) {
       Component component =
-          AdapterUtil.replaceMatchPlaceholders(
-              player, PapiUtil.runThroughFormat(player, line), partyFfa);
+          AdapterUtil.replaceMatchPlaceholders(player, PapiUtil.format(player, line), partyFfa);
 
       if (ladderType == LadderType.BOXING) {
         for (int i = 1; i <= 3; i++) {
@@ -754,8 +751,7 @@ public class PracticeAdapter implements SidebarAdapter {
 
     for (String line : ladderLines(config.getMatch().getLadder(), match)) {
       Component component =
-          AdapterUtil.replaceMatchPlaceholders(
-              player, PapiUtil.runThroughFormat(player, line), partySplit);
+          AdapterUtil.replaceMatchPlaceholders(player, PapiUtil.format(player, line), partySplit);
 
       component =
           switch (ladderType) {
@@ -837,8 +833,7 @@ public class PracticeAdapter implements SidebarAdapter {
 
     for (String line : ladderLines(config.getMatch().getLadder(), match)) {
       Component component =
-          AdapterUtil.replaceMatchPlaceholders(
-              player, PapiUtil.runThroughFormat(player, line), partyVsParty);
+          AdapterUtil.replaceMatchPlaceholders(player, PapiUtil.format(player, line), partyVsParty);
 
       component =
           switch (ladderType) {
@@ -895,15 +890,11 @@ public class PracticeAdapter implements SidebarAdapter {
 
     if (ffa.getBuildRollback() != null) {
       for (String line : orEmpty(config.getFfa().getGame().getBuild())) {
-        sidebar.add(
-            AdapterUtil.replaceFfaPlaceholders(
-                player, PapiUtil.runThroughFormat(player, line), ffa));
+        sidebar.add(AdapterUtil.replaceFfaPlaceholders(player, PapiUtil.format(player, line), ffa));
       }
     } else {
       for (String line : orEmpty(config.getFfa().getGame().getNonBuild())) {
-        sidebar.add(
-            AdapterUtil.replaceFfaPlaceholders(
-                player, PapiUtil.runThroughFormat(player, line), ffa));
+        sidebar.add(AdapterUtil.replaceFfaPlaceholders(player, PapiUtil.format(player, line), ffa));
       }
     }
   }
@@ -920,7 +911,7 @@ public class PracticeAdapter implements SidebarAdapter {
         Lms lms = (Lms) event;
         for (String line : eventLines) {
           sidebar.add(
-              PapiUtil.runThroughFormat(player, line)
+              PapiUtil.format(player, line)
                   .replaceText(
                       TextReplacementConfig.builder()
                           .matchLiteral("%players%")
@@ -952,7 +943,7 @@ public class PracticeAdapter implements SidebarAdapter {
 
         for (String line : eventLines) {
           sidebar.add(
-              PapiUtil.runThroughFormat(player, line)
+              PapiUtil.format(player, line)
                   .replaceText(
                       TextReplacementConfig.builder()
                           .matchLiteral("%topPlayer%")
@@ -989,7 +980,7 @@ public class PracticeAdapter implements SidebarAdapter {
         TntTag tntTag = (TntTag) event;
         for (String line : eventLines) {
           sidebar.add(
-              PapiUtil.runThroughFormat(player, line)
+              PapiUtil.format(player, line)
                   .replaceText(
                       TextReplacementConfig.builder()
                           .matchLiteral("%explosionTime%")
@@ -1011,7 +1002,7 @@ public class PracticeAdapter implements SidebarAdapter {
         if (bracketFight != null) {
           for (String line : eventLines) {
             sidebar.add(
-                PapiUtil.runThroughFormat(player, line)
+                PapiUtil.format(player, line)
                     .replaceText(
                         TextReplacementConfig.builder()
                             .matchLiteral("%enemy%")
@@ -1044,7 +1035,7 @@ public class PracticeAdapter implements SidebarAdapter {
         } else {
           for (String line : eventLines(config.getSpectate().getEvent(), event)) {
             sidebar.add(
-                PapiUtil.runThroughFormat(player, line)
+                PapiUtil.format(player, line)
                     .replaceText(
                         TextReplacementConfig.builder()
                             .matchLiteral("%players%")
@@ -1075,7 +1066,7 @@ public class PracticeAdapter implements SidebarAdapter {
         Splegg splegg = (Splegg) event;
         for (String line : eventLines) {
           sidebar.add(
-              PapiUtil.runThroughFormat(player, line)
+              PapiUtil.format(player, line)
                   .replaceText(
                       TextReplacementConfig.builder()
                           .matchLiteral("%players%")
@@ -1110,7 +1101,7 @@ public class PracticeAdapter implements SidebarAdapter {
         Juggernaut juggernaut = (Juggernaut) event;
         for (String line : eventLines) {
           sidebar.add(
-              PapiUtil.runThroughFormat(player, line)
+              PapiUtil.format(player, line)
                   .replaceText(
                       TextReplacementConfig.builder()
                           .matchLiteral("%players%")
@@ -1148,13 +1139,11 @@ public class PracticeAdapter implements SidebarAdapter {
     } else if (spectatable instanceof Ffa ffa) {
       if (ffa.getBuildRollback() != null) {
         for (String line : orEmpty(config.getFfa().getSpectate().getBuild())) {
-          sidebar.add(
-              AdapterUtil.replaceFfaSpecPlaceholders(PapiUtil.runThroughFormat(player, line), ffa));
+          sidebar.add(AdapterUtil.replaceFfaSpecPlaceholders(PapiUtil.format(player, line), ffa));
         }
       } else {
         for (String line : orEmpty(config.getFfa().getSpectate().getNonBuild())) {
-          sidebar.add(
-              AdapterUtil.replaceFfaSpecPlaceholders(PapiUtil.runThroughFormat(player, line), ffa));
+          sidebar.add(AdapterUtil.replaceFfaSpecPlaceholders(PapiUtil.format(player, line), ffa));
         }
       }
     } else if (spectatable instanceof Event event) {
@@ -1212,8 +1201,7 @@ public class PracticeAdapter implements SidebarAdapter {
                 break;
             }
             sidebar.add(
-                AdapterUtil.replaceMatchSpectatePlaceholders(
-                    PapiUtil.runThroughFormat(player, line), duel));
+                AdapterUtil.replaceMatchSpectatePlaceholders(PapiUtil.format(player, line), duel));
           }
         }
         case PARTY_FFA -> {
@@ -1269,7 +1257,7 @@ public class PracticeAdapter implements SidebarAdapter {
             }
             sidebar.add(
                 AdapterUtil.replaceMatchSpectatePlaceholders(
-                    PapiUtil.runThroughFormat(player, line), partyFfa));
+                    PapiUtil.format(player, line), partyFfa));
           }
         }
         case PARTY_SPLIT -> {
@@ -1315,7 +1303,7 @@ public class PracticeAdapter implements SidebarAdapter {
             }
             sidebar.add(
                 AdapterUtil.replaceMatchSpectatePlaceholders(
-                    PapiUtil.runThroughFormat(player, line), partySplit));
+                    PapiUtil.format(player, line), partySplit));
           }
         }
         case PARTY_VS_PARTY -> {
@@ -1361,7 +1349,7 @@ public class PracticeAdapter implements SidebarAdapter {
             }
             sidebar.add(
                 AdapterUtil.replaceMatchSpectatePlaceholders(
-                    PapiUtil.runThroughFormat(player, line), partyVsParty));
+                    PapiUtil.format(player, line), partyVsParty));
           }
         }
 
@@ -1377,8 +1365,7 @@ public class PracticeAdapter implements SidebarAdapter {
                 case PARTY_VS_PARTY -> config.getSpectate().getMatch().getPartyVsParty();
               })) {
         sidebar.add(
-            AdapterUtil.replaceMatchSpectatePlaceholders(
-                PapiUtil.runThroughFormat(player, line), match));
+            AdapterUtil.replaceMatchSpectatePlaceholders(PapiUtil.format(player, line), match));
       }
     }
   }
@@ -1394,7 +1381,7 @@ public class PracticeAdapter implements SidebarAdapter {
               line.replace("%players%", String.valueOf(lms.getStartPlayerCount()))
                   .replace("%alivePlayers%", String.valueOf(lms.getPlayers().size()))
                   .replace("%duration%", lms.getDurationRunnable().getFormattedTime());
-          sidebar.add(PapiUtil.runThroughFormat(player, line));
+          sidebar.add(PapiUtil.format(player, line));
         }
       }
       case OITC -> {
@@ -1416,7 +1403,7 @@ public class PracticeAdapter implements SidebarAdapter {
                   .replace("%players%", String.valueOf(oitc.getPlayerPoints().size()))
                   .replace("%alivePlayers%", String.valueOf(oitc.getPlayers().size()))
                   .replace("%duration%", oitc.getDurationRunnable().getFormattedTime());
-          sidebar.add(PapiUtil.runThroughFormat(player, line));
+          sidebar.add(PapiUtil.format(player, line));
         }
       }
       case TNTTAG -> {
@@ -1429,7 +1416,7 @@ public class PracticeAdapter implements SidebarAdapter {
                           ? String.valueOf(tntTag.getDurationRunnable().getSeconds())
                           : "0"))
                   .replace("%alivePlayers%", String.valueOf(tntTag.getPlayers().size()));
-          sidebar.add(PapiUtil.runThroughFormat(player, line));
+          sidebar.add(PapiUtil.format(player, line));
         }
       }
       case BRACKETS, SUMO -> {
@@ -1444,7 +1431,7 @@ public class PracticeAdapter implements SidebarAdapter {
                           ? duelEvent.getDurationRunnable().getFormattedTime()
                           : "0"))
                   .replace("%round%", String.valueOf(duelEvent.getRound()));
-          sidebar.add(PapiUtil.runThroughFormat(player, line));
+          sidebar.add(PapiUtil.format(player, line));
         }
       }
       case SPLEGG -> {
@@ -1458,7 +1445,7 @@ public class PracticeAdapter implements SidebarAdapter {
                       (splegg.getDurationRunnable() != null
                           ? splegg.getDurationRunnable().getFormattedTime()
                           : "0"));
-          sidebar.add(PapiUtil.runThroughFormat(player, line));
+          sidebar.add(PapiUtil.format(player, line));
         }
       }
       case JUGGERNAUT -> {
@@ -1468,7 +1455,7 @@ public class PracticeAdapter implements SidebarAdapter {
               line.replace("%players%", String.valueOf(juggernaut.getStartPlayerCount()))
                   .replace("%alivePlayers%", String.valueOf(juggernaut.getPlayers().size() - 1))
                   .replace("%duration%", juggernaut.getDurationRunnable().getFormattedTime());
-          sidebar.add(PapiUtil.runThroughFormat(player, line));
+          sidebar.add(PapiUtil.format(player, line));
         }
       }
 
@@ -1484,7 +1471,7 @@ public class PracticeAdapter implements SidebarAdapter {
         && !group.getSidebarExtensionRaw().isEmpty()) {
       for (String rawLine : group.getSidebarExtensionRaw()) {
         Component extensionLine =
-            AdapterUtil.replaceArenaPlaceholders(PapiUtil.runThroughFormat(player, rawLine));
+            AdapterUtil.replaceArenaPlaceholders(PapiUtil.format(player, rawLine));
         sidebar.add(NameFormatUtil.applyPlaceholders(extensionLine, profile, player.getName()));
       }
     }
@@ -1502,7 +1489,7 @@ public class PracticeAdapter implements SidebarAdapter {
     }
 
     for (String rawLine : adminLines) {
-      Component line = PapiUtil.runThroughFormat(player, rawLine);
+      Component line = PapiUtil.format(player, rawLine);
       sidebar.add(AdapterUtil.replaceArenaPlaceholders(line));
     }
   }

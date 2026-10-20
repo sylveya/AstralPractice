@@ -9,10 +9,6 @@ public final class PapiUtil {
 
   private PapiUtil() {}
 
-  public static Component runThroughFormat(Player player, String line) {
-    return format(player, line);
-  }
-
   public static Component format(Player player, String line) {
     if (line == null || line.isEmpty()) {
       return Component.empty();

@@ -597,8 +597,8 @@ public class NametagManager {
 
   private Component applyNametagLines(
       Player player, Component nametag, String topLine, String bottomLine) {
-    Component top = PapiUtil.runThroughFormat(player, topLine);
-    Component bottom = PapiUtil.runThroughFormat(player, bottomLine);
+    Component top = PapiUtil.format(player, topLine);
+    Component bottom = PapiUtil.format(player, bottomLine);
     if (!top.equals(Component.empty())) {
       nametag = top.append(Component.newline()).append(nametag);
     }

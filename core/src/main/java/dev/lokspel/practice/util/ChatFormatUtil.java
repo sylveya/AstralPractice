@@ -89,7 +89,7 @@ public final class ChatFormatUtil {
 
     Component component;
     if (SoftDependUtil.isPAPI_ENABLED && viewer instanceof Player viewerPlayer) {
-      component = PapiUtil.runThroughFormat(viewerPlayer, format);
+      component = PapiUtil.format(viewerPlayer, format);
     } else {
       component =
           AstralPractice.getMiniMessage().deserialize(StringUtil.legacyToMiniMessage(format));
