@@ -191,13 +191,13 @@ public final class Common {
     return getItemDisplayNameMiniMessage(itemStack.getItemMeta());
   }
 
-  public static short getItemDamage(ItemStack itemStack) {
+  public static int getItemDamage(ItemStack itemStack) {
     if (itemStack == null || !itemStack.hasItemMeta()) {
       return 0;
     }
     ItemMeta itemMeta = itemStack.getItemMeta();
     if (itemMeta instanceof Damageable damageable) {
-      return (short) damageable.getDamage();
+      return damageable.getDamage();
     }
     return 0;
   }

@@ -126,7 +126,7 @@ public class LadderTypeGui extends Gui {
 
                 if (item.getMaterial() == null) {
                   item.setMaterial(ladderType.getIcon());
-                  item.setDamage((short) 0);
+                  item.setDamage(0);
                 }
 
                 item.replace("%ladderTypeName%", ladderType.getName());

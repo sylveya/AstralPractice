@@ -158,7 +158,7 @@ public class DivisionGui extends Gui {
       guiItem.setMaterial(division.getIconMaterial());
     }
 
-    if (guiItem.getDamage() != null) {
+    if (guiItem.getDamage() != -1) {
       guiItem.setDamage(division.getIconDamage());
     }
 

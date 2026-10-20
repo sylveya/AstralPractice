@@ -312,11 +312,9 @@ public class LadderFile {
             String[] s2 = destroyableBlock.split("::");
             ladder
                 .getDestroyableBlocks()
-                .add(new BasicItem(Material.valueOf(s2[0]), Short.parseShort(s2[1])));
+                .add(new BasicItem(Material.valueOf(s2[0]), Integer.parseInt(s2[1])));
           } else {
-            ladder
-                .getDestroyableBlocks()
-                .add(new BasicItem(Material.valueOf(destroyableBlock), (short) 0));
+            ladder.getDestroyableBlocks().add(new BasicItem(Material.valueOf(destroyableBlock), 0));
           }
         } catch (IllegalArgumentException e) {
           Common.sendConsoleMmMessage(
