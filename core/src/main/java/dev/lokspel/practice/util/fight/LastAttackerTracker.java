@@ -1,4 +1,4 @@
-package dev.lokspel.practice.util;
+package dev.lokspel.practice.util.fight;
 
 import java.util.Collection;
 import java.util.HashMap;

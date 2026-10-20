@@ -1,6 +1,7 @@
-package dev.lokspel.practice.util;
+package dev.lokspel.practice.util.kit;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import dev.lokspel.practice.util.items.ItemSerializationUtil;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;

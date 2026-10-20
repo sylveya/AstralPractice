@@ -12,7 +12,7 @@ import dev.lokspel.practice.manager.profile.cosmetics.CosmeticsData;
 import dev.lokspel.practice.manager.profile.cosmetics.CosmeticsPermissionManager;
 import dev.lokspel.practice.util.Common;
 import dev.lokspel.practice.util.InventoryUtil;
-import dev.lokspel.practice.util.ItemCreateUtil;
+import dev.lokspel.practice.util.items.ItemCreateUtil;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;

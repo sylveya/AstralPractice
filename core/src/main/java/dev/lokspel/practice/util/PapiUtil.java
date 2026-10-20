@@ -1,6 +1,7 @@
 package dev.lokspel.practice.util;
 
 import dev.lokspel.practice.AstralPractice;
+import dev.lokspel.practice.util.startup.SoftDependUtil;
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;

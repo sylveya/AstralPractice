@@ -14,7 +14,7 @@ import dev.lokspel.practice.manager.gui.GuiType;
 import dev.lokspel.practice.manager.gui.setup.arena.ArenaGuiSetupManager;
 import dev.lokspel.practice.util.Common;
 import dev.lokspel.practice.util.InventoryUtil;
-import dev.lokspel.practice.util.ItemCreateUtil;
+import dev.lokspel.practice.util.items.ItemCreateUtil;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;

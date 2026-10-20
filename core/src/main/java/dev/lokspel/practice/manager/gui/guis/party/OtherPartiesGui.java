@@ -12,7 +12,7 @@ import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.util.Common;
 import dev.lokspel.practice.util.InventoryUtil;
-import dev.lokspel.practice.util.ItemCreateUtil;
+import dev.lokspel.practice.util.items.ItemCreateUtil;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

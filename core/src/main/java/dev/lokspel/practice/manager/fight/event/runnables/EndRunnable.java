@@ -2,8 +2,8 @@ package dev.lokspel.practice.manager.fight.event.runnables;
 
 import dev.lokspel.practice.manager.fight.event.EventManager;
 import dev.lokspel.practice.manager.fight.event.interfaces.Event;
-import dev.lokspel.practice.util.PermanentConfig;
 import dev.lokspel.practice.util.interfaces.Runnable;
+import dev.lokspel.practice.util.startup.PermanentConfig;
 
 public class EndRunnable extends Runnable {
 

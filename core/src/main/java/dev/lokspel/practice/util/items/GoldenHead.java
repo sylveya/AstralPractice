@@ -1,4 +1,4 @@
-package dev.lokspel.practice.util;
+package dev.lokspel.practice.util.items;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
 import com.destroystokyo.paper.profile.ProfileProperty;
@@ -8,6 +8,7 @@ import dev.lokspel.practice.manager.backend.BackendUtil;
 import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.manager.profile.enums.ProfileStatus;
+import dev.lokspel.practice.util.NumberUtil;
 import dev.lokspel.practice.util.actionbar.ActionBarPriority;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.Consumable;

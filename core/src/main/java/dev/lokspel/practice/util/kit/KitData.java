@@ -1,4 +1,4 @@
-package dev.lokspel.practice.util;
+package dev.lokspel.practice.util.kit;
 
 import java.util.ArrayList;
 import java.util.List;

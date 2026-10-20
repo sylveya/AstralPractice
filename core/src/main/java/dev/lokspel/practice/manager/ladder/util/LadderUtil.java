@@ -1,6 +1,6 @@
 package dev.lokspel.practice.manager.ladder.util;
 
-import static dev.lokspel.practice.util.PermanentConfig.FIGHT_ENTITY;
+import static dev.lokspel.practice.util.startup.PermanentConfig.FIGHT_ENTITY;
 
 import dev.lokspel.practice.AstralPractice;
 import dev.lokspel.practice.config.PracticeConfig;

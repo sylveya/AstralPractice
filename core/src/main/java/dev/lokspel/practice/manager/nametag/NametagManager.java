@@ -10,7 +10,7 @@ import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.manager.profile.enums.ProfileStatus;
 import dev.lokspel.practice.util.LobbyNametagUtil;
 import dev.lokspel.practice.util.PapiUtil;
-import dev.lokspel.practice.util.PermanentConfig;
+import dev.lokspel.practice.util.startup.PermanentConfig;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;

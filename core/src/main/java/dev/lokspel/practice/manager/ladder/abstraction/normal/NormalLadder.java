@@ -10,7 +10,7 @@ import dev.lokspel.practice.manager.ladder.abstraction.Ladder;
 import dev.lokspel.practice.manager.ladder.enums.LadderType;
 import dev.lokspel.practice.manager.ladder.enums.WeightClassType;
 import dev.lokspel.practice.manager.ladder.util.LadderUtil;
-import dev.lokspel.practice.util.BasicItem;
+import dev.lokspel.practice.util.items.BasicItem;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;

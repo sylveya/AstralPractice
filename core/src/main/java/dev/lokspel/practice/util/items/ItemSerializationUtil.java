@@ -1,5 +1,6 @@
-package dev.lokspel.practice.util;
+package dev.lokspel.practice.util.items;
 
+import dev.lokspel.practice.util.Common;
 import java.util.Base64;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;

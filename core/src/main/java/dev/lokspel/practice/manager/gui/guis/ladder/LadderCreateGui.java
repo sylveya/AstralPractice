@@ -11,7 +11,7 @@ import dev.lokspel.practice.manager.ladder.abstraction.normal.NormalLadder;
 import dev.lokspel.practice.manager.ladder.enums.LadderType;
 import dev.lokspel.practice.util.Common;
 import dev.lokspel.practice.util.InventoryUtil;
-import dev.lokspel.practice.util.ItemCreateUtil;
+import dev.lokspel.practice.util.items.ItemCreateUtil;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.Getter;

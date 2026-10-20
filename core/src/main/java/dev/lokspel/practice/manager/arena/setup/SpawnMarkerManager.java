@@ -5,7 +5,7 @@ import dev.lokspel.practice.manager.arena.arenas.FfaArena;
 import dev.lokspel.practice.manager.arena.arenas.interfaces.DisplayArena;
 import dev.lokspel.practice.manager.arena.util.ArenaUtil;
 import dev.lokspel.practice.util.Common;
-import dev.lokspel.practice.util.ItemCreateUtil;
+import dev.lokspel.practice.util.items.ItemCreateUtil;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;

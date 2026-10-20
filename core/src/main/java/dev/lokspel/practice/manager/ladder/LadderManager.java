@@ -19,7 +19,7 @@ import dev.lokspel.practice.manager.ladder.abstraction.normal.LadderData;
 import dev.lokspel.practice.manager.ladder.abstraction.normal.NormalLadder;
 import dev.lokspel.practice.manager.ladder.enums.LadderType;
 import dev.lokspel.practice.util.Common;
-import dev.lokspel.practice.util.StartUpCallback;
+import dev.lokspel.practice.util.startup.StartUpCallback;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;

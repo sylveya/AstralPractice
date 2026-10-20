@@ -12,7 +12,7 @@ import dev.lokspel.practice.manager.ladder.abstraction.playercustom.CustomLadder
 import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.util.InventoryUtil;
-import dev.lokspel.practice.util.KitData;
+import dev.lokspel.practice.util.kit.KitData;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

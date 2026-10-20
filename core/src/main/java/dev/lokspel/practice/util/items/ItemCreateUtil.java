@@ -1,7 +1,8 @@
-package dev.lokspel.practice.util;
+package dev.lokspel.practice.util.items;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
 import dev.lokspel.practice.AstralPractice;
+import dev.lokspel.practice.util.StringUtil;
 import java.util.List;
 import java.util.stream.Collectors;
 import net.kyori.adventure.text.Component;

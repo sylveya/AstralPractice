@@ -1,4 +1,4 @@
-package dev.lokspel.practice.util;
+package dev.lokspel.practice.util.startup;
 
 import dev.lokspel.practice.AstralPractice;
 

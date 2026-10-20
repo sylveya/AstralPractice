@@ -6,7 +6,7 @@ import dev.lokspel.practice.config.PracticeConfig;
 import dev.lokspel.practice.manager.fight.event.enums.EventStatus;
 import dev.lokspel.practice.manager.fight.event.events.ffa.interfaces.FfaEvent;
 import dev.lokspel.practice.manager.server.ServerManager;
-import dev.lokspel.practice.util.KitData;
+import dev.lokspel.practice.util.kit.KitData;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;

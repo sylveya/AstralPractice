@@ -2,6 +2,7 @@ package dev.lokspel.practice.util;
 
 import dev.lokspel.practice.AstralPractice;
 import dev.lokspel.practice.manager.profile.Profile;
+import dev.lokspel.practice.util.startup.SoftDependUtil;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
 import java.util.ArrayList;

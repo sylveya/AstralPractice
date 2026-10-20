@@ -8,10 +8,10 @@ import dev.lokspel.practice.manager.ladder.abstraction.interfaces.TempBuildRetur
 import dev.lokspel.practice.manager.ladder.enums.WeightClassType;
 import dev.lokspel.practice.manager.ladder.type.Creeper;
 import dev.lokspel.practice.manager.ladder.util.LadderFileUtil;
-import dev.lokspel.practice.util.BasicItem;
 import dev.lokspel.practice.util.Common;
-import dev.lokspel.practice.util.ItemSerializationUtil;
-import dev.lokspel.practice.util.KitData;
+import dev.lokspel.practice.util.items.BasicItem;
+import dev.lokspel.practice.util.items.ItemSerializationUtil;
+import dev.lokspel.practice.util.kit.KitData;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;

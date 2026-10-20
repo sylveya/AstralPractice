@@ -1,7 +1,7 @@
 package dev.lokspel.practice.manager.fight.match.listener;
 
 import static dev.lokspel.practice.manager.arena.util.ArenaUtil.containsDestroyableBlock;
-import static dev.lokspel.practice.util.PermanentConfig.FIGHT_ENTITY;
+import static dev.lokspel.practice.util.startup.PermanentConfig.FIGHT_ENTITY;
 
 import com.destroystokyo.paper.event.player.PlayerPickupExperienceEvent;
 import dev.lokspel.practice.AstralPractice;
@@ -34,9 +34,9 @@ import dev.lokspel.practice.manager.spectator.SpectatorManager;
 import dev.lokspel.practice.util.Common;
 import dev.lokspel.practice.util.Cuboid;
 import dev.lokspel.practice.util.NumberUtil;
-import dev.lokspel.practice.util.PermanentConfig;
 import dev.lokspel.practice.util.cooldown.CooldownObject;
 import dev.lokspel.practice.util.cooldown.PlayerCooldown;
+import dev.lokspel.practice.util.startup.PermanentConfig;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;

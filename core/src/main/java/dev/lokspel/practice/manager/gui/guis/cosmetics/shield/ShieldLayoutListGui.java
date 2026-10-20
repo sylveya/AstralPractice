@@ -14,7 +14,7 @@ import dev.lokspel.practice.manager.profile.cosmetics.shield.ShieldLayout;
 import dev.lokspel.practice.manager.profile.cosmetics.shield.ShieldPreset;
 import dev.lokspel.practice.util.Common;
 import dev.lokspel.practice.util.InventoryUtil;
-import dev.lokspel.practice.util.ItemCreateUtil;
+import dev.lokspel.practice.util.items.ItemCreateUtil;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
 import java.util.ArrayList;

@@ -8,7 +8,7 @@ import dev.lokspel.practice.manager.ladder.abstraction.Ladder;
 import dev.lokspel.practice.manager.ladder.enums.LadderType;
 import dev.lokspel.practice.manager.playerkit.guis.MainGui;
 import dev.lokspel.practice.manager.profile.Profile;
-import dev.lokspel.practice.util.KitFileData;
+import dev.lokspel.practice.util.kit.KitFileData;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;

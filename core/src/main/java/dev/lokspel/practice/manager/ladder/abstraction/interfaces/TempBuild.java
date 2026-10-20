@@ -1,6 +1,6 @@
 package dev.lokspel.practice.manager.ladder.abstraction.interfaces;
 
-import static dev.lokspel.practice.util.PermanentConfig.PLACED_IN_FIGHT;
+import static dev.lokspel.practice.util.startup.PermanentConfig.PLACED_IN_FIGHT;
 
 import dev.lokspel.practice.manager.arena.util.ArenaUtil;
 import dev.lokspel.practice.manager.fight.match.Match;

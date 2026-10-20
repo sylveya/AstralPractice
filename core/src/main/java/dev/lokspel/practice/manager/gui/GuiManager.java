@@ -14,7 +14,7 @@ import dev.lokspel.practice.manager.server.sound.SoundEffect;
 import dev.lokspel.practice.manager.server.sound.SoundManager;
 import dev.lokspel.practice.manager.server.sound.SoundType;
 import dev.lokspel.practice.util.Common;
-import dev.lokspel.practice.util.ItemCreateUtil;
+import dev.lokspel.practice.util.items.ItemCreateUtil;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;

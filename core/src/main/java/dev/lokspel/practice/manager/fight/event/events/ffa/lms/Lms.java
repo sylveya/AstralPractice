@@ -2,7 +2,7 @@ package dev.lokspel.practice.manager.fight.event.events.ffa.lms;
 
 import dev.lokspel.practice.config.PracticeConfig;
 import dev.lokspel.practice.manager.fight.event.events.ffa.interfaces.FfaEvent;
-import dev.lokspel.practice.util.KitData;
+import dev.lokspel.practice.util.kit.KitData;
 import org.bukkit.entity.Player;
 
 public class Lms extends FfaEvent {
