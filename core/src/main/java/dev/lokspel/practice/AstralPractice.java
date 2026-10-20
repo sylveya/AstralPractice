@@ -43,13 +43,13 @@ import dev.lokspel.practice.command.singlecommands.StatisticsCommand;
 import dev.lokspel.practice.command.singlecommands.UnrankedCommand;
 import dev.lokspel.practice.command.staff.StaffCommand;
 import dev.lokspel.practice.config.PracticeConfig;
+import dev.lokspel.practice.listener.AsyncPlayerPreLogin;
 import dev.lokspel.practice.listener.EntityDamage;
 import dev.lokspel.practice.listener.ItemConsume;
 import dev.lokspel.practice.listener.PlayerChatListener;
 import dev.lokspel.practice.listener.PlayerCommandPreprocess;
 import dev.lokspel.practice.listener.PlayerInteract;
 import dev.lokspel.practice.listener.PlayerJoin;
-import dev.lokspel.practice.listener.PlayerPreLogin;
 import dev.lokspel.practice.listener.PlayerQuit;
 import dev.lokspel.practice.listener.ProjectileLaunch;
 import dev.lokspel.practice.listener.StatisticListener;
@@ -91,13 +91,13 @@ import dev.lokspel.practice.manager.profile.cosmetics.CosmeticsPermissionManager
 import dev.lokspel.practice.manager.server.ServerManager;
 import dev.lokspel.practice.manager.sidebar.SidebarManager;
 import dev.lokspel.practice.util.Common;
-import dev.lokspel.practice.util.MiniMessageTagResolver;
-import dev.lokspel.practice.util.SoftDependUtil;
-import dev.lokspel.practice.util.StartUpTypes;
-import dev.lokspel.practice.util.StartUpUtil;
-import dev.lokspel.practice.util.UpdateChecker;
-import dev.lokspel.practice.util.VersionChecker;
+import dev.lokspel.practice.util.minimessage.MiniMessageUtil;
 import dev.lokspel.practice.util.placeholderapi.PlayerExpansion;
+import dev.lokspel.practice.util.startup.SoftDependUtil;
+import dev.lokspel.practice.util.startup.StartUpTypes;
+import dev.lokspel.practice.util.startup.StartUpUtil;
+import dev.lokspel.practice.util.startup.UpdateChecker;
+import dev.lokspel.practice.util.startup.VersionChecker;
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
 import java.io.File;
 import java.util.Comparator;
@@ -155,7 +155,7 @@ public final class AstralPractice extends JavaPlugin {
   private final Map<StartUpTypes, Boolean> startUpProgress = new EnumMap<>(StartUpTypes.class);
 
   @Getter private static AstralPractice instance;
-  @Getter private static MiniMessage miniMessage = MiniMessageTagResolver.createMiniMessage();
+  @Getter private static MiniMessage miniMessage = MiniMessageUtil.createMiniMessage();
   @Getter private static EntityHider entityHider;
   @Getter private static ArenaCopyUtilListener arenaCopyUtilListener;
 
@@ -189,7 +189,7 @@ public final class AstralPractice extends JavaPlugin {
   public void onEnable() {
     instance = this;
 
-    miniMessage = MiniMessageTagResolver.createMiniMessage();
+    miniMessage = MiniMessageUtil.createMiniMessage();
     entityHider = new EntityHider(this, EntityHider.Policy.BLACKLIST);
     arenaCopyUtilListener = new ArenaCopyUtilListener();
 
@@ -456,7 +456,7 @@ public final class AstralPractice extends JavaPlugin {
   /** It registers all the events that are used in the plugin. */
   private void registerListeners(PluginManager pm) {
 
-    pm.registerEvents(new PlayerPreLogin(), this);
+    pm.registerEvents(new AsyncPlayerPreLogin(), this);
     pm.registerEvents(new PlayerJoin(), this);
     pm.registerEvents(new PlayerQuit(), this);
     pm.registerEvents(new PlayerInteract(), this);

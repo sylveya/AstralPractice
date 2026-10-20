@@ -2,9 +2,9 @@ package dev.lokspel.practice.manager.fight.ffa.game;
 
 import dev.lokspel.practice.AstralPractice;
 import dev.lokspel.practice.config.PracticeConfig;
-import dev.lokspel.practice.util.PermanentConfig;
 import dev.lokspel.practice.util.fightmapchange.FightChangeOptimized;
 import dev.lokspel.practice.util.interfaces.Runnable;
+import dev.lokspel.practice.util.startup.PermanentConfig;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 

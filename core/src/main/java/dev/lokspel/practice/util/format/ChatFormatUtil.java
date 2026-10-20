@@ -1,10 +1,13 @@
-package dev.lokspel.practice.util;
+package dev.lokspel.practice.util.format;
 
 import dev.lokspel.practice.AstralPractice;
 import dev.lokspel.practice.config.PracticeConfig;
 import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.manager.profile.group.Group;
+import dev.lokspel.practice.util.PapiUtil;
+import dev.lokspel.practice.util.StringUtil;
+import dev.lokspel.practice.util.startup.SoftDependUtil;
 import java.util.ArrayList;
 import java.util.List;
 import net.kyori.adventure.text.Component;
@@ -89,7 +92,7 @@ public final class ChatFormatUtil {
 
     Component component;
     if (SoftDependUtil.isPAPI_ENABLED && viewer instanceof Player viewerPlayer) {
-      component = PapiUtil.runThroughFormat(viewerPlayer, format);
+      component = PapiUtil.format(viewerPlayer, format);
     } else {
       component =
           AstralPractice.getMiniMessage().deserialize(StringUtil.legacyToMiniMessage(format));

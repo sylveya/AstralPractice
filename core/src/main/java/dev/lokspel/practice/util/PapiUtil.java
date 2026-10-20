@@ -1,6 +1,7 @@
 package dev.lokspel.practice.util;
 
 import dev.lokspel.practice.AstralPractice;
+import dev.lokspel.practice.util.startup.SoftDependUtil;
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
@@ -8,10 +9,6 @@ import org.bukkit.entity.Player;
 public final class PapiUtil {
 
   private PapiUtil() {}
-
-  public static Component runThroughFormat(Player player, String line) {
-    return format(player, line);
-  }
 
   public static Component format(Player player, String line) {
     if (line == null || line.isEmpty()) {

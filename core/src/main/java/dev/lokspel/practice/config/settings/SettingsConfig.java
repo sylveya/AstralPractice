@@ -92,9 +92,6 @@ public class SettingsConfig {
   @JsonProperty("CHAT")
   private Chat chat = new Chat();
 
-  @JsonProperty("DEBUG")
-  private Debug debug = new Debug();
-
   @Comment("Update checker")
   @JsonProperty("UPDATE-CHECKER")
   private UpdateChecker updateChecker = new UpdateChecker();
@@ -319,6 +316,9 @@ public class SettingsConfig {
     @JsonProperty("COMBAT-LOG")
     private CombatLog combatLog = new CombatLog();
 
+    @JsonProperty("KILLSTREAK")
+    private Killstreak killstreak = new Killstreak();
+
     @Getter
     public static class Nametag {
       @Comment("If true, a drop shadow is drawn behind FFA players' nametags.")
@@ -386,6 +386,25 @@ public class SettingsConfig {
       @Comment("If true, killing a player clears the killer's \"in combat\" status.")
       @JsonProperty("CLEAR-ON-KILL")
       private boolean clearOnKill = false;
+    }
+
+    @Getter
+    public static class Killstreak {
+      @Comment("If true, reaching a killstreak milestone is announced in the FFA chat.")
+      @JsonProperty("ENABLED")
+      private boolean enabled = true;
+
+      @Comment(
+          "Kill amounts at which a broadcast is sent. After the highest value, REPEAT-EVERY is used"
+              + " as the repeat step.")
+      @JsonProperty("MILESTONES")
+      private List<Integer> milestones = List.of(5, 10, 15, 20, 25, 30, 40, 50);
+
+      @Comment(
+          "After the highest milestone, a broadcast is sent every this many kills. Set to 0 to"
+              + " disable.")
+      @JsonProperty("REPEAT-EVERY")
+      private int repeatEvery = 50;
     }
   }
 
@@ -1157,23 +1176,6 @@ public class SettingsConfig {
               + " time.")
       @JsonProperty("SHORTCUT")
       private boolean shortcut = true;
-    }
-  }
-
-  @Getter
-  public static class Debug {
-    @JsonProperty("ACTIONBAR")
-    private Actionbar actionbar = new Actionbar();
-
-    @Getter
-    public static class Actionbar {
-      @Comment("Enables detailed action-bar lifecycle logs and in-memory history.")
-      @JsonProperty("ENABLED")
-      private boolean enabled = false;
-
-      @Comment("Optional player-name list. Empty = all players.")
-      @JsonProperty("TARGETS")
-      private List<String> targets = List.of();
     }
   }
 

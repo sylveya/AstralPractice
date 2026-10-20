@@ -7,6 +7,7 @@ import dev.lokspel.api.event.spectate.end.FfaSpectateEndEvent;
 import dev.lokspel.api.event.spectate.start.FfaSpectateStartEvent;
 import dev.lokspel.practice.AstralPractice;
 import dev.lokspel.practice.config.PracticeConfig;
+import dev.lokspel.practice.config.settings.SettingsConfig;
 import dev.lokspel.practice.manager.arena.arenas.FfaArena;
 import dev.lokspel.practice.manager.backend.BackendUtil;
 import dev.lokspel.practice.manager.fight.ffa.FfaFightPlayer;
@@ -28,14 +29,15 @@ import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.manager.profile.enums.ProfileStatus;
 import dev.lokspel.practice.manager.sidebar.SidebarManager;
 import dev.lokspel.practice.manager.spectator.SpectatorManager;
-import dev.lokspel.practice.util.CombatLogUtil;
 import dev.lokspel.practice.util.Common;
 import dev.lokspel.practice.util.Cuboid;
-import dev.lokspel.practice.util.LastAttackerTracker;
 import dev.lokspel.practice.util.entityhider.PlayerHider;
+import dev.lokspel.practice.util.fight.CombatLogUtil;
+import dev.lokspel.practice.util.fight.LastAttackerTracker;
 import dev.lokspel.practice.util.fightmapchange.FightChangeOptimized;
 import dev.lokspel.practice.util.interfaces.Spectatable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -300,6 +302,7 @@ public class Ffa implements Spectatable, dev.lokspel.api.interfaces.Ffa {
       killerProfile.getStats().getFfaStats().increaseKills();
 
       increaseFfaSessionKills(killer);
+      broadcastKillstreak(killer);
       Statistic killerStat = statistics.get(killer);
       if (killerStat != null) {
         killerProfile.getStats().getFfaStats().updateBestKillStreak(killerStat.getBestKillStreak());
@@ -446,6 +449,7 @@ public class Ffa implements Spectatable, dev.lokspel.api.interfaces.Ffa {
     killerProfile.getStats().getFfaStats().increaseKills();
 
     increaseFfaSessionKills(attacker);
+    broadcastKillstreak(attacker);
     Statistic attackerStat = statistics.get(attacker);
     if (attackerStat != null) {
       killerProfile.getStats().getFfaStats().updateBestKillStreak(attackerStat.getBestKillStreak());
@@ -492,6 +496,54 @@ public class Ffa implements Spectatable, dev.lokspel.api.interfaces.Ffa {
     Statistic statistic = statistics.computeIfAbsent(killer, p -> new Statistic(p.getUniqueId()));
     statistic.setKills(statistic.getKills() + 1);
     statistic.increaseKillStreak();
+  }
+
+  /**
+   * Broadcasts the killer's current killstreak to the FFA when it matches a configured milestone.
+   */
+  private void broadcastKillstreak(Player killer) {
+    Statistic statistic = statistics.get(killer);
+    if (statistic == null) {
+      return;
+    }
+
+    SettingsConfig.Ffa.Killstreak config = PracticeConfig.settings().getFfa().getKillstreak();
+    int streak = statistic.getKillStreak();
+    if (!config.isEnabled() || !isKillstreakMilestone(streak)) {
+      return;
+    }
+
+    this.sendMessage(
+        PracticeConfig.language()
+            .getFfa()
+            .getGame()
+            .getKillstreakBroadcast()
+            .replace("%player%", killer.getName())
+            .replace("%streak%", String.valueOf(streak)),
+        true);
+  }
+
+  /**
+   * Returns whether {@code streak} is a configured milestone. After the highest milestone, the
+   * streak is also a milestone every {@code REPEAT-EVERY} kills (if enabled), so long streaks keep
+   * being announced.
+   */
+  private boolean isKillstreakMilestone(int streak) {
+    List<Integer> milestones = PracticeConfig.settings().getFfa().getKillstreak().getMilestones();
+    if (milestones.isEmpty()) {
+      return false;
+    }
+    if (milestones.contains(streak)) {
+      return true;
+    }
+
+    int repeatEvery = PracticeConfig.settings().getFfa().getKillstreak().getRepeatEvery();
+    if (repeatEvery <= 0) {
+      return false;
+    }
+
+    int highest = Collections.max(milestones);
+    return streak > highest && (streak - highest) % repeatEvery == 0;
   }
 
   public void teleportPlayer(Player player) {

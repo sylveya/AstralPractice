@@ -7,7 +7,7 @@ import dev.lokspel.practice.manager.ladder.enums.KnockbackType;
 import dev.lokspel.practice.manager.ladder.enums.LadderType;
 import dev.lokspel.practice.manager.ladder.util.LadderKnockback;
 import dev.lokspel.practice.util.Common;
-import dev.lokspel.practice.util.KitData;
+import dev.lokspel.practice.util.kit.KitData;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;

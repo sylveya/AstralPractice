@@ -19,7 +19,7 @@ import dev.lokspel.practice.manager.profile.enums.ProfileStatus;
 import dev.lokspel.practice.manager.server.ServerManager;
 import dev.lokspel.practice.manager.server.WorldEnum;
 import dev.lokspel.practice.util.Common;
-import dev.lokspel.practice.util.NameFormatUtil;
+import dev.lokspel.practice.util.format.NameFormatUtil;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
@@ -448,7 +448,7 @@ public class PlayerHider implements Listener {
    * Takes the tab list entry of {@code target} away from {@code observer} without touching the
    * entity visibility, so the caller stays in charge of who can see the player.
    */
-  public void removeTabEntry(Player observer, Player target) {
+  private void removeTabEntry(Player observer, Player target) {
     WrapperPlayServerPlayerInfoUpdate.PlayerInfo playerInfo =
         new WrapperPlayServerPlayerInfoUpdate.PlayerInfo(target.getUniqueId());
     playerInfo.setListed(false);
@@ -470,7 +470,7 @@ public class PlayerHider implements Listener {
    * so the global name the server already broadcasts (LuckPerms, TAB, {@link NametagManager}) is
    * kept.
    */
-  public void showTabEntry(Player observer, Player target) {
+  private void showTabEntry(Player observer, Player target) {
     showTabEntry(observer, target, NametagManager.getInstance().getTabListName(target));
   }
 
@@ -479,7 +479,7 @@ public class PlayerHider implements Listener {
    * name. The name stays viewer specific, so it does not overwrite the global tab list name other
    * viewers see.
    */
-  public void showTabEntry(Player observer, Player target, Component tabName) {
+  private void showTabEntry(Player observer, Player target, Component tabName) {
     if (!observer.isOnline() || !target.isOnline()) {
       return;
     }

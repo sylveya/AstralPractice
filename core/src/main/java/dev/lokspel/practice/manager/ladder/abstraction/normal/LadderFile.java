@@ -8,10 +8,10 @@ import dev.lokspel.practice.manager.ladder.abstraction.interfaces.TempBuildRetur
 import dev.lokspel.practice.manager.ladder.enums.WeightClassType;
 import dev.lokspel.practice.manager.ladder.type.Creeper;
 import dev.lokspel.practice.manager.ladder.util.LadderFileUtil;
-import dev.lokspel.practice.util.BasicItem;
 import dev.lokspel.practice.util.Common;
-import dev.lokspel.practice.util.ItemSerializationUtil;
-import dev.lokspel.practice.util.KitData;
+import dev.lokspel.practice.util.items.BasicItem;
+import dev.lokspel.practice.util.items.ItemSerializationUtil;
+import dev.lokspel.practice.util.kit.KitData;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -312,11 +312,9 @@ public class LadderFile {
             String[] s2 = destroyableBlock.split("::");
             ladder
                 .getDestroyableBlocks()
-                .add(new BasicItem(Material.valueOf(s2[0]), Short.parseShort(s2[1])));
+                .add(new BasicItem(Material.valueOf(s2[0]), Integer.parseInt(s2[1])));
           } else {
-            ladder
-                .getDestroyableBlocks()
-                .add(new BasicItem(Material.valueOf(destroyableBlock), (short) 0));
+            ladder.getDestroyableBlocks().add(new BasicItem(Material.valueOf(destroyableBlock), 0));
           }
         } catch (IllegalArgumentException e) {
           Common.sendConsoleMmMessage(
@@ -353,6 +351,13 @@ public class LadderFile {
   /** Deletes the ladder's file. */
   public void delete() {
     DataFiles.delete(file);
+  }
+
+  /** Writes the ladder's file again under another name, disabled. */
+  public void copyTo(String name) {
+    data.setEnabled(false);
+    data.setName(name);
+    DataFiles.write("ladders/" + name.toLowerCase() + ".yml", data);
   }
 
   private void writeKit(KitData kitData) {

@@ -347,6 +347,12 @@ public class Command {
       @JsonProperty("CREATE")
       private Create create = new Create();
 
+      @JsonProperty("LOAD")
+      private Load load = new Load();
+
+      @JsonProperty("CLONE")
+      private Clone clone = new Clone();
+
       @JsonProperty("DELETE")
       private Delete delete = new Delete();
 
@@ -392,6 +398,10 @@ public class Command {
                     + " information of the ladder.'>/%label% info <ladder>",
                 " <red>» <click:suggest_command:'/%label% create '><hover:show_text:'<gray>Create a"
                     + " new ladder.'>/%label% create <name>",
+                " <red>» <click:suggest_command:'/%label% load '><hover:show_text:'<gray>Load a"
+                    + " ladder kit into your inventory.'>/%label% load <ladder>",
+                " <red>» <click:suggest_command:'/%label% clone '><hover:show_text:'<gray>Clone a"
+                    + " ladder under a new name.'>/%label% clone <ladder> <name>",
                 " <red>» <click:suggest_command:'/%label% delete '><hover:show_text:'<gray>Delete a"
                     + " ladder.'>/%label% delete <ladder>",
                 " <red>» <click:suggest_command:'/%label% set '><hover:show_text:'<gray>Set up"
@@ -423,6 +433,35 @@ public class Command {
         @JsonProperty("REACHED-MAX")
         private String reachedMax =
             "<red>The server has reached the maximum number of ladders. (%max%/%max%)";
+      }
+
+      @Getter
+      public static class Load {
+        @JsonProperty("COMMAND-HELP")
+        private String commandHelp = "<red>/%label% load <ladder>";
+
+        @JsonProperty("NOT-EXISTS")
+        private String notExists = "<red>%ladder% ladder doesn't exists.";
+
+        @JsonProperty("NOT-SET")
+        private String notSet = "<red>The %ladder% ladder has no kit set.";
+
+        @JsonProperty("LOAD-SUCCESS")
+        private String loadSuccess =
+            "<green>You successfully <red>loaded <green>the <gold>%ladder%<green> kit.";
+      }
+
+      @Getter
+      public static class Clone {
+        @JsonProperty("COMMAND-HELP")
+        private String commandHelp = "<red>/%label% clone <ladder> <name>";
+
+        @JsonProperty("NOT-EXISTS")
+        private String notExists = "<red>%ladder% ladder doesn't exists.";
+
+        @JsonProperty("CLONE-SUCCESS")
+        private String cloneSuccess =
+            "<green>You successfully <red>cloned <gold>%ladder% <green>as <gold>%clone%<green>.";
       }
 
       @Getter

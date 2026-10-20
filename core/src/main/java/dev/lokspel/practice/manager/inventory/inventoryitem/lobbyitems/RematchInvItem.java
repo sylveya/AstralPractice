@@ -9,7 +9,7 @@ import dev.lokspel.practice.manager.fight.match.MatchManager;
 import dev.lokspel.practice.manager.fight.match.util.RematchRequest;
 import dev.lokspel.practice.manager.gui.GuiItem;
 import dev.lokspel.practice.manager.inventory.inventoryitem.InvItem;
-import dev.lokspel.practice.util.ItemCreateUtil;
+import dev.lokspel.practice.util.items.ItemCreateUtil;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;

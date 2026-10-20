@@ -1,7 +1,7 @@
 package dev.lokspel.practice.manager.fight.event.enums;
 
 import dev.lokspel.practice.config.PracticeConfig;
-import dev.lokspel.practice.util.ItemCreateUtil;
+import dev.lokspel.practice.util.items.ItemCreateUtil;
 import java.util.List;
 import lombok.Getter;
 import org.bukkit.Material;

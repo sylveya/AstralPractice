@@ -1,7 +1,7 @@
 package dev.lokspel.practice.manager.fight.event.interfaces;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import dev.lokspel.practice.util.KitFileData;
+import dev.lokspel.practice.util.kit.KitFileData;
 import lombok.Getter;
 import lombok.Setter;
 

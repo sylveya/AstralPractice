@@ -1,4 +1,4 @@
-package dev.lokspel.practice.util;
+package dev.lokspel.practice.util.kit;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -98,15 +98,15 @@ public class KitData {
     this.extra = extra.clone();
   }
 
-  public void loadStorage(Player player) {
+  private void loadStorage(Player player) {
     player.getInventory().setContents(this.storage.clone());
   }
 
-  public void loadArmor(Player player) {
+  private void loadArmor(Player player) {
     player.getInventory().setArmorContents(this.armor.clone());
   }
 
-  public void loadExtra(Player player) {
+  private void loadExtra(Player player) {
     player.getInventory().setExtraContents(this.extra.clone());
   }
 }

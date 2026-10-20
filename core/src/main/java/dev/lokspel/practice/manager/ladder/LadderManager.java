@@ -3,22 +3,27 @@ package dev.lokspel.practice.manager.ladder;
 import dev.lokspel.practice.AstralPractice;
 import dev.lokspel.practice.config.PracticeConfig;
 import dev.lokspel.practice.data.DataFiles;
+import dev.lokspel.practice.manager.gui.Gui;
 import dev.lokspel.practice.manager.gui.GuiManager;
+import dev.lokspel.practice.manager.gui.GuiType;
 import dev.lokspel.practice.manager.gui.guis.customladder.EditorMenuGui;
 import dev.lokspel.practice.manager.gui.guis.customladder.premadecustom.CustomLadderSelectorGui;
 import dev.lokspel.practice.manager.gui.guis.ladder.LadderPreviewGui;
 import dev.lokspel.practice.manager.gui.guis.queue.RankedGui;
 import dev.lokspel.practice.manager.gui.guis.queue.UnrankedGui;
 import dev.lokspel.practice.manager.gui.guis.queue.customkit.ChooseQueueTypeGui;
+import dev.lokspel.practice.manager.gui.setup.arena.ArenaGuiSetupManager;
 import dev.lokspel.practice.manager.gui.setup.ladder.LadderSetupManager;
+import dev.lokspel.practice.manager.ladder.abstraction.Ladder;
 import dev.lokspel.practice.manager.ladder.abstraction.normal.LadderData;
 import dev.lokspel.practice.manager.ladder.abstraction.normal.NormalLadder;
 import dev.lokspel.practice.manager.ladder.enums.LadderType;
 import dev.lokspel.practice.util.Common;
-import dev.lokspel.practice.util.StartUpCallback;
-import java.lang.reflect.InvocationTargetException;
+import dev.lokspel.practice.util.startup.StartUpCallback;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 
@@ -60,6 +65,32 @@ public class LadderManager {
     return list;
   }
 
+  /**
+   * Tells whether no more ladders can be added, either because the limit is off or it is reached.
+   */
+  public boolean isFull() {
+    int maxLadders = PracticeConfig.settings().getSetup().getMaxLadders();
+    return maxLadders > 0 && ladders.size() >= maxLadders;
+  }
+
+  /** Adds a ladder to the manager and rebuilds the GUIs that show it. */
+  public void addLadder(NormalLadder ladder) {
+    ladders.add(ladder);
+    ladders.sort(Comparator.comparing(Ladder::getName));
+
+    LadderSetupManager.getInstance().buildLadderSetupGuis(ladder);
+    GuiManager.getInstance().searchGui(GuiType.Ladder_Summary).update();
+    GuiManager.getInstance().searchGui(GuiType.Arena_Summary).update();
+    GuiManager.getInstance().searchGui(GuiType.Queue_Unranked).update(true);
+    if (ladder.isRanked()) {
+      GuiManager.getInstance().searchGui(GuiType.Queue_Ranked).update(true);
+    }
+
+    for (Map<GuiType, Gui> map : ArenaGuiSetupManager.getInstance().getArenaSetupGuis().values()) {
+      map.get(GuiType.Arena_Ladders_Single).update();
+    }
+  }
+
   public void loadLadders(final StartUpCallback startUpCallback) {
     Bukkit.getScheduler()
         .runTaskAsynchronously(
@@ -72,21 +103,10 @@ public class LadderManager {
                   String name = data.getName();
 
                   try {
-                    LadderType type = LadderType.valueOf(data.getType());
-
-                    ladders.add(
-                        (NormalLadder)
-                            type.getClassInstance()
-                                .getConstructor(String.class, LadderType.class)
-                                .newInstance(name, type));
+                    ladders.add(LadderType.valueOf(data.getType()).create(name));
                   } catch (IllegalArgumentException e) {
                     Common.sendConsoleMmMessage(
                         "<red>Invalid ladder format for ladder " + name + ".");
-                  } catch (NoSuchMethodException
-                      | InvocationTargetException
-                      | InstantiationException
-                      | IllegalAccessException e) {
-                    throw new RuntimeException(e);
                   }
                 }
               }
@@ -94,6 +114,12 @@ public class LadderManager {
               Bukkit.getScheduler()
                   .runTask(AstralPractice.getInstance(), startUpCallback::onLoadingDone);
             });
+  }
+
+  public void saveLadders() {
+    for (NormalLadder ladder : ladders) {
+      ladder.setData();
+    }
   }
 
   public void loadGuis() {
@@ -120,11 +146,5 @@ public class LadderManager {
     GuiManager.getInstance().addGui(new ChooseQueueTypeGui());
     GuiManager.getInstance().addGui(new CustomLadderSelectorGui());
     GuiManager.getInstance().addGui(new EditorMenuGui());
-  }
-
-  public void saveLadders() {
-    for (NormalLadder ladder : ladders) {
-      ladder.setData();
-    }
   }
 }

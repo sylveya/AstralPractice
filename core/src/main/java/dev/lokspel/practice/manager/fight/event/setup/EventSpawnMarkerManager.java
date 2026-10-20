@@ -3,7 +3,7 @@ package dev.lokspel.practice.manager.fight.event.setup;
 import dev.lokspel.practice.AstralPractice;
 import dev.lokspel.practice.manager.fight.event.interfaces.EventData;
 import dev.lokspel.practice.util.Common;
-import dev.lokspel.practice.util.ItemCreateUtil;
+import dev.lokspel.practice.util.items.ItemCreateUtil;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

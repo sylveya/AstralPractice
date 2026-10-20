@@ -1,6 +1,6 @@
 package dev.lokspel.practice.manager.ladder.type;
 
-import static dev.lokspel.practice.util.PermanentConfig.PLACED_IN_FIGHT;
+import static dev.lokspel.practice.util.startup.PermanentConfig.PLACED_IN_FIGHT;
 
 import dev.lokspel.practice.AstralPractice;
 import dev.lokspel.practice.config.language.LadderSpecificMessages;

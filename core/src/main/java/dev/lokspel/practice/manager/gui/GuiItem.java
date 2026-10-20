@@ -3,8 +3,8 @@ package dev.lokspel.practice.manager.gui;
 import dev.lokspel.practice.AstralPractice;
 import dev.lokspel.practice.manager.ladder.util.LadderUtil;
 import dev.lokspel.practice.util.Common;
-import dev.lokspel.practice.util.ItemCreateUtil;
 import dev.lokspel.practice.util.StringUtil;
+import dev.lokspel.practice.util.items.ItemCreateUtil;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,7 +24,7 @@ public class GuiItem {
 
   @Getter @Setter private String name;
   @Getter private Material material;
-  @Getter private Short damage = -1;
+  @Getter private int damage = -1;
   @Getter private int amount = 1;
   @Getter private List<String> lore = new ArrayList<>();
   @Getter private boolean glowing = false;
@@ -48,7 +48,7 @@ public class GuiItem {
   public GuiItem(String name, Material material, int damage) {
     this.name = name;
     this.material = material;
-    this.damage = Short.valueOf(String.valueOf(damage));
+    this.damage = damage;
   }
 
   public GuiItem(String name, Material material, List<String> lore) {
@@ -57,21 +57,21 @@ public class GuiItem {
     this.lore = lore;
   }
 
-  public GuiItem(String name, Material material, short damage, List<String> lore) {
+  public GuiItem(String name, Material material, int damage, List<String> lore) {
     this.name = name;
     this.material = material;
     this.damage = damage;
     this.lore = lore;
   }
 
-  public GuiItem(String name, Material material, short damage, int amount) {
+  public GuiItem(String name, Material material, int damage, int amount) {
     this.name = name;
     this.material = material;
     this.damage = damage;
     this.amount = amount;
   }
 
-  public GuiItem(String name, Material material, short damage, int amount, List<String> lore) {
+  public GuiItem(String name, Material material, int damage, int amount, List<String> lore) {
     this.name = name;
     this.material = material;
     this.damage = damage;
@@ -99,7 +99,7 @@ public class GuiItem {
       }
       this.glowing = itemMeta.hasEnchants();
       if (itemMeta instanceof Damageable damageable) {
-        this.damage = (short) damageable.getDamage();
+        this.damage = damageable.getDamage();
       }
     }
     this.amount = itemStack.getAmount();
@@ -263,7 +263,7 @@ public class GuiItem {
     return this;
   }
 
-  public GuiItem setDamage(short damage) {
+  public GuiItem setDamage(int damage) {
     if (damage == -1) {
       return this;
     }

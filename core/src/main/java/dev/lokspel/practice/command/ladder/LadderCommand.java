@@ -1,10 +1,12 @@
 package dev.lokspel.practice.command.ladder;
 
+import dev.lokspel.practice.command.ladder.arguments.CloneArg;
 import dev.lokspel.practice.command.ladder.arguments.CreateArg;
 import dev.lokspel.practice.command.ladder.arguments.DeleteArg;
 import dev.lokspel.practice.command.ladder.arguments.FreezeArg;
 import dev.lokspel.practice.command.ladder.arguments.HelpArg;
 import dev.lokspel.practice.command.ladder.arguments.InfoArg;
+import dev.lokspel.practice.command.ladder.arguments.LoadArg;
 import dev.lokspel.practice.command.ladder.arguments.SetArg;
 import dev.lokspel.practice.command.ladder.arguments.StopArg;
 import dev.lokspel.practice.config.PracticeConfig;
@@ -35,6 +37,12 @@ public class LadderCommand implements CommandExecutor, TabCompleter {
           break;
         case "create":
           CreateArg.run(player, label, args);
+          break;
+        case "load":
+          LoadArg.run(player, label, args);
+          break;
+        case "clone":
+          CloneArg.run(player, label, args);
           break;
         case "delete":
           DeleteArg.run(player, label, args);
@@ -72,6 +80,8 @@ public class LadderCommand implements CommandExecutor, TabCompleter {
       if (player.hasPermission("ap.setup")) {
         arguments.add("info");
         arguments.add("create");
+        arguments.add("load");
+        arguments.add("clone");
         arguments.add("delete");
         arguments.add("set");
       }
@@ -97,6 +107,12 @@ public class LadderCommand implements CommandExecutor, TabCompleter {
           break;
         case "info":
           completion = InfoArg.tabComplete(player, args);
+          break;
+        case "load":
+          completion = LoadArg.tabComplete(player, args);
+          break;
+        case "clone":
+          completion = CloneArg.tabComplete(player, args);
           break;
         case "set":
           completion = SetArg.tabComplete(player, args);

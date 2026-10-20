@@ -1,9 +1,12 @@
-package dev.lokspel.practice.util;
+package dev.lokspel.practice.util.format;
 
 import dev.lokspel.practice.AstralPractice;
 import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.enums.ProfilePrefixVisibility;
 import dev.lokspel.practice.manager.profile.group.Group;
+import dev.lokspel.practice.util.PapiUtil;
+import dev.lokspel.practice.util.StringUtil;
+import dev.lokspel.practice.util.startup.SoftDependUtil;
 import java.util.regex.Pattern;
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.Component;
@@ -48,26 +51,18 @@ public final class NameFormatUtil {
    * Returns the last (trailing) explicit color in a component tree — i.e. the color that would
    * visually "bleed" into the next component appended after this one.
    */
-  private static TextColor findLastExplicitColor(Component component) {
+  public static TextColor extractTrailingColor(Component component) {
     if (component == null) {
       return null;
     }
     TextColor last = component.color();
     for (Component child : component.children()) {
-      TextColor childLast = findLastExplicitColor(child);
+      TextColor childLast = extractTrailingColor(child);
       if (childLast != null) {
         last = childLast;
       }
     }
     return last;
-  }
-
-  /**
-   * Public wrapper used to extract the trailing prefix color so it can be inherited by the name
-   * component.
-   */
-  public static TextColor extractTrailingColor(Component component) {
-    return findLastExplicitColor(component);
   }
 
   public static Component parseConfiguredComponent(String raw) {
@@ -213,10 +208,6 @@ public final class NameFormatUtil {
     Component groupPrefix = group != null ? group.getPrefix() : null;
 
     return resolveAffix(profile, player, visible, groupTemplate, groupPrefix, profile.getPrefix());
-  }
-
-  public static Component resolveSuffix(Profile profile) {
-    return resolveSuffix(profile, null);
   }
 
   public static Component resolveSuffix(Profile profile, Player player) {

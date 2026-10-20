@@ -17,7 +17,7 @@ import dev.lokspel.practice.manager.inventory.service.InventoryCosmeticService;
 import dev.lokspel.practice.manager.inventory.service.InventoryTransitionService;
 import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.cosmetics.CosmeticsData;
-import dev.lokspel.practice.util.ItemSerializationUtil;
+import dev.lokspel.practice.util.items.ItemSerializationUtil;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;

@@ -10,7 +10,7 @@ import dev.lokspel.practice.manager.ladder.abstraction.interfaces.LadderHandle;
 import dev.lokspel.practice.manager.ladder.abstraction.normal.LadderData;
 import dev.lokspel.practice.manager.ladder.abstraction.normal.NormalLadder;
 import dev.lokspel.practice.manager.ladder.enums.LadderType;
-import dev.lokspel.practice.util.ItemSerializationUtil;
+import dev.lokspel.practice.util.items.ItemSerializationUtil;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;

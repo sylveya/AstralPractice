@@ -1,12 +1,11 @@
-package dev.lokspel.practice.util;
+package dev.lokspel.practice.manager.nametag;
 
 import dev.lokspel.api.utilities.PlayerNametag;
 import dev.lokspel.practice.config.PracticeConfig;
 import dev.lokspel.practice.manager.fight.util.PlayerUtil;
-import dev.lokspel.practice.manager.nametag.NametagManager;
-import dev.lokspel.practice.manager.nametag.TabIntegration;
-import dev.lokspel.practice.manager.nametag.TeamPacketBlocker;
 import dev.lokspel.practice.manager.profile.Profile;
+import dev.lokspel.practice.util.format.NameFormatUtil;
+import dev.lokspel.practice.util.startup.PermanentConfig;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
@@ -26,9 +25,9 @@ public final class LobbyNametagUtil {
 
     LobbyNametag nametag = getLobbyNametag(profile, player.getName(), player);
 
-    Component prefix = nametag.getPrefix();
-    Component name = nametag.getName();
-    Component suffix = nametag.getSuffix();
+    Component prefix = nametag.prefix();
+    Component name = nametag.name();
+    Component suffix = nametag.suffix();
 
     // Tab-list
     Component listName = prefix.append(name).append(suffix);
@@ -40,7 +39,7 @@ public final class LobbyNametagUtil {
     // Above-head nametag
     if (PermanentConfig.NAMETAG_MANAGEMENT_ENABLED) {
       NametagManager.getInstance()
-          .setNametag(player, prefix, nametag.getScoreboardNameColor(), suffix);
+          .setNametag(player, prefix, nametag.scoreboardNameColor(), suffix);
     }
   }
 
@@ -77,50 +76,13 @@ public final class LobbyNametagUtil {
     String playerName = profile.getPlayer() != null ? profile.getPlayer().getName() : "";
     LobbyNametag nametag = getLobbyNametag(profile, playerName);
     return new PlayerNametag(
-        nametag.getPrefix(),
-        nametag.getScoreboardNameColor(),
-        nametag.getSuffix(),
-        nametag.getSortPriority());
+        nametag.prefix(), nametag.scoreboardNameColor(), nametag.suffix(), nametag.sortPriority());
   }
 
-  public static final class LobbyNametag {
-    private final Component prefix;
-    private final Component name;
-    private final NamedTextColor scoreboardNameColor;
-    private final Component suffix;
-    private final int sortPriority;
-
-    public LobbyNametag(
-        Component prefix,
-        Component name,
-        NamedTextColor scoreboardNameColor,
-        Component suffix,
-        int sortPriority) {
-      this.prefix = prefix;
-      this.name = name;
-      this.scoreboardNameColor = scoreboardNameColor;
-      this.suffix = suffix;
-      this.sortPriority = sortPriority;
-    }
-
-    public Component getPrefix() {
-      return prefix;
-    }
-
-    public Component getName() {
-      return name;
-    }
-
-    public NamedTextColor getScoreboardNameColor() {
-      return scoreboardNameColor;
-    }
-
-    public Component getSuffix() {
-      return suffix;
-    }
-
-    public int getSortPriority() {
-      return sortPriority;
-    }
-  }
+  public record LobbyNametag(
+      Component prefix,
+      Component name,
+      NamedTextColor scoreboardNameColor,
+      Component suffix,
+      int sortPriority) {}
 }

@@ -2,7 +2,7 @@ package dev.lokspel.practice.manager.fight.event.events.onevsall.juggernaut;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.lokspel.practice.manager.fight.event.interfaces.EventFileData;
-import dev.lokspel.practice.util.KitFileData;
+import dev.lokspel.practice.util.kit.KitFileData;
 import lombok.Getter;
 import lombok.Setter;
 

@@ -2,7 +2,7 @@ package dev.lokspel.practice.manager.fight.event.events.duel.brackets;
 
 import dev.lokspel.practice.config.PracticeConfig;
 import dev.lokspel.practice.manager.fight.event.events.duel.interfaces.DuelEvent;
-import dev.lokspel.practice.util.KitData;
+import dev.lokspel.practice.util.kit.KitData;
 import dev.lokspel.practice.util.playerutil.PlayerUtil;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;

@@ -12,7 +12,7 @@ import dev.lokspel.practice.manager.gui.guis.queue.customkit.ChooseQueueTypeGui;
 import dev.lokspel.practice.manager.ladder.abstraction.normal.NormalLadder;
 import dev.lokspel.practice.manager.queue.CustomKitQueueManager;
 import dev.lokspel.practice.manager.queue.QueueManager;
-import dev.lokspel.practice.util.ItemCreateUtil;
+import dev.lokspel.practice.util.items.ItemCreateUtil;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;

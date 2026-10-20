@@ -6,7 +6,7 @@ import dev.lokspel.practice.manager.fight.event.enums.EventType;
 import dev.lokspel.practice.manager.fight.event.events.onevsall.juggernaut.JuggernautData;
 import dev.lokspel.practice.manager.fight.event.util.EventUtil;
 import dev.lokspel.practice.util.Common;
-import dev.lokspel.practice.util.KitData;
+import dev.lokspel.practice.util.kit.KitData;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.entity.Player;

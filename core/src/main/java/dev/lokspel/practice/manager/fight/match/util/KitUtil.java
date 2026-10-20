@@ -13,7 +13,7 @@ import dev.lokspel.practice.manager.profile.cosmetics.armortrim.ArmorSlot;
 import dev.lokspel.practice.manager.profile.cosmetics.armortrim.ArmorTrimPreset;
 import dev.lokspel.practice.manager.profile.cosmetics.armortrim.ArmorTrimTier;
 import dev.lokspel.practice.util.InventoryUtil;
-import dev.lokspel.practice.util.KitData;
+import dev.lokspel.practice.util.kit.KitData;
 import java.util.Objects;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;

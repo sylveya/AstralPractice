@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.lokspel.practice.manager.ladder.abstraction.playercustom.CustomLadderData;
 import dev.lokspel.practice.manager.profile.statistics.FfaStatsData;
 import dev.lokspel.practice.manager.profile.statistics.LadderStatsData;
-import dev.lokspel.practice.util.KitFileData;
+import dev.lokspel.practice.util.kit.KitFileData;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;

@@ -25,7 +25,7 @@ public final class NumberUtil {
     return !isInteger(s, 10);
   }
 
-  public static boolean isInteger(String s, int radix) {
+  private static boolean isInteger(String s, int radix) {
     if (s == null || s.isEmpty()) {
       return false;
     }

@@ -3,8 +3,8 @@ package dev.lokspel.practice.command.practice.arguments;
 import dev.lokspel.practice.config.PracticeConfig;
 import dev.lokspel.practice.manager.server.ServerManager;
 import dev.lokspel.practice.util.Common;
-import dev.lokspel.practice.util.GoldenHead;
 import dev.lokspel.practice.util.NumberUtil;
+import dev.lokspel.practice.util.items.GoldenHead;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 

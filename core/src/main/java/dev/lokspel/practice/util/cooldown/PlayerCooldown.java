@@ -23,7 +23,7 @@ public final class PlayerCooldown {
     addCooldown(player.getUniqueId(), object, time);
   }
 
-  public static void addCooldown(UUID uuid, CooldownObject object, double time) {
+  private static void addCooldown(UUID uuid, CooldownObject object, double time) {
     if (uuid == null || object == null) {
       return;
     }
@@ -38,7 +38,7 @@ public final class PlayerCooldown {
     }
   }
 
-  public static void removeCooldown(UUID uuid, CooldownObject object) {
+  private static void removeCooldown(UUID uuid, CooldownObject object) {
     if (uuid == null || object == null) {
       return;
     }
@@ -54,7 +54,7 @@ public final class PlayerCooldown {
     }
   }
 
-  public static void clearPlayer(UUID uuid) {
+  private static void clearPlayer(UUID uuid) {
     if (uuid != null) {
       cooldowns.remove(uuid);
     }
@@ -64,7 +64,7 @@ public final class PlayerCooldown {
     return player != null && isActive(player.getUniqueId(), object);
   }
 
-  public static boolean isActive(UUID uuid, CooldownObject object) {
+  private static boolean isActive(UUID uuid, CooldownObject object) {
     if (uuid == null || object == null) {
       return false;
     }
@@ -80,7 +80,7 @@ public final class PlayerCooldown {
     return player != null ? getLeft(player.getUniqueId(), object) : 0L;
   }
 
-  public static long getLeft(UUID uuid, CooldownObject object) {
+  private static long getLeft(UUID uuid, CooldownObject object) {
     if (uuid == null || object == null) {
       return 0L;
     }
@@ -98,7 +98,7 @@ public final class PlayerCooldown {
     return player != null ? getLeftInDouble(player.getUniqueId(), object) : 0.0;
   }
 
-  public static double getLeftInDouble(UUID uuid, CooldownObject object) {
+  private static double getLeftInDouble(UUID uuid, CooldownObject object) {
     long left = getLeft(uuid, object);
     return Math.round(left / 100.0) / 10.0;
   }

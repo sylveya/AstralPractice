@@ -9,7 +9,7 @@ import dev.lokspel.practice.manager.fight.match.type.playersvsplayers.partyvspar
 import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.manager.profile.enums.ProfileStatus;
-import dev.lokspel.practice.util.PermanentConfig;
+import dev.lokspel.practice.util.startup.PermanentConfig;
 import org.bukkit.entity.Player;
 
 public enum TeamUtil {

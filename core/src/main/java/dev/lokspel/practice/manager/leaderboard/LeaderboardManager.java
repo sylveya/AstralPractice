@@ -17,7 +17,7 @@ import dev.lokspel.practice.manager.leaderboard.types.LbSecondaryType;
 import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.manager.profile.statistics.LadderStats;
-import dev.lokspel.practice.util.StartUpCallback;
+import dev.lokspel.practice.util.startup.StartUpCallback;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;

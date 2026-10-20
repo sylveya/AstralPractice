@@ -7,13 +7,11 @@ import dev.lokspel.practice.manager.gui.GuiManager;
 import dev.lokspel.practice.manager.gui.GuiType;
 import dev.lokspel.practice.manager.gui.setup.ladder.LadderSetupManager;
 import dev.lokspel.practice.manager.ladder.LadderManager;
-import dev.lokspel.practice.manager.ladder.abstraction.Ladder;
 import dev.lokspel.practice.manager.ladder.abstraction.normal.NormalLadder;
 import dev.lokspel.practice.manager.ladder.enums.LadderType;
 import dev.lokspel.practice.util.Common;
 import dev.lokspel.practice.util.InventoryUtil;
-import dev.lokspel.practice.util.ItemCreateUtil;
-import java.util.Comparator;
+import dev.lokspel.practice.util.items.ItemCreateUtil;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.Getter;
@@ -109,20 +107,10 @@ public class LadderCreateGui extends Gui {
 
   private void createLadder(Player player, LadderType type) {
     try {
-      NormalLadder ladder =
-          (NormalLadder)
-              type.getClassInstance()
-                  .getConstructor(String.class, LadderType.class)
-                  .newInstance(ladderName, type);
-
+      NormalLadder ladder = type.create(ladderName);
       ladder.setData();
 
-      LadderManager.getInstance().getLadders().add(ladder);
-      LadderManager.getInstance().getLadders().sort(Comparator.comparing(Ladder::getName));
-
-      LadderSetupManager.getInstance().buildLadderSetupGuis(ladder);
-      GuiManager.getInstance().searchGui(GuiType.Ladder_Summary).update();
-      GuiManager.getInstance().searchGui(GuiType.Arena_Summary).update();
+      LadderManager.getInstance().addLadder(ladder);
 
       Common.sendMmMessage(
           player,

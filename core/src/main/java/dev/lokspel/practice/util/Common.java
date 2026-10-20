@@ -2,6 +2,7 @@ package dev.lokspel.practice.util;
 
 import dev.lokspel.practice.AstralPractice;
 import dev.lokspel.practice.manager.profile.Profile;
+import dev.lokspel.practice.util.startup.SoftDependUtil;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
 import java.util.ArrayList;
@@ -191,13 +192,13 @@ public final class Common {
     return getItemDisplayNameMiniMessage(itemStack.getItemMeta());
   }
 
-  public static short getItemDamage(ItemStack itemStack) {
+  public static int getItemDamage(ItemStack itemStack) {
     if (itemStack == null || !itemStack.hasItemMeta()) {
       return 0;
     }
     ItemMeta itemMeta = itemStack.getItemMeta();
     if (itemMeta instanceof Damageable damageable) {
-      return (short) damageable.getDamage();
+      return damageable.getDamage();
     }
     return 0;
   }

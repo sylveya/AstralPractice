@@ -15,7 +15,7 @@ import dev.lokspel.practice.manager.profile.statistics.FfaStats;
 import dev.lokspel.practice.manager.profile.statistics.LadderStats;
 import dev.lokspel.practice.manager.profile.statistics.ProfileStat;
 import dev.lokspel.practice.util.Common;
-import dev.lokspel.practice.util.StartUpCallback;
+import dev.lokspel.practice.util.startup.StartUpCallback;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

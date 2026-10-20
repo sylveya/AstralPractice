@@ -16,7 +16,7 @@ import dev.lokspel.practice.manager.profile.cosmetics.CosmeticsData;
 import dev.lokspel.practice.manager.profile.cosmetics.deatheffect.DeathEffect;
 import dev.lokspel.practice.manager.profile.cosmetics.shield.ShieldLayout;
 import dev.lokspel.practice.util.InventoryUtil;
-import dev.lokspel.practice.util.ItemCreateUtil;
+import dev.lokspel.practice.util.items.ItemCreateUtil;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;

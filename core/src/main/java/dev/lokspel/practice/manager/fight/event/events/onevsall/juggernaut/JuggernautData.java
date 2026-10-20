@@ -3,8 +3,8 @@ package dev.lokspel.practice.manager.fight.event.events.onevsall.juggernaut;
 import dev.lokspel.practice.manager.fight.event.enums.EventType;
 import dev.lokspel.practice.manager.fight.event.interfaces.EventData;
 import dev.lokspel.practice.manager.fight.event.interfaces.EventFileData;
-import dev.lokspel.practice.util.KitData;
-import dev.lokspel.practice.util.KitFileData;
+import dev.lokspel.practice.util.kit.KitData;
+import dev.lokspel.practice.util.kit.KitFileData;
 import java.io.IOException;
 import lombok.Getter;
 

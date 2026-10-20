@@ -1,7 +1,7 @@
 package dev.lokspel.practice.manager.playerkit;
 
 import dev.lokspel.practice.manager.playerkit.items.KitItem;
-import dev.lokspel.practice.util.KitData;
+import dev.lokspel.practice.util.kit.KitData;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

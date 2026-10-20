@@ -5,7 +5,7 @@ import dev.lokspel.practice.manager.fight.ffa.game.Ffa;
 import dev.lokspel.practice.manager.fight.match.Match;
 import dev.lokspel.practice.manager.fight.match.MatchManager;
 import dev.lokspel.practice.manager.fight.util.BlockUtil;
-import dev.lokspel.practice.util.PermanentConfig;
+import dev.lokspel.practice.util.startup.PermanentConfig;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
