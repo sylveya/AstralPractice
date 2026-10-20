@@ -92,9 +92,6 @@ public class SettingsConfig {
   @JsonProperty("CHAT")
   private Chat chat = new Chat();
 
-  @JsonProperty("DEBUG")
-  private Debug debug = new Debug();
-
   @Comment("Update checker")
   @JsonProperty("UPDATE-CHECKER")
   private UpdateChecker updateChecker = new UpdateChecker();
@@ -1179,23 +1176,6 @@ public class SettingsConfig {
               + " time.")
       @JsonProperty("SHORTCUT")
       private boolean shortcut = true;
-    }
-  }
-
-  @Getter
-  public static class Debug {
-    @JsonProperty("ACTIONBAR")
-    private Actionbar actionbar = new Actionbar();
-
-    @Getter
-    public static class Actionbar {
-      @Comment("Enables detailed action-bar lifecycle logs and in-memory history.")
-      @JsonProperty("ENABLED")
-      private boolean enabled = false;
-
-      @Comment("Optional player-name list. Empty = all players.")
-      @JsonProperty("TARGETS")
-      private List<String> targets = List.of();
     }
   }
 
