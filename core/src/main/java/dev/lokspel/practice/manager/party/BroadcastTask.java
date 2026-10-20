@@ -53,7 +53,9 @@ public class BroadcastTask extends BukkitRunnable {
         PracticeConfig.language()
             .getParty()
             .getBroadcastMsg()
-            .replace("%player%", party.getLeader().getName());
+            .replace("%player%", party.getLeader().getName())
+            .replace("%members%", String.valueOf(party.getMembers().size()))
+            .replace("%maxPlayerLimit%", String.valueOf(party.getMaxPlayerLimit()));
 
     for (Player online : Bukkit.getOnlinePlayers()) {
       Profile profile = ProfileManager.getInstance().getProfile(online);

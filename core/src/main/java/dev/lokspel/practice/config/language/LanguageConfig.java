@@ -795,9 +795,11 @@ public class LanguageConfig {
 
     @JsonProperty("BROADCAST-MSG")
     private String broadcastMsg =
-        "<gold>%player%'s <gray>party is <green>public<gray>. <hover:show_text:'<yellow>Click here"
-            + " to <green>join <yellow>the party.'><click:run_command:/party join"
-            + " %player%><yellow><u>Click here</click></hover> <gray>to join.";
+        "<gold>%player%'s <gray>party is <green>public<gray>"
+            + " (<yellow>%members%<gray>/<yellow>%maxPlayerLimit%<gray>)."
+            + " <hover:show_text:'<yellow>Click here to <green>join <yellow>the"
+            + " party.'><click:run_command:/party join %player%><yellow><u>Click"
+            + " here</click></hover> <gray>to join.";
 
     @JsonProperty("NOT-ENOUGH-PLAYER-FOR-GAME")
     private String notEnoughPlayerForGame =
