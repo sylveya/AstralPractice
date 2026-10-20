@@ -49,7 +49,7 @@ import dev.lokspel.practice.listener.PlayerChatListener;
 import dev.lokspel.practice.listener.PlayerCommandPreprocess;
 import dev.lokspel.practice.listener.PlayerInteract;
 import dev.lokspel.practice.listener.PlayerJoin;
-import dev.lokspel.practice.listener.PlayerPreLogin;
+import dev.lokspel.practice.listener.AsyncPlayerPreLogin;
 import dev.lokspel.practice.listener.PlayerQuit;
 import dev.lokspel.practice.listener.ProjectileLaunch;
 import dev.lokspel.practice.listener.StatisticListener;
@@ -456,7 +456,7 @@ public final class AstralPractice extends JavaPlugin {
   /** It registers all the events that are used in the plugin. */
   private void registerListeners(PluginManager pm) {
 
-    pm.registerEvents(new PlayerPreLogin(), this);
+    pm.registerEvents(new AsyncPlayerPreLogin(), this);
     pm.registerEvents(new PlayerJoin(), this);
     pm.registerEvents(new PlayerQuit(), this);
     pm.registerEvents(new PlayerInteract(), this);
