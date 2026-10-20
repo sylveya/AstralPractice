@@ -8,7 +8,6 @@ import dev.lokspel.practice.manager.fight.util.PlayerUtil;
 import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.manager.profile.enums.ProfileStatus;
-import dev.lokspel.practice.util.LobbyNametagUtil;
 import dev.lokspel.practice.util.PapiUtil;
 import dev.lokspel.practice.util.startup.PermanentConfig;
 import java.util.ArrayList;
@@ -423,10 +422,10 @@ public class NametagManager {
             ? LobbyNametagUtil.getLobbyNametag(profile, player.getName(), player)
             : null;
 
-    Component basePrefix = listing != null ? listing.getPrefix() : Component.empty();
+    Component basePrefix = listing != null ? listing.prefix() : Component.empty();
     Component baseName =
-        listing != null ? listing.getName() : Component.text(player.getName(), NamedTextColor.GRAY);
-    Component baseSuffix = listing != null ? listing.getSuffix() : Component.empty();
+        listing != null ? listing.name() : Component.text(player.getName(), NamedTextColor.GRAY);
+    Component baseSuffix = listing != null ? listing.suffix() : Component.empty();
 
     NametagOverride override = customNametags.get(player.getUniqueId());
 
@@ -698,17 +697,13 @@ public class NametagManager {
 
       NametagOverride override = customNametags.get(player.getUniqueId());
       Component prefix =
-          override != null && override.prefix() != null
-              ? override.prefix()
-              : lobbyNametag.getPrefix();
-      Component name = lobbyNametag.getName();
+          override != null && override.prefix() != null ? override.prefix() : lobbyNametag.prefix();
+      Component name = lobbyNametag.name();
       if (override != null && override.nameColor() != null) {
         name = name.color(override.nameColor());
       }
       Component suffix =
-          override != null && override.suffix() != null
-              ? override.suffix()
-              : lobbyNametag.getSuffix();
+          override != null && override.suffix() != null ? override.suffix() : lobbyNametag.suffix();
 
       Component tabListName = prefix.append(name).append(suffix);
       TabIntegration tabIntegration = TeamPacketBlocker.getInstance().getTabIntegration();
@@ -733,20 +728,16 @@ public class NametagManager {
     NametagOverride override = customNametags.get(player.getUniqueId());
 
     Component prefix =
-        override != null && override.prefix() != null
-            ? override.prefix()
-            : lobbyNametag.getPrefix();
+        override != null && override.prefix() != null ? override.prefix() : lobbyNametag.prefix();
 
-    Component name = lobbyNametag.getName();
+    Component name = lobbyNametag.name();
 
     if (override != null && override.nameColor() != null) {
       name = name.color(override.nameColor());
     }
 
     Component suffix =
-        override != null && override.suffix() != null
-            ? override.suffix()
-            : lobbyNametag.getSuffix();
+        override != null && override.suffix() != null ? override.suffix() : lobbyNametag.suffix();
 
     return prefix.append(name).append(suffix);
   }

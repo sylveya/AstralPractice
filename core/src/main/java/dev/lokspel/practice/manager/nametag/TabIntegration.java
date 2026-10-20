@@ -3,7 +3,6 @@ package dev.lokspel.practice.manager.nametag;
 import dev.lokspel.practice.AstralPractice;
 import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
-import dev.lokspel.practice.util.LobbyNametagUtil;
 import lombok.Getter;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;

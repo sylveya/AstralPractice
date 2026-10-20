@@ -1,10 +1,10 @@
 package dev.lokspel.practice.command.practice.arguments;
 
 import dev.lokspel.practice.config.PracticeConfig;
+import dev.lokspel.practice.manager.nametag.LobbyNametagUtil;
 import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.util.Common;
-import dev.lokspel.practice.util.LobbyNametagUtil;
 import dev.lokspel.practice.util.format.NameFormatUtil;
 import java.util.ArrayList;
 import java.util.List;

@@ -5,11 +5,11 @@ import dev.lokspel.practice.manager.fight.match.MatchManager;
 import dev.lokspel.practice.manager.fight.util.PlayerUtil;
 import dev.lokspel.practice.manager.inventory.Inventory;
 import dev.lokspel.practice.manager.inventory.InventoryManager;
+import dev.lokspel.practice.manager.nametag.LobbyNametagUtil;
 import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.manager.profile.enums.ProfileStatus;
 import dev.lokspel.practice.manager.server.ServerManager;
-import dev.lokspel.practice.util.LobbyNametagUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 

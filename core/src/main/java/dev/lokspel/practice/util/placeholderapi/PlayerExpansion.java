@@ -18,12 +18,12 @@ import dev.lokspel.practice.manager.leaderboard.Leaderboard;
 import dev.lokspel.practice.manager.leaderboard.LeaderboardManager;
 import dev.lokspel.practice.manager.leaderboard.types.LbMainType;
 import dev.lokspel.practice.manager.leaderboard.types.LbSecondaryType;
+import dev.lokspel.practice.manager.nametag.LobbyNametagUtil;
 import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.manager.profile.group.Group;
 import dev.lokspel.practice.manager.profile.statistics.FfaStats;
 import dev.lokspel.practice.manager.queue.QueueManager;
-import dev.lokspel.practice.util.LobbyNametagUtil;
 import java.util.ArrayList;
 import java.util.Map;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
@@ -727,8 +727,7 @@ public class PlayerExpansion extends PlaceholderExpansion implements Relational 
 
     String playerName = offlinePlayer.getName() == null ? "" : offlinePlayer.getName();
     NamedTextColor lobbyColor =
-        LobbyNametagUtil.getLobbyNametag(profile, playerName, onlinePlayer)
-            .getScoreboardNameColor();
+        LobbyNametagUtil.getLobbyNametag(profile, playerName, onlinePlayer).scoreboardNameColor();
     return "<" + lobbyColor.toString().toLowerCase() + ">";
   }
 
