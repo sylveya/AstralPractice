@@ -1332,6 +1332,10 @@ public class LanguageConfig {
       @JsonProperty("PLAYER-LEAVE")
       private String playerLeave = "<gold>%player% <yellow>left the FFA.";
 
+      @JsonProperty("KILLSTREAK-BROADCAST")
+      private String killstreakBroadcast =
+          "<gold>%player% <yellow>is on a <red>%streak% <yellow>killstreak!";
+
       @JsonProperty("COOLDOWN")
       private Cooldown cooldown = new Cooldown();
 
