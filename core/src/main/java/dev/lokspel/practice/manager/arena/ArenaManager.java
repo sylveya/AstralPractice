@@ -126,28 +126,44 @@ public class ArenaManager implements Listener {
                 }
 
                 String name = data.getName();
-                if (name != null && CreateArg.checkName(name) == null) {
-                  try {
-                    ArenaType type = ArenaType.valueOf(String.valueOf(data.getType()));
-                    // An arena keeps its data in the file named after it.
-                    ArenaData preloaded = file.equals(ArenaFile.path(name)) ? data : null;
+                if (name == null) {
+                  Common.sendConsoleMmMessage(
+                      "<red>Skipping arena file '" + file + "': missing or null arena name.");
+                  continue;
+                }
 
-                    Bukkit.getScheduler()
-                        .runTask(
-                            AstralPractice.getInstance(),
-                            () -> {
-                              if (type == ArenaType.FFA) {
-                                arenaList.add(new FfaArena(name, preloaded));
-                              } else {
-                                arenaList.add(new Arena(name, type, preloaded));
-                              }
-                            });
-                  } catch (IllegalArgumentException e) {
-                    Common.sendConsoleMmMessage(
-                        "<red>Can't load arena "
-                            + name
-                            + " because the type format isn't set correctly in the config.");
-                  }
+                String invalidReason = CreateArg.checkName(name);
+                if (invalidReason != null) {
+                  Common.sendConsoleMmMessage(
+                      "<red>Skipping arena file '"
+                          + file
+                          + "': invalid arena name '"
+                          + name
+                          + "'. "
+                          + invalidReason);
+                  continue;
+                }
+
+                try {
+                  ArenaType type = ArenaType.valueOf(String.valueOf(data.getType()));
+                  // An arena keeps its data in the file named after it.
+                  ArenaData preloaded = file.equals(ArenaFile.path(name)) ? data : null;
+
+                  Bukkit.getScheduler()
+                      .runTask(
+                          AstralPractice.getInstance(),
+                          () -> {
+                            if (type == ArenaType.FFA) {
+                              arenaList.add(new FfaArena(name, preloaded));
+                            } else {
+                              arenaList.add(new Arena(name, type, preloaded));
+                            }
+                          });
+                } catch (IllegalArgumentException e) {
+                  Common.sendConsoleMmMessage(
+                      "<red>Can't load arena "
+                          + name
+                          + " because the type format isn't set correctly in the config.");
                 }
               }
 

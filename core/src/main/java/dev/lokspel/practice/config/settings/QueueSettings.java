@@ -156,7 +156,7 @@ public class QueueSettings {
 
       static Settings unranked() {
         Settings value = new Settings();
-        value.mode = "LADDER";
+        value.mode = "GLOBAL";
         value.searchInOwnDivisions = 20;
         value.extendDivisionSearch = 10;
 
