@@ -682,6 +682,8 @@ public class PlayerExpansion extends PlaceholderExpansion implements Relational 
               return String.valueOf(ffa.getPlayers().size());
             case "spectators":
               return String.valueOf(ffa.getSpectators().size());
+            case "ladder":
+              return ffa.getLadderDisplayName();
 
             default:
               break;

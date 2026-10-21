@@ -15,6 +15,7 @@ import dev.lokspel.practice.manager.fight.match.type.playersvsplayers.partyvspar
 import dev.lokspel.practice.manager.fight.match.util.TeamUtil;
 import dev.lokspel.practice.manager.fight.util.PlayerUtil;
 import dev.lokspel.practice.manager.fight.util.stats.Statistic;
+import dev.lokspel.practice.manager.ladder.abstraction.normal.NormalLadder;
 import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.manager.profile.statistics.FfaStats;
@@ -339,6 +340,10 @@ public enum AdapterUtil {
     int globalBestStreak = ffaStats != null ? ffaStats.getBestKillStreak() : 0;
     double kdr = ffaStats != null ? ffaStats.getKdr() : 0.0;
 
+    NormalLadder playerLadder = ffa.getPlayers().get(player);
+    String ladderDisplay =
+        playerLadder != null ? playerLadder.getDisplayName() : ffa.getLadderDisplayName();
+
     return line.replaceText(replace("%players%", String.valueOf(ffa.getPlayers().size())))
         .replaceText(replace("%spectators%", String.valueOf(ffa.getSpectators().size())))
         .replaceText(
@@ -346,10 +351,7 @@ public enum AdapterUtil {
                 "%nextReset%",
                 ffa.getBuildRollback() != null ? ffa.getBuildRollback().getFormattedTime() : "N/A"))
         .replaceText(replace("%ping%", String.valueOf(PlayerUtil.getPing(player))))
-        .replaceText(
-            replace(
-                "%ladder%",
-                Common.deserializeMiniMessage(ffa.getPlayers().get(player).getDisplayName())))
+        .replaceText(replace("%ladder%", Common.deserializeMiniMessage(ladderDisplay)))
         .replaceText(
             replace("%arena%", Common.deserializeMiniMessage(ffa.getArena().getDisplayName())))
         // Session placeholders
@@ -391,7 +393,9 @@ public enum AdapterUtil {
                 "%nextReset%",
                 ffa.getBuildRollback() != null ? ffa.getBuildRollback().getFormattedTime() : "N/A"))
         .replaceText(
-            replace("%arena%", Common.deserializeMiniMessage(ffa.getArena().getDisplayName())));
+            replace("%arena%", Common.deserializeMiniMessage(ffa.getArena().getDisplayName())))
+        .replaceText(
+            replace("%ladder%", Common.deserializeMiniMessage(ffa.getLadderDisplayName())));
   }
 
   public static Component replaceMatchSpectatePlaceholders(Component line, Match match) {

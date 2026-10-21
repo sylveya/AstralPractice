@@ -77,6 +77,7 @@ Ladder placeholders use the ladder name instead of the type:
 |---------------------------------|----------------------------------------------|
 | %ap_ffa_<arena>_players%       | Players in the FFA arena                     |
 | %ap_ffa_<arena>_spectators%    | Spectators in the FFA arena                  |
+| %ap_ffa_<arena>_ladder%        | Ladder or kit name for the FFA arena         |
 | %ap_ffa_session_kills%          | Player's kills in current FFA session        |
 | %ap_ffa_session_deaths%         | Player's deaths in current FFA session       |
 | %ap_ffa_session_streak%         | Player's current killstreak in session       |
