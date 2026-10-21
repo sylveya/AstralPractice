@@ -108,9 +108,7 @@ public class ServerManager implements Listener {
           };
       runnable.runTaskTimer(AstralPractice.getInstance(), 0, 20L * 5);
     }
-    if (PracticeConfig.settings().getRanked().getLimit().isEnabled()) {
-      profileLimitRunnable.begin();
-    }
+    profileLimitRunnable.begin();
     if (PracticeConfig.settings().getMariadbDatabase().isEnabled()) {
       mariadbSaveRunnable.begin();
     }
