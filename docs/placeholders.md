@@ -43,6 +43,12 @@
 | %ap_division_short%    | Global division short name             |
 | %ap_division_full%     | Global division full name              |
 | %ap_division_weight%   | Global division weight                 |
+| %ap_best_division_short% | Best ladder division short name       |
+| %ap_best_division_full%  | Best ladder division full name        |
+| %ap_best_division_weight%| Best ladder division weight           |
+| %ap_match_division_short%| Match ladder division short name      |
+| %ap_match_division_full% | Match ladder division full name       |
+| %ap_match_division_weight%| Match ladder division weight         |
 | %ap_nametag_color%     | Player's nametag color                 |
 | %ap_group_name%        | Player group name                      |
 | %ap_group_prefix%      | Player group prefix                    |
@@ -56,6 +62,12 @@ Ladder placeholders use the ladder name instead of the type:
 
 | PlaceholderAPI                  | Description            |
 |---------------------------------|------------------------|
+| %ap_division_<ladder>_short%  | Ladder division short name |
+| %ap_division_<ladder>_full%   | Ladder division full name  |
+| %ap_division_<ladder>_weight% | Ladder division weight     |
+| %ap_division_ladder_<ladder>_short%  | Ladder division short name (alias) |
+| %ap_division_ladder_<ladder>_full%   | Ladder division full name (alias)  |
+| %ap_division_ladder_<ladder>_weight% | Ladder division weight (alias)     |
 | %ap_wins_ladder_<ladder>_u%    | Unranked wins in kit   |
 | %ap_wins_ladder_<ladder>_r%    | Ranked wins in kit     |
 | %ap_losses_ladder_<ladder>_u%  | Unranked losses in kit |

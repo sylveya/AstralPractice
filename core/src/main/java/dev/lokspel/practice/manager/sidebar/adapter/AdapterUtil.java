@@ -2,6 +2,8 @@ package dev.lokspel.practice.manager.sidebar.adapter;
 
 import dev.lokspel.practice.config.PracticeConfig;
 import dev.lokspel.practice.manager.arena.ArenaManager;
+import dev.lokspel.practice.manager.division.Division;
+import dev.lokspel.practice.manager.division.DivisionManager;
 import dev.lokspel.practice.manager.fight.ffa.game.Ffa;
 import dev.lokspel.practice.manager.fight.match.Match;
 import dev.lokspel.practice.manager.fight.match.Round;
@@ -62,19 +64,48 @@ public enum AdapterUtil {
     return currentRound != null ? currentRound.getFormattedTime() : "0";
   }
 
-  /** Replaces common match placeholders (duration, arena, ladder, ping). */
+  /** Replaces common match placeholders (duration, arena, ladder, ping, division). */
   private static Component replaceCommonMatchPlaceholders(
       Component line, Match match, Player player) {
     String roundDuration = getRoundDurationString(match);
-    return line.replaceText(replace("%duration%", roundDuration))
-        .replaceText(replace("%totalRounds%", String.valueOf(match.getLadder().getRounds())))
-        .replaceText(replace("%roundDuration%", roundDuration))
-        .replaceText(replace("%matchDuration%", match.getFormattedTime()))
-        .replaceText(replace("%ping%", String.valueOf(PlayerUtil.getPing(player))))
-        .replaceText(
-            replace("%arena%", Common.deserializeMiniMessage(match.getArena().getDisplayName())))
-        .replaceText(
-            replace("%ladder%", Common.deserializeMiniMessage(match.getLadder().getDisplayName())));
+    line =
+        line.replaceText(replace("%duration%", roundDuration))
+            .replaceText(replace("%totalRounds%", String.valueOf(match.getLadder().getRounds())))
+            .replaceText(replace("%roundDuration%", roundDuration))
+            .replaceText(replace("%matchDuration%", match.getFormattedTime()))
+            .replaceText(replace("%ping%", String.valueOf(PlayerUtil.getPing(player))))
+            .replaceText(
+                replace(
+                    "%arena%", Common.deserializeMiniMessage(match.getArena().getDisplayName())))
+            .replaceText(
+                replace(
+                    "%ladder%", Common.deserializeMiniMessage(match.getLadder().getDisplayName())));
+
+    if (match.getLadder() instanceof NormalLadder normalLadder) {
+      Profile profile = ProfileManager.getInstance().getProfile(player);
+      if (profile != null) {
+        Division matchDiv = DivisionManager.getInstance().getLadderDivision(profile, normalLadder);
+        Division bestDiv = DivisionManager.getInstance().getBestDivision(profile);
+        line =
+            line.replaceText(
+                    replace(
+                        "%matchDivision%",
+                        matchDiv != null ? matchDiv.getComponentFullName() : Component.empty()))
+                .replaceText(
+                    replace(
+                        "%matchDivision_short%",
+                        matchDiv != null ? matchDiv.getComponentShortName() : Component.empty()))
+                .replaceText(
+                    replace(
+                        "%bestDivision%",
+                        bestDiv != null ? bestDiv.getComponentFullName() : Component.empty()))
+                .replaceText(
+                    replace(
+                        "%bestDivision_short%",
+                        bestDiv != null ? bestDiv.getComponentShortName() : Component.empty()));
+      }
+    }
+    return line;
   }
 
   /** Replaces team placeholders for a given team prefix (team1, team2, partyTeam, enemyTeam). */
@@ -260,6 +291,40 @@ public enum AdapterUtil {
                 replace(
                     "%enemyNameOnly%",
                     enemy == null ? Component.empty() : getSidebarNameOnly(enemy)));
+
+    if (enemy != null && duel.getLadder() instanceof NormalLadder normalLadder) {
+      Profile enemyProfile = ProfileManager.getInstance().getProfile(enemy);
+      if (enemyProfile != null) {
+        Division enemyMatchDiv =
+            DivisionManager.getInstance().getLadderDivision(enemyProfile, normalLadder);
+        Division enemyBestDiv = DivisionManager.getInstance().getBestDivision(enemyProfile);
+        line =
+            line.replaceText(
+                    replace(
+                        "%enemyMatchDivision%",
+                        enemyMatchDiv != null
+                            ? enemyMatchDiv.getComponentFullName()
+                            : Component.empty()))
+                .replaceText(
+                    replace(
+                        "%enemyMatchDivision_short%",
+                        enemyMatchDiv != null
+                            ? enemyMatchDiv.getComponentShortName()
+                            : Component.empty()))
+                .replaceText(
+                    replace(
+                        "%enemyBestDivision%",
+                        enemyBestDiv != null
+                            ? enemyBestDiv.getComponentFullName()
+                            : Component.empty()))
+                .replaceText(
+                    replace(
+                        "%enemyBestDivision_short%",
+                        enemyBestDiv != null
+                            ? enemyBestDiv.getComponentShortName()
+                            : Component.empty()));
+      }
+    }
 
     // Replace team and round info
     return line.replaceText(replace("%playerTeamName%", team.getNameComponent()))
@@ -462,6 +527,35 @@ public enum AdapterUtil {
                                 duel.getWinsNeeded(),
                                 duel.getWonRounds(player2),
                                 TeamEnum.TEAM2.getColor()))));
+
+    if (duel.getLadder() instanceof NormalLadder normalLadder) {
+      Profile profile1 = player1 != null ? ProfileManager.getInstance().getProfile(player1) : null;
+      Profile profile2 = player2 != null ? ProfileManager.getInstance().getProfile(player2) : null;
+      if (profile1 != null) {
+        Division div1 = DivisionManager.getInstance().getLadderDivision(profile1, normalLadder);
+        line =
+            line.replaceText(
+                    replace(
+                        "%player1Division%",
+                        div1 != null ? div1.getComponentFullName() : Component.empty()))
+                .replaceText(
+                    replace(
+                        "%player1Division_short%",
+                        div1 != null ? div1.getComponentShortName() : Component.empty()));
+      }
+      if (profile2 != null) {
+        Division div2 = DivisionManager.getInstance().getLadderDivision(profile2, normalLadder);
+        line =
+            line.replaceText(
+                    replace(
+                        "%player2Division%",
+                        div2 != null ? div2.getComponentFullName() : Component.empty()))
+                .replaceText(
+                    replace(
+                        "%player2Division_short%",
+                        div2 != null ? div2.getComponentShortName() : Component.empty()));
+      }
+    }
 
     // Replace individual player info
     return line.replaceText(replace("%player1%", getSidebarName(player1)))
