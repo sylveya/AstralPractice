@@ -34,6 +34,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Mannequin;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
 
 public final class ArenaUtil {
 
@@ -197,6 +198,16 @@ public final class ArenaUtil {
   }
 
   public static void setGamerules(World world) {
+    if (world == null) {
+      return;
+    }
+
+    World defaultWorld = Bukkit.getWorlds().isEmpty() ? null : Bukkit.getWorlds().getFirst();
+    if (defaultWorld != null) {
+      defaultWorld.getDifficulty();
+      world.setDifficulty(defaultWorld.getDifficulty());
+    }
+
     world.setSpawnLocation(0, 60, 0);
     world.setGameRule(GameRules.SPAWN_MOBS, false);
     world.setGameRule(GameRules.SHOW_DEATH_MESSAGES, false);
@@ -323,7 +334,7 @@ public final class ArenaUtil {
     if (arena.getCuboid() == null) {
       return;
     }
-    org.bukkit.World world = arena.getCuboid().getWorld();
+    World world = arena.getCuboid().getWorld();
     if (world == null) {
       return;
     }
@@ -335,7 +346,7 @@ public final class ArenaUtil {
     int minCz = arena.getCuboid().getLowerZ() >> 4;
     int maxCz = arena.getCuboid().getUpperZ() >> 4;
 
-    org.bukkit.plugin.Plugin plugin = AstralPractice.getInstance();
+    Plugin plugin = AstralPractice.getInstance();
     for (int cx = minCx; cx <= maxCx; cx++) {
       for (int cz = minCz; cz <= maxCz; cz++) {
         if (ArenaManager.LOAD_CHUNKS) {
@@ -357,9 +368,7 @@ public final class ArenaUtil {
     if (mannequin == null) {
       return;
     }
-    if (mannequin.getEquipment() == null) {
-      return;
-    }
+    mannequin.getEquipment();
 
     if (rightHand) {
       mannequin.getEquipment().setItemInMainHand(item);
