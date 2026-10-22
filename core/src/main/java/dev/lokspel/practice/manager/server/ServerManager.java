@@ -2,6 +2,7 @@ package dev.lokspel.practice.manager.server;
 
 import dev.lokspel.practice.AstralPractice;
 import dev.lokspel.practice.config.PracticeConfig;
+import dev.lokspel.practice.listener.StatisticListener;
 import dev.lokspel.practice.manager.arena.util.ArenaWorldUtil;
 import dev.lokspel.practice.manager.backend.BackendManager;
 import dev.lokspel.practice.manager.division.DivisionManager;
@@ -22,7 +23,6 @@ import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.manager.profile.cosmetics.CosmeticPresets;
 import dev.lokspel.practice.manager.profile.enums.ProfileStatus;
 import dev.lokspel.practice.manager.queue.QueueManager;
-import dev.lokspel.practice.listener.StatisticListener;
 import dev.lokspel.practice.manager.sidebar.SidebarManager;
 import dev.lokspel.practice.manager.spectator.SpectatorManager;
 import dev.lokspel.practice.util.Common;

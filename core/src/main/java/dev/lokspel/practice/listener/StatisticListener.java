@@ -14,13 +14,13 @@ import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.manager.profile.enums.ProfileStatus;
 import dev.lokspel.practice.manager.sidebar.SidebarManager;
+import io.papermc.paper.event.player.PrePlayerAttackEntityEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.Getter;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.ThrownPotion;
@@ -44,6 +44,7 @@ public class StatisticListener implements Listener {
   @Getter protected final AstralPractice practice = AstralPractice.getInstance();
   private static final Map<UUID, List<Long>> clickTimestamps = new HashMap<>();
   private static final Map<UUID, Integer> currentCombo = new HashMap<>();
+  private static final Map<UUID, Float> lastAttackCooldown = new HashMap<>();
 
   public static int getCurrentCombo(Player player) {
     if (player == null) {
@@ -65,6 +66,7 @@ public class StatisticListener implements Listener {
     }
     clickTimestamps.remove(uuid);
     currentCombo.remove(uuid);
+    lastAttackCooldown.remove(uuid);
   }
 
   public StatisticListener() {
@@ -73,7 +75,9 @@ public class StatisticListener implements Listener {
 
   public static void reload() {
     var settings = PracticeConfig.settings();
-    if (settings == null || settings.getMatchSettings() == null || settings.getMatchSettings().getBoxing() == null) {
+    if (settings == null
+        || settings.getMatchSettings() == null
+        || settings.getMatchSettings().getBoxing() == null) {
       return;
     }
     var boxing = settings.getMatchSettings().getBoxing().getCustomAttackCooldown();
@@ -168,6 +172,19 @@ public class StatisticListener implements Listener {
   }
 
   @EventHandler(priority = EventPriority.LOWEST)
+  public void onPrePlayerHit(PrePlayerAttackEntityEvent e) {
+    if (!customCooldownEnabled) {
+      return;
+    }
+
+    if (!(e.getAttacked() instanceof Player)) {
+      return;
+    }
+
+    lastAttackCooldown.put(e.getPlayer().getUniqueId(), e.getPlayer().getAttackCooldown());
+  }
+
+  @EventHandler(priority = EventPriority.LOWEST)
   public void onPlayerHit(EntityDamageByEntityEvent e) {
     if (e.isCancelled()) {
       return;
@@ -204,7 +221,9 @@ public class StatisticListener implements Listener {
 
         if (match.getLadder() instanceof Boxing) {
           if (customCooldownEnabled) {
-            if (attacker.getAttackCooldown() < customCooldownValue) {
+            Float preCooldown = lastAttackCooldown.remove(attacker.getUniqueId());
+            float cooldown = preCooldown != null ? preCooldown : attacker.getAttackCooldown();
+            if (cooldown < customCooldownValue) {
               return;
             }
             if (onlySword) {
