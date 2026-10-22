@@ -22,6 +22,7 @@ import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.manager.profile.cosmetics.CosmeticPresets;
 import dev.lokspel.practice.manager.profile.enums.ProfileStatus;
 import dev.lokspel.practice.manager.queue.QueueManager;
+import dev.lokspel.practice.listener.StatisticListener;
 import dev.lokspel.practice.manager.sidebar.SidebarManager;
 import dev.lokspel.practice.manager.spectator.SpectatorManager;
 import dev.lokspel.practice.util.Common;
@@ -297,6 +298,7 @@ public class ServerManager implements Listener {
       SidebarManager.getInstance().reloadSidebarConfig();
       goldenHead.reload();
       NametagManager.getInstance().reload();
+      StatisticListener.reload();
       // A failed configuration reload keeps the GUIs built from the previous values.
       if (configurationReloaded) {
         reloadGuis();
