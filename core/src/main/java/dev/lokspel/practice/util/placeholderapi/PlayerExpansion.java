@@ -637,7 +637,7 @@ public class PlayerExpansion extends PlaceholderExpansion implements Relational 
                   case "deaths" ->
                       LeaderboardManager.getInstance()
                           .searchLb(LbMainType.FFA_GLOBAL, LbSecondaryType.DEATHS, null);
-                  case "streak", "best_streak", "killstreak", "kill_streak" ->
+                  case "streak", "killstreak" ->
                       LeaderboardManager.getInstance()
                           .searchLb(LbMainType.FFA_GLOBAL, LbSecondaryType.BEST_WIN_STREAK, null);
                   default -> null;
@@ -785,11 +785,16 @@ public class PlayerExpansion extends PlaceholderExpansion implements Relational 
                   case "kdr" -> {
                     return String.valueOf(ffaStats.getKdr());
                   }
-                  case "streak", "best_streak" -> {
+                  case "streak" -> {
                     return String.valueOf(ffaStats.getBestKillStreak());
                   }
                   default -> {}
                 }
+              } else if (input.length == 4
+                  && input[2].equals("best")
+                  && input[3].equals("streak")) {
+                // ffa_global_best_streak or ffa_lifetime_best_streak
+                return String.valueOf(ffaStats.getBestKillStreak());
               }
               break;
             // ffa_kdr
