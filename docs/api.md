@@ -119,6 +119,9 @@ PlayerState stateByUuid = api.getPlayers().getState(uuid);
 // Player division name (SHORT or FULL)
 String divisionShort = api.getPlayers().getDivision(player, DivisionName.SHORT);
 String divisionFull = api.getPlayers().getDivision(player, DivisionName.FULL);
+String ladderDivision = api.getPlayers().getDivision(player, "boxing", DivisionName.FULL);
+String bestDivision = api.getPlayers().getBestDivision(player, DivisionName.FULL);
+String matchDivision = api.getPlayers().getMatchDivision(player, DivisionName.FULL);
 
 // Nametag components (Adventure Component prefix/suffix, color, sort priority)
 PlayerNametag nametag = api.getPlayers().getNametag(player);

@@ -138,6 +138,14 @@ public class QueueSettings {
 
     @Getter
     public static class Settings {
+      @Comment({
+        "Mode for unranked division search:",
+        "LADDER - kit-specific division (based on wins/elo in that ladder)",
+        "GLOBAL - overall profile division (based on total wins/elo)"
+      })
+      @JsonProperty("MODE")
+      private String mode;
+
       @Comment("In sec.")
       @JsonProperty("SEARCH-IN-OWN-DIVISIONS")
       private Integer searchInOwnDivisions;
@@ -148,10 +156,15 @@ public class QueueSettings {
 
       static Settings unranked() {
         Settings value = new Settings();
+        value.mode = "GLOBAL";
         value.searchInOwnDivisions = 20;
         value.extendDivisionSearch = 10;
 
         return value;
+      }
+
+      public boolean isLadderMode() {
+        return "LADDER".equalsIgnoreCase(mode);
       }
     }
   }

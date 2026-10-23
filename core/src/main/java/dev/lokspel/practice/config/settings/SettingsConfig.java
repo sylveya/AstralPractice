@@ -96,9 +96,6 @@ public class SettingsConfig {
   @JsonProperty("UPDATE-CHECKER")
   private UpdateChecker updateChecker = new UpdateChecker();
 
-  @JsonProperty("RANKED")
-  private Ranked ranked = new Ranked();
-
   private static Map<String, Sound> defaultSounds() {
     Map<String, Sound> values = new LinkedHashMap<>();
     values.put("MATCH_START_COUNTDOWN", Sound.matchStartCountdown());
@@ -1185,21 +1182,5 @@ public class SettingsConfig {
         "Checks the repository VERSION file on startup and tells you when a newer release is out.")
     @JsonProperty("ENABLED")
     private boolean enabled = true;
-  }
-
-  @Getter
-  public static class Ranked {
-    @JsonProperty("LIMIT")
-    private Limit limit = new Limit();
-
-    @Getter
-    public static class Limit {
-      @Comment({
-        "Resets the daily limits of the groups (UNRANKED-PER-DAY, RANKED-PER-DAY, ...)",
-        "every midnight."
-      })
-      @JsonProperty("ENABLED")
-      private boolean enabled = false;
-    }
   }
 }

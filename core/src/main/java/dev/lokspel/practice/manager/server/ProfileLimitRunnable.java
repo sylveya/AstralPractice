@@ -6,6 +6,7 @@ import dev.lokspel.practice.manager.fight.match.enums.WeightClass;
 import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.manager.profile.group.Group;
+import dev.lokspel.practice.manager.profile.group.GroupManager;
 import dev.lokspel.practice.util.Common;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -41,13 +42,23 @@ public class ProfileLimitRunnable extends BukkitRunnable {
       profile.setPartyBroadcastLeft(group != null ? group.getPartyBroadcastLimit() : 0);
     }
 
-    for (Player player : Bukkit.getOnlinePlayers()) {
-      Common.sendMmMessage(
-          player,
-          PracticeConfig.language()
-              .getGamesReset()
-              .replace("%unranked%", WeightClass.UNRANKED.getMmName())
-              .replace("%ranked%", WeightClass.RANKED.getMmName()));
+    boolean hasGameLimits = false;
+    for (Group group : GroupManager.getInstance().getGroups()) {
+      if (group.getRankedLimit() > 0 || group.getUnrankedLimit() > 0) {
+        hasGameLimits = true;
+        break;
+      }
+    }
+
+    String gamesResetMessage = PracticeConfig.language().getGamesReset();
+    if (hasGameLimits && gamesResetMessage != null && !gamesResetMessage.isBlank()) {
+      for (Player player : Bukkit.getOnlinePlayers()) {
+        Common.sendMmMessage(
+            player,
+            gamesResetMessage
+                .replace("%unranked%", WeightClass.UNRANKED.getMmName())
+                .replace("%ranked%", WeightClass.RANKED.getMmName()));
+      }
     }
   }
 }

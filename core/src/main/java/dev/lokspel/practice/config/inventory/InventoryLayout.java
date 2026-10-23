@@ -218,7 +218,7 @@ public class InventoryLayout {
 
     static InventoryItem partyJoin() {
       InventoryItem value = new InventoryItem();
-      value.slot = 6;
+      value.slot = -1;
       value.item =
           ItemConfig.of("LIME_DYE")
               .name("<green>Join Party <gray>(Right-Click)")

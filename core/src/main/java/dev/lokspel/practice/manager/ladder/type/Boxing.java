@@ -38,9 +38,9 @@ public class Boxing extends NormalLadder implements CustomConfig, LadderHandle, 
   @Override
   public boolean shouldEndRound(Match match, Round round, Player player) {
     // Check if the player has reached the required hits
-    int requiredStrokes = boxingWinHit - 1;
+    int requiredStrokes = boxingWinHit;
     Statistic statistic = match.getCurrentStat(player);
-    return statistic != null && statistic.getHit() == requiredStrokes;
+    return statistic != null && statistic.getHit() >= requiredStrokes;
   }
 
   @Override
@@ -98,7 +98,6 @@ public class Boxing extends NormalLadder implements CustomConfig, LadderHandle, 
     }
 
     int requiredStrokes = ladder.getBoxingWinHit();
-    requiredStrokes--;
 
     MatchType matchType = match.getType();
     TeamEnum attackerTeam;
@@ -108,7 +107,7 @@ public class Boxing extends NormalLadder implements CustomConfig, LadderHandle, 
     switch (matchType) {
       case DUEL:
       case PARTY_FFA:
-        if (attackerStat.getHit() == requiredStrokes && round instanceof PlayerWinner) {
+        if (attackerStat.getHit() >= requiredStrokes && round instanceof PlayerWinner) {
           PlayerWinner playerWinner = (PlayerWinner) match.getCurrentRound();
 
           if (!attackerStat.isSet()) {
@@ -123,7 +122,7 @@ public class Boxing extends NormalLadder implements CustomConfig, LadderHandle, 
           attackerTeam = playersVsPlayers.getTeam(attacker);
 
           if (getTeamBoxingStrokes(match, playersVsPlayers.getTeamPlayers(attackerTeam))
-              == requiredStrokes) {
+              >= requiredStrokes) {
             if (!attackerStat.isSet()) {
               playersVsPlayers.getCurrentRound().setRoundWinner(attackerTeam);
               round.endRound();

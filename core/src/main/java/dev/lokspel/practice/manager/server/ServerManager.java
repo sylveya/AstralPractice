@@ -2,6 +2,7 @@ package dev.lokspel.practice.manager.server;
 
 import dev.lokspel.practice.AstralPractice;
 import dev.lokspel.practice.config.PracticeConfig;
+import dev.lokspel.practice.listener.StatisticListener;
 import dev.lokspel.practice.manager.arena.util.ArenaWorldUtil;
 import dev.lokspel.practice.manager.backend.BackendManager;
 import dev.lokspel.practice.manager.division.DivisionManager;
@@ -108,9 +109,7 @@ public class ServerManager implements Listener {
           };
       runnable.runTaskTimer(AstralPractice.getInstance(), 0, 20L * 5);
     }
-    if (PracticeConfig.settings().getRanked().getLimit().isEnabled()) {
-      profileLimitRunnable.begin();
-    }
+    profileLimitRunnable.begin();
     if (PracticeConfig.settings().getMariadbDatabase().isEnabled()) {
       mariadbSaveRunnable.begin();
     }
@@ -299,6 +298,7 @@ public class ServerManager implements Listener {
       SidebarManager.getInstance().reloadSidebarConfig();
       goldenHead.reload();
       NametagManager.getInstance().reload();
+      StatisticListener.reload();
       // A failed configuration reload keeps the GUIs built from the previous values.
       if (configurationReloaded) {
         reloadGuis();

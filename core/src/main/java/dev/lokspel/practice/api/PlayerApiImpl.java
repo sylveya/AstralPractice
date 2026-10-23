@@ -4,6 +4,12 @@ import dev.lokspel.api.enums.DivisionName;
 import dev.lokspel.api.enums.PlayerState;
 import dev.lokspel.api.player.PlayerApi;
 import dev.lokspel.api.utilities.PlayerNametag;
+import dev.lokspel.practice.manager.division.Division;
+import dev.lokspel.practice.manager.division.DivisionManager;
+import dev.lokspel.practice.manager.fight.match.Match;
+import dev.lokspel.practice.manager.fight.match.MatchManager;
+import dev.lokspel.practice.manager.ladder.LadderManager;
+import dev.lokspel.practice.manager.ladder.abstraction.normal.NormalLadder;
 import dev.lokspel.practice.manager.nametag.LobbyNametagUtil;
 import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
@@ -56,6 +62,62 @@ public class PlayerApiImpl implements PlayerApi {
     return switch (divisionName) {
       case FULL -> profile.getStats().getDivision().getFullName();
       case SHORT -> profile.getStats().getDivision().getShortName();
+    };
+  }
+
+  @Override
+  public String getDivision(Player player, String ladderName, DivisionName divisionName) {
+    Profile profile = ProfileManager.getInstance().getProfile(player);
+    if (profile == null) {
+      return null;
+    }
+    NormalLadder ladder = LadderManager.getInstance().getLadder(ladderName);
+    if (ladder == null) {
+      return null;
+    }
+    Division division = DivisionManager.getInstance().getLadderDivision(profile, ladder);
+    if (division == null) {
+      return null;
+    }
+    return switch (divisionName) {
+      case FULL -> division.getFullName();
+      case SHORT -> division.getShortName();
+    };
+  }
+
+  @Override
+  public String getBestDivision(Player player, DivisionName divisionName) {
+    Profile profile = ProfileManager.getInstance().getProfile(player);
+    if (profile == null) {
+      return null;
+    }
+    Division division = DivisionManager.getInstance().getBestDivision(profile);
+    if (division == null) {
+      return null;
+    }
+    return switch (divisionName) {
+      case FULL -> division.getFullName();
+      case SHORT -> division.getShortName();
+    };
+  }
+
+  @Override
+  public String getMatchDivision(Player player, DivisionName divisionName) {
+    Profile profile = ProfileManager.getInstance().getProfile(player);
+    if (profile == null) {
+      return null;
+    }
+    Match match = MatchManager.getInstance().getLiveMatchByPlayer(player);
+    if (match == null || !(match.getLadder() instanceof NormalLadder normalLadder)) {
+      return null;
+    }
+    Division division = DivisionManager.getInstance().getLadderDivision(profile, normalLadder);
+    if (division == null) {
+      return null;
+    }
+    return switch (divisionName) {
+      case FULL -> division.getFullName();
+      case SHORT -> division.getShortName();
     };
   }
 

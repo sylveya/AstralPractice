@@ -35,7 +35,7 @@ public class KitData {
   }
 
   public boolean isSet() {
-    return storage != null && armor != null;
+    return storage != null || armor != null || extra != null;
   }
 
   public void setKitData(final Player player, final boolean setEffect) {
@@ -79,7 +79,7 @@ public class KitData {
   }
 
   public void setStorage(ItemStack[] storage) {
-    this.storage = storage.clone();
+    this.storage = storage != null ? storage.clone() : null;
   }
 
   public void setArmor(Player player) {
@@ -87,7 +87,7 @@ public class KitData {
   }
 
   public void setArmor(ItemStack[] armor) {
-    this.armor = armor.clone();
+    this.armor = armor != null ? armor.clone() : null;
   }
 
   public void setExtra(Player player) {
@@ -95,18 +95,30 @@ public class KitData {
   }
 
   public void setExtra(ItemStack[] extra) {
-    this.extra = extra.clone();
+    this.extra = extra != null ? extra.clone() : null;
   }
 
   private void loadStorage(Player player) {
-    player.getInventory().setContents(this.storage.clone());
+    if (this.storage != null) {
+      player.getInventory().setContents(this.storage.clone());
+    } else {
+      player.getInventory().clear();
+    }
   }
 
   private void loadArmor(Player player) {
-    player.getInventory().setArmorContents(this.armor.clone());
+    if (this.armor != null) {
+      player.getInventory().setArmorContents(this.armor.clone());
+    } else {
+      player.getInventory().setArmorContents(new ItemStack[4]);
+    }
   }
 
   private void loadExtra(Player player) {
-    player.getInventory().setExtraContents(this.extra.clone());
+    if (this.extra != null) {
+      player.getInventory().setExtraContents(this.extra.clone());
+    } else {
+      player.getInventory().setExtraContents(new ItemStack[1]);
+    }
   }
 }

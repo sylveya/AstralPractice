@@ -53,6 +53,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -93,7 +94,7 @@ public abstract class Match extends BukkitRunnable
 
   // Spectator variables
   @Setter private boolean allowSpectators = true;
-  protected final List<Player> spectators = new ArrayList<>(); // List of the spectators
+  protected final List<Player> spectators = new CopyOnWriteArrayList<>(); // List of the spectators
 
   // Fight change
   private final FightChangeOptimized fightChange;
@@ -127,7 +128,7 @@ public abstract class Match extends BukkitRunnable
     this.arena = resolvedArena;
     this.ladder = ladder;
     this.winsNeeded = winsNeeded;
-    this.players = new ArrayList<>(players);
+    this.players = new CopyOnWriteArrayList<>(players);
     for (Player player : players) {
       this.matchPlayers.put(player, new MatchFightPlayer(player, this));
       this.addPlayerToBelowName(player);

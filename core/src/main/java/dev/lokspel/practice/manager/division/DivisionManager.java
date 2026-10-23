@@ -8,6 +8,7 @@ import dev.lokspel.practice.manager.fight.match.Match;
 import dev.lokspel.practice.manager.ladder.abstraction.normal.NormalLadder;
 import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
+import dev.lokspel.practice.manager.profile.statistics.LadderStats;
 import dev.lokspel.practice.util.Common;
 import java.util.ArrayList;
 import java.util.List;
@@ -71,10 +72,46 @@ public class DivisionManager implements Listener {
   }
 
   public Division getDivision(final Profile profile) {
-    int experience = profile.getStats().getExperience();
-    int wins = profile.getStats().getGlobalWins();
-    int elo = profile.getStats().getGlobalElo();
+    if (profile == null) {
+      return null;
+    }
+    return calculateDivision(
+        profile.getStats().getExperience(),
+        profile.getStats().getGlobalWins(),
+        profile.getStats().getGlobalElo());
+  }
 
+  public Division getLadderDivision(final Profile profile, final NormalLadder ladder) {
+    if (profile == null || ladder == null) {
+      return null;
+    }
+    LadderStats stats = profile.getStats().getLadderStat(ladder);
+    if (stats == null) {
+      return null;
+    }
+    int wins = stats.getRankedWins() + stats.getUnRankedWins();
+    int elo = stats.getElo();
+    return calculateDivision(profile.getStats().getExperience(), wins, elo);
+  }
+
+  public Division getBestDivision(final Profile profile) {
+    if (profile == null) {
+      return null;
+    }
+    Division best = null;
+    int bestWeight = -1;
+    for (NormalLadder ladder : profile.getStats().getLadderStats().keySet()) {
+      Division division = getLadderDivision(profile, ladder);
+      int weight = getDivisionWeight(division);
+      if (weight > bestWeight) {
+        bestWeight = weight;
+        best = division;
+      }
+    }
+    return best != null ? best : getDivision(profile);
+  }
+
+  private Division calculateDivision(final int experience, final int wins, final int elo) {
     for (int i = 0; i < this.divisions.size(); i++) {
       Division division = this.divisions.get(i);
       Division nextDivision;
@@ -106,28 +143,20 @@ public class DivisionManager implements Listener {
     return null;
   }
 
-  private Division getDivision(Division division) {
+  public Division getNextDivision(final Profile profile) {
+    return profile != null ? getNextDivision(profile.getStats().getDivision()) : null;
+  }
+
+  public Division getNextDivision(final Division division) {
     if (division == null) {
       return null;
     }
 
     int index = this.divisions.indexOf(division);
-    if (index == -1) {
-      return null;
-    }
-
-    if (index + 1 >= this.divisions.size()) {
+    if (index == -1 || index + 1 >= this.divisions.size()) {
       return null;
     }
     return this.divisions.get(index + 1);
-  }
-
-  public Division getNextDivision(final Profile profile) {
-    return getDivision(profile.getStats().getDivision());
-  }
-
-  public Division getNextDivision(final Division division) {
-    return getDivision(division);
   }
 
   public Division getPreviousDivision(final Division division) {
@@ -136,11 +165,7 @@ public class DivisionManager implements Listener {
     }
 
     int index = this.divisions.indexOf(division);
-    if (index == -1) {
-      return null;
-    }
-
-    if (index - 1 < 0) {
+    if (index <= 0) {
       return null;
     }
     return this.divisions.get(index - 1);

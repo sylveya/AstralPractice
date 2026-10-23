@@ -447,6 +447,7 @@ public class SidebarConfig {
               "  <white>Next Reset: <yellow>%nextReset%",
               "",
               "  <white>Arena: <green>%arena%",
+              "  <white>Ladder: <green>%ladder%",
               "",
               "<gold>play.astralpractice.com",
               "<gray><st>---------------------");
@@ -460,6 +461,7 @@ public class SidebarConfig {
               "  <white>Spectators: <yellow>%spectators%",
               "",
               "  <white>Arena: <green>%arena%",
+              "  <white>Ladder: <green>%ladder%",
               "",
               "<gold>play.astralpractice.com",
               "<gray><st>---------------------");

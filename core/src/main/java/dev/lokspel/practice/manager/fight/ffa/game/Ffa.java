@@ -783,4 +783,42 @@ public class Ffa implements Spectatable, dev.lokspel.api.interfaces.Ffa {
 
     MatchManager.getInstance().getBelowNameManager().cleanUpForUser(player);
   }
+
+  /**
+   * Returns the single ladder configured for this FFA arena, or {@code null} if multiple or no
+   * ladders are assigned.
+   *
+   * @return the assigned {@link NormalLadder}, or {@code null}
+   */
+  public @Nullable NormalLadder getLadder() {
+    if (this.arena == null || this.arena.getAssignedLadders().size() != 1) {
+      return null;
+    }
+    return this.arena.getAssignedLadders().iterator().next();
+  }
+
+  @Override
+  public @Nullable String getLadderName() {
+    NormalLadder ladder = getLadder();
+    return ladder != null ? ladder.getName() : null;
+  }
+
+  @Override
+  public String getLadderDisplayName() {
+    NormalLadder ladder = getLadder();
+    if (ladder != null) {
+      return ladder.getDisplayName();
+    }
+
+    if (this.arena != null && this.arena.getAssignedLadders().size() > 1) {
+      String label =
+          PracticeConfig.settings().getQueue().getMulti().getSidebar().getMultipleLabel();
+      if (label == null || label.isBlank()) {
+        label = PracticeConfig.language().getQueues().getMulti().getSidebarMultiple();
+      }
+      return (label == null || label.isBlank()) ? "Multiple Ladders" : label;
+    }
+
+    return "Unknown";
+  }
 }

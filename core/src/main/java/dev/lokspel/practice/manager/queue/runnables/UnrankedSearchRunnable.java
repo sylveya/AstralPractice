@@ -35,8 +35,25 @@ public class UnrankedSearchRunnable extends SearchRunnable {
   public UnrankedSearchRunnable(final Queue queue) {
     super(queue, SEARCH_IN_OWN_DIVISION * 20L, SEARCH_IN_NEXT_DIVISION * 20L, false);
 
-    this.currentDivision = queue.getProfile().getStats().getDivision();
-    this.acceptableDivisions.add(currentDivision);
+    boolean ladderMode =
+        PracticeConfig.settings()
+            .getQueue()
+            .getUnranked()
+            .getDivisionSearch()
+            .getSettings()
+            .isLadderMode();
+    Division initial = null;
+    if (ladderMode && queue.getLadder() != null) {
+      initial =
+          DivisionManager.getInstance().getLadderDivision(queue.getProfile(), queue.getLadder());
+    }
+    if (initial == null) {
+      initial = queue.getProfile().getStats().getDivision();
+    }
+    this.currentDivision = initial;
+    if (currentDivision != null) {
+      this.acceptableDivisions.add(currentDivision);
+    }
     this.sendMsg();
 
     this.searching =
@@ -44,17 +61,12 @@ public class UnrankedSearchRunnable extends SearchRunnable {
           @Override
           public void run() {
             for (Queue q : queueManager.getQueues()) {
-              if (q == queue) {
+              if (q == queue || q.getPlayer() == queue.getPlayer()) {
                 continue;
               }
 
-              if (q.getPlayer() == queue.getPlayer()) {
-                continue;
-              }
-
-              if (queue.getProfile().getIgnoredPlayers().contains(q.getProfile())) {
-                continue;
-              } else if (q.getProfile().getIgnoredPlayers().contains(queue.getProfile())) {
+              if (queue.getProfile().getIgnoredPlayers().contains(q.getProfile())
+                  || q.getProfile().getIgnoredPlayers().contains(queue.getProfile())) {
                 continue;
               }
 
@@ -62,16 +74,19 @@ public class UnrankedSearchRunnable extends SearchRunnable {
                 continue;
               }
 
-              Division queueDivision = q.getProfile().getStats().getDivision();
-              if (acceptableDivisions.contains(queueDivision)) {
-                for (NormalLadder ladder : getShuffledQueuedLadders()) {
-                  if (!q.isQueued(ladder)) {
-                    continue;
-                  }
+              for (NormalLadder ladder : getShuffledQueuedLadders()) {
+                if (!q.isQueued(ladder)) {
+                  continue;
+                }
 
+                Division targetDivision =
+                    ladderMode
+                        ? DivisionManager.getInstance().getLadderDivision(q.getProfile(), ladder)
+                        : q.getProfile().getStats().getDivision();
+
+                if (acceptableDivisions.contains(targetDivision)) {
                   this.cancel();
                   queue.startMatch(q, ladder);
-
                   return;
                 }
               }
@@ -82,6 +97,10 @@ public class UnrankedSearchRunnable extends SearchRunnable {
 
   @Override
   public void run() {
+    if (currentDivision == null) {
+      return;
+    }
+
     Division nextDivision2;
     if (nextDivision == null) {
       nextDivision2 = DivisionManager.getInstance().getNextDivision(currentDivision);
@@ -114,6 +133,10 @@ public class UnrankedSearchRunnable extends SearchRunnable {
   }
 
   private void sendMsg() {
+    if (currentDivision == null) {
+      return;
+    }
+
     if (acceptableDivisions.size() == 1) {
       this.updateQueueActionBar(
           PracticeConfig.language()

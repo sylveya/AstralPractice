@@ -43,6 +43,34 @@ public interface PlayerApi {
   String getDivision(Player player, DivisionName divisionName);
 
   /**
+   * Get the player's division for a specific ladder.
+   *
+   * @param player The player
+   * @param ladder The ladder identifier
+   * @param divisionName Short or Full name of the division
+   * @return The player's ladder division, or null if not found
+   */
+  String getDivision(Player player, String ladder, DivisionName divisionName);
+
+  /**
+   * Get the player's best ladder division.
+   *
+   * @param player The player
+   * @param divisionName Short or Full name of the division
+   * @return The player's best division, or null if none
+   */
+  String getBestDivision(Player player, DivisionName divisionName);
+
+  /**
+   * Get the player's division in their current active match.
+   *
+   * @param player The player
+   * @param divisionName Short or Full name of the division
+   * @return The player's match division, or null if none
+   */
+  String getMatchDivision(Player player, DivisionName divisionName);
+
+  /**
    * Get the amount of unranked matches left for the player today.
    *
    * @param player The player

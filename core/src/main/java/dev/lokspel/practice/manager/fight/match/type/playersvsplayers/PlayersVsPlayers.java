@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import lombok.Getter;
 import org.bukkit.entity.Player;
 
@@ -38,10 +39,10 @@ public abstract class PlayersVsPlayers extends Match implements Team {
   protected PlayersVsPlayers(Ladder ladder, Arena arena, List<Player> players, int winsNeeded) {
     super(ladder, arena, players, winsNeeded);
 
-    this.teams.put(TeamEnum.TEAM1, new ArrayList<>());
-    this.teams.put(TeamEnum.TEAM2, new ArrayList<>());
-    this.originalTeams.put(TeamEnum.TEAM1, new ArrayList<>());
-    this.originalTeams.put(TeamEnum.TEAM2, new ArrayList<>());
+    this.teams.put(TeamEnum.TEAM1, new CopyOnWriteArrayList<>());
+    this.teams.put(TeamEnum.TEAM2, new CopyOnWriteArrayList<>());
+    this.originalTeams.put(TeamEnum.TEAM1, new CopyOnWriteArrayList<>());
+    this.originalTeams.put(TeamEnum.TEAM2, new CopyOnWriteArrayList<>());
   }
 
   @Override
