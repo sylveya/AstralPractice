@@ -10,4 +10,4 @@
 - [⚙Configuration files](./configuration.md)
 
 > [!IMPORTANT]
-> Join our [Discord server](https://discord.gg/3t8tZRkJ6H) for support.
+> Join our [Discord server](https://discord.gg/tRq4JJnRc2) for support.
