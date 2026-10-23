@@ -368,7 +368,6 @@ public final class ArenaUtil {
     if (mannequin == null) {
       return;
     }
-    mannequin.getEquipment();
 
     if (rightHand) {
       mannequin.getEquipment().setItemInMainHand(item);
