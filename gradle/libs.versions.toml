@@ -46,7 +46,7 @@ paper-api = { group = "io.papermc.paper", name = "paper-api", version.ref = "pap
 
 # core dependencies
 packetevents-spigot = { group = "com.github.retrooper", name = "packetevents-spigot", version.ref = "packetevents" }
-placeholderapi = { group = "me.clip", name = "placeholderapi", version.ref = "placeholderapi" }
+placeholderapi = { group = "maven.modrinth", name = "placeholderapi", version.ref = "placeholderapi" }
 tab-api = { group = "com.github.NEZNAMY", name = "TAB-API", version.ref = "tab-api" }
 fawe-core = { group = "com.fastasyncworldedit", name = "FastAsyncWorldEdit-Core", version.ref = "fastasyncworldedit" }
 fawe-bukkit = { group = "com.fastasyncworldedit", name = "FastAsyncWorldEdit-Bukkit", version.ref = "fastasyncworldedit" }

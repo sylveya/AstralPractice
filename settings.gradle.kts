@@ -23,7 +23,6 @@ dependencyResolutionManagement {
         maven("https://repo.codemc.io/repository/maven-releases/")
         maven("https://jitpack.io/")
         maven("https://mvn.wesjd.net/")
-        maven("https://repo.extendedclip.com/content/repositories/placeholderapi/")
         maven("https://repo.faststats.dev/releases")
         maven("https://maven.enginehub.org/repo/")
         maven("https://registry.whereareiam.me/maven/packages")
