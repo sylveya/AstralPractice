@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Predicate;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -82,6 +83,22 @@ public class ArenaManager implements Listener {
 
   public List<FfaArena> getEnabledFfaArenas() {
     return getFfaArenas().stream().filter(FfaArena::isEnabled).toList();
+  }
+
+  public List<String> getArenaNames() {
+    return arenaList.stream().map(DisplayArena::getName).toList();
+  }
+
+  public List<String> getArenaNames(Predicate<DisplayArena> filter) {
+    return arenaList.stream().filter(filter).map(DisplayArena::getName).toList();
+  }
+
+  public List<String> getNormalArenaNames() {
+    return getNormalArenas().stream().map(DisplayArena::getName).toList();
+  }
+
+  public List<String> getNormalArenaNames(Predicate<Arena> filter) {
+    return getNormalArenas().stream().filter(filter).map(DisplayArena::getName).toList();
   }
 
   public void loadArenas(final StartUpCallback boolCallback) {

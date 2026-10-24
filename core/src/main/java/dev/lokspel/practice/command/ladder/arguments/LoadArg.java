@@ -74,16 +74,11 @@ public final class LoadArg {
   }
 
   public static List<String> tabComplete(Player player, String[] args) {
-    List<String> completion = new ArrayList<>();
     if (!player.hasPermission("ap.setup") || args.length != 2) {
-      return completion;
+      return List.of();
     }
 
-    List<String> arguments = new ArrayList<>();
-    for (Ladder ladder : LadderManager.getInstance().getLadders()) {
-      arguments.add(ladder.getName());
-    }
-
-    return StringUtil.copyPartialMatches(args[1], arguments, completion);
+    return StringUtil.copyPartialMatches(
+        args[1], LadderManager.getInstance().getLadderNames(), new ArrayList<>());
   }
 }

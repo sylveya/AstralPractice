@@ -2,7 +2,6 @@ package dev.lokspel.practice.command.ladder.arguments;
 
 import dev.lokspel.practice.config.PracticeConfig;
 import dev.lokspel.practice.manager.ladder.LadderManager;
-import dev.lokspel.practice.manager.ladder.abstraction.Ladder;
 import dev.lokspel.practice.manager.ladder.abstraction.normal.NormalLadder;
 import dev.lokspel.practice.util.Common;
 import java.util.ArrayList;
@@ -90,16 +89,11 @@ public final class CloneArg {
   }
 
   public static List<String> tabComplete(Player player, String[] args) {
-    List<String> completion = new ArrayList<>();
     if (!player.hasPermission("ap.setup") || args.length != 2) {
-      return completion;
+      return List.of();
     }
 
-    List<String> arguments = new ArrayList<>();
-    for (Ladder ladder : LadderManager.getInstance().getLadders()) {
-      arguments.add(ladder.getName());
-    }
-
-    return StringUtil.copyPartialMatches(args[1], arguments, completion);
+    return StringUtil.copyPartialMatches(
+        args[1], LadderManager.getInstance().getLadderNames(), new ArrayList<>());
   }
 }

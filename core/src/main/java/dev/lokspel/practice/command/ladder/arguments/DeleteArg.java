@@ -101,21 +101,13 @@ public final class DeleteArg {
   }
 
   public static List<String> tabComplete(Player player, String[] args) {
-    List<String> arguments = new ArrayList<>();
-    if (!player.hasPermission("ap.setup")) {
-      return arguments;
+    if (!player.hasPermission("ap.setup") || args.length != 2) {
+      return List.of();
     }
 
-    if (args.length == 2) {
-      for (Ladder ladder : LadderManager.getInstance().getLadders()) {
-        if (!ladder.isEnabled()) {
-          arguments.add(ladder.getName());
-        }
-      }
-
-      return StringUtil.copyPartialMatches(args[1], arguments, new ArrayList<>());
-    }
-
-    return arguments;
+    return StringUtil.copyPartialMatches(
+        args[1],
+        LadderManager.getInstance().getLadderNames(ladder -> !ladder.isEnabled()),
+        new ArrayList<>());
   }
 }

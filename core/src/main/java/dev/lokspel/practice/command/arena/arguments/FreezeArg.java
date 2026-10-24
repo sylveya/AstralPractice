@@ -95,21 +95,13 @@ public final class FreezeArg {
   }
 
   public static List<String> tabComplete(Player player, String[] args) {
-    List<String> arguments = new ArrayList<>();
-    if (!player.hasPermission("ap.arena.freeze")) {
-      return arguments;
+    if (!player.hasPermission("ap.arena.freeze") || args.length != 2) {
+      return List.of();
     }
 
-    if (args.length == 2) {
-      for (Arena arena : ArenaManager.getInstance().getNormalArenas()) {
-        if (arena.isEnabled()) {
-          arguments.add(arena.getName());
-        }
-      }
-
-      return StringUtil.copyPartialMatches(args[1], arguments, new ArrayList<>());
-    }
-
-    return arguments;
+    return StringUtil.copyPartialMatches(
+        args[1],
+        ArenaManager.getInstance().getNormalArenaNames(Arena::isEnabled),
+        new ArrayList<>());
   }
 }

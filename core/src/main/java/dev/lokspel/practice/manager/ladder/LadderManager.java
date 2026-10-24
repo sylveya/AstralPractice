@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 
@@ -55,6 +56,14 @@ public class LadderManager {
 
   public List<NormalLadder> getEnabledLadders() {
     return ladders.stream().filter(NormalLadder::isEnabled).toList();
+  }
+
+  public List<String> getLadderNames() {
+    return ladders.stream().map(Ladder::getName).toList();
+  }
+
+  public List<String> getLadderNames(Predicate<Ladder> filter) {
+    return ladders.stream().filter(filter).map(Ladder::getName).toList();
   }
 
   /**
