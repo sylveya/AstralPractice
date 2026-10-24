@@ -162,27 +162,24 @@ public class MessageCommand extends PrivateMessageCommand {
 
   @Override
   public List<String> onTabComplete(CommandSender sender, String[] args) {
-    List<String> results = new ArrayList<>();
-    if (!(sender instanceof Player player)) {
-      return results;
+    if (!(sender instanceof Player player) || args.length != 1) {
+      return List.of();
     }
 
-    if (args.length == 1) {
-      List<String> onlineNames = new ArrayList<>();
+    List<String> onlineNames =
+        Bukkit.getOnlinePlayers().stream()
+            .filter(online -> player != online)
+            .filter(
+                online -> {
+                  Profile onlineProfile = ProfileManager.getInstance().getProfile(online);
+                  return (!onlineProfile.isHideFromPlayers()
+                          || player.hasPermission("ap.staffmode.see"))
+                      && (onlineProfile.isPrivateMessages()
+                          || player.hasPermission("ap.bypass.privatemessage"));
+                })
+            .map(Player::getName)
+            .toList();
 
-      for (Player online : Bukkit.getOnlinePlayers()) {
-        Profile onlineProfile = ProfileManager.getInstance().getProfile(online);
-        if (player != online
-            && (!onlineProfile.isHideFromPlayers() || player.hasPermission("ap.staffmode.see"))
-            && (onlineProfile.isPrivateMessages()
-                || player.hasPermission("ap.bypass.privatemessage"))) {
-          onlineNames.add(online.getName());
-        }
-      }
-
-      return StringUtil.copyPartialMatches(args[0], onlineNames, new ArrayList<>());
-    }
-
-    return results;
+    return StringUtil.copyPartialMatches(args[0], onlineNames, new ArrayList<>());
   }
 }

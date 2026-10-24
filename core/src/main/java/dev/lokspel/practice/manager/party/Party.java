@@ -205,15 +205,11 @@ public class Party implements dev.lokspel.api.interfaces.Party {
   }
 
   public void sendMessage(String message) {
-    for (Player player : members) {
-      Common.sendMmMessage(player, message);
-    }
+    members.forEach(player -> Common.sendMmMessage(player, message));
   }
 
   public void sendMessage(Component component) {
-    for (Player player : members) {
-      Common.send(player, component);
-    }
+    members.forEach(player -> Common.send(player, component));
   }
 
   public List<String> getMemberNames() {

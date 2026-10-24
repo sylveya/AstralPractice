@@ -38,20 +38,20 @@ public class BedWars extends BedFight implements LadderHandle {
 
   @Override
   public boolean handleEvents(Event e, Match match) {
-    if (e instanceof EntityDamageEvent) {
-      onPlayerDamage((EntityDamageEvent) e, match);
+    if (e instanceof EntityDamageEvent damageEvent) {
+      onPlayerDamage(damageEvent, match);
       return true;
-    } else if (e instanceof PlayerDropItemEvent) {
-      onItemDrop((PlayerDropItemEvent) e);
+    } else if (e instanceof PlayerDropItemEvent dropEvent) {
+      onItemDrop(dropEvent);
       return true;
-    } else if (e instanceof PlayerMoveEvent) {
-      onPlayerMove((PlayerMoveEvent) e, match);
+    } else if (e instanceof PlayerMoveEvent moveEvent) {
+      onPlayerMove(moveEvent, match);
       return true;
-    } else if (e instanceof BlockBreakEvent) {
-      onBedDestroy((BlockBreakEvent) e, match);
+    } else if (e instanceof BlockBreakEvent breakEvent) {
+      onBedDestroy(breakEvent, match);
       return true;
-    } else if (e instanceof BlockPlaceEvent) {
-      onBlockPlace((BlockPlaceEvent) e, match);
+    } else if (e instanceof BlockPlaceEvent placeEvent) {
+      onBlockPlace(placeEvent, match);
       return true;
     }
     return false;
@@ -84,8 +84,7 @@ public class BedWars extends BedFight implements LadderHandle {
       return;
     }
 
-    EntityDamageEvent.DamageCause cause = e.getCause();
-    if (cause.equals(EntityDamageEvent.DamageCause.FALL)) {
+    if (e.getCause() == EntityDamageEvent.DamageCause.FALL) {
       e.setCancelled(true);
     }
   }

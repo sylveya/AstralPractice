@@ -5,8 +5,6 @@ import dev.lokspel.practice.command.privatemessage.MessageCommand;
 import dev.lokspel.practice.manager.fight.match.MatchManager;
 import dev.lokspel.practice.manager.fight.util.EntityHiderListener;
 import dev.lokspel.practice.manager.nametag.NametagManager;
-import dev.lokspel.practice.manager.party.Party;
-import dev.lokspel.practice.manager.party.PartyManager;
 import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.manager.profile.enums.ProfileStatus;
@@ -35,15 +33,9 @@ public class PlayerQuit implements Listener {
     MessageCommand.clearPlayer(player);
     EntityHiderListener.getInstance().clearPlayer(player);
 
-    final Profile profile = ProfileManager.getInstance().getProfile(player);
-    final Party party = PartyManager.getInstance().getParty(player);
-
-    if (party != null) {
-      party.removeMember(player, false);
-    }
-
     MatchManager.getInstance().invalidateRematchByPlayer(player);
 
+    final Profile profile = ProfileManager.getInstance().getProfile(player);
     if (profile != null) {
       profile.getActionBar().resetForReconnect();
       profile.setStaffMode(false);
