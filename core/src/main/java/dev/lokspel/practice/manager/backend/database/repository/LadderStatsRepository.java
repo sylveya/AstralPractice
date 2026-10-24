@@ -71,7 +71,18 @@ public class LadderStatsRepository {
     return CompletableFuture.runAsync(
         () -> {
           try (Connection connection = dataSource.getConnection()) {
-            replaceRows(connection, profile);
+            boolean previousAutoCommit = connection.getAutoCommit();
+            connection.setAutoCommit(false);
+
+            try {
+              replaceRows(connection, profile);
+              connection.commit();
+            } catch (SQLException e) {
+              connection.rollback();
+              throw e;
+            } finally {
+              connection.setAutoCommit(previousAutoCommit);
+            }
           } catch (SQLException e) {
             Common.sendConsoleMmMessage(
                 "<red>[Database] save ladder stats error: " + e.getMessage());
