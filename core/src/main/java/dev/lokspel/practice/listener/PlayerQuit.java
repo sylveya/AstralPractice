@@ -52,11 +52,18 @@ public class PlayerQuit implements Listener {
       profile.setPlayerCustomKitSelector(null);
 
       if (AstralPractice.getInstance().isEnabled()) {
+        final UUID uuid = player.getUniqueId();
         Bukkit.getScheduler()
             .runTaskLater(
-                AstralPractice.getInstance(), () -> profile.setStatus(ProfileStatus.OFFLINE), 5L);
+                AstralPractice.getInstance(),
+                () -> {
+                  Player online = Bukkit.getPlayer(uuid);
+                  if (online == null || !online.isOnline()) {
+                    profile.setStatus(ProfileStatus.OFFLINE);
+                  }
+                },
+                5L);
 
-        UUID uuid = player.getUniqueId();
         Bukkit.getScheduler()
             .runTaskLater(
                 AstralPractice.getInstance(),

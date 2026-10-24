@@ -63,6 +63,9 @@ public class PlayerJoin implements Listener {
           .runTaskLater(
               AstralPractice.getInstance(),
               () -> {
+                if (!player.isOnline()) {
+                  return;
+                }
                 PlayerUtil.setPlayerWorldTime(player);
 
                 if (PracticeConfig.settings().getStaffMode().isJoinHideFromPlayers()
