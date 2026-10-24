@@ -157,7 +157,7 @@ public enum AdapterUtil {
     return line.replaceText(replace(placeholder, team.getColor().append(getSidebarName(player))));
   }
 
-  private static Component getSidebarName(Player player) {
+  static Component getSidebarName(Player player) {
     Profile profile = ProfileManager.getInstance().getProfile(player);
     if (profile == null) {
       return Component.text(player.getName());

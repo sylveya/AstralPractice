@@ -79,11 +79,7 @@ public class GuiManager implements Listener {
   }
 
   public Gui searchGui(GuiType type) {
-    if (guis.containsKey(type)) {
-      return guis.get(type);
-    }
-
-    return null;
+    return guis.get(type);
   }
 
   public Gui addGui(Gui gui) {
@@ -105,11 +101,12 @@ public class GuiManager implements Listener {
 
   /** Closes the GUI of every player who has one open, so no inventory outlives its GUI. */
   private void closeOpenGuis() {
-    // Closing fires the close event, which already detaches the player from the GUI.
-    for (Map.Entry<Player, Gui> entry : new HashMap<>(openGui).entrySet()) {
-      entry.getKey().closeInventory();
-      entry.getValue().close(entry.getKey());
-    }
+    new HashMap<>(openGui)
+        .forEach(
+            (player, gui) -> {
+              player.closeInventory();
+              gui.close(player);
+            });
   }
 
   @EventHandler
@@ -232,17 +229,9 @@ public class GuiManager implements Listener {
     }
 
     List<Component> lore = meta.lore();
-    if (lore == null || lore.isEmpty()) {
-      return false;
-    }
-
-    for (Component loreLine : lore) {
-      if (containsBackOrCloseKeyword(PLAIN_TEXT_SERIALIZER.serialize(loreLine))) {
-        return true;
-      }
-    }
-
-    return false;
+    return lore != null
+        && lore.stream()
+            .anyMatch(line -> containsBackOrCloseKeyword(PLAIN_TEXT_SERIALIZER.serialize(line)));
   }
 
   private boolean containsBackOrCloseKeyword(String text) {
@@ -251,12 +240,7 @@ public class GuiManager implements Listener {
     }
 
     String normalized = Common.stripLegacyColor(text).toLowerCase(Locale.ROOT);
-    for (String keyword : BACK_OR_CLOSE_KEYWORDS) {
-      if (normalized.contains(keyword)) {
-        return true;
-      }
-    }
-    return false;
+    return BACK_OR_CLOSE_KEYWORDS.stream().anyMatch(normalized::contains);
   }
 
   private void playGuiClickSound(Player player, GuiClickSoundIntent intent) {

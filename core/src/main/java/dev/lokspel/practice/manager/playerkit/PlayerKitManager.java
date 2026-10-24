@@ -108,24 +108,9 @@ public class PlayerKitManager implements Listener {
     load();
   }
 
-  /**
-   * Scans GUI.ITEMS.CATEGORY-GUI.ICONS in playerkit.yml. Any key that is NOT one of the fixed
-   * built-in categories is treated as a dynamic (custom) category. Its item list must exist under
-   * GUI.ITEMS.ITEMS-GUI.CATEGORIES.<same-key>.TITLE / .ITEMS.
-   *
-   * <p>To add a new category: just add its icon entry under CATEGORY-GUI.ICONS and its item list
-   * under ITEMS-GUI.CATEGORIES — no code change needed.
-   */
-  private static final java.util.Set<String> FIXED_ICON_KEYS =
-      new java.util.HashSet<>(
-          java.util.Arrays.asList(
-              "BACK-TO",
-              "NONE",
-              "ARMOR",
-              "WEAPONS-TOOLS",
-              "BOWS-ARROWS",
-              "POTIONS",
-              "SHULKER-BOXES"));
+  private static final Set<String> FIXED_ICON_KEYS =
+      Set.of(
+          "BACK-TO", "NONE", "ARMOR", "WEAPONS-TOOLS", "BOWS-ARROWS", "POTIONS", "SHULKER-BOXES");
 
   private void loadDynamicCategories() {
     dynamicCategories.clear();
@@ -141,7 +126,7 @@ public class PlayerKitManager implements Listener {
       String id = entry.getKey();
       if (FIXED_ICON_KEYS.contains(id)) {
         continue;
-      } // skip built-ins
+      }
 
       Items.ItemsGui.ItemCategory category = categories != null ? categories.get(id) : null;
 
@@ -205,10 +190,9 @@ public class PlayerKitManager implements Listener {
   }
 
   public String getCopyCode() {
-    String uuid = UUID.randomUUID().toString();
     String code;
     do {
-      code = uuid.replace("[^a-zA-Z0-9]", "").substring(0, 7);
+      code = UUID.randomUUID().toString().replace("-", "").substring(0, 7);
     } while (this.copy.containsKey(code));
     return code;
   }

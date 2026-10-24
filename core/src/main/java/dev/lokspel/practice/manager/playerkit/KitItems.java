@@ -27,41 +27,37 @@ public class KitItems {
   public KitItems(final KitData kitData) {
     this.kitData = kitData;
 
-    if (kitData.getArmor() != null) {
-      helmet = new KitItem(StaticItems.mainGuiHeadPlaceholderIcon(), kitData.getArmor()[3]);
-      chest = new KitItem(StaticItems.mainGuiChestPlaceholderIcon(), kitData.getArmor()[2]);
-      legs = new KitItem(StaticItems.mainGuiLegsPlaceholderIcon(), kitData.getArmor()[1]);
-      boots = new KitItem(StaticItems.mainGuiBootsPlaceholderIcon(), kitData.getArmor()[0]);
-    } else {
-      helmet = new KitItem(StaticItems.mainGuiHeadPlaceholderIcon());
-      chest = new KitItem(StaticItems.mainGuiChestPlaceholderIcon());
-      legs = new KitItem(StaticItems.mainGuiLegsPlaceholderIcon());
-      boots = new KitItem(StaticItems.mainGuiBootsPlaceholderIcon());
-    }
+    boolean hasArmor = kitData.getArmor() != null;
+    helmet =
+        new KitItem(
+            StaticItems.mainGuiHeadPlaceholderIcon(), hasArmor ? kitData.getArmor()[3] : null);
+    chest =
+        new KitItem(
+            StaticItems.mainGuiChestPlaceholderIcon(), hasArmor ? kitData.getArmor()[2] : null);
+    legs =
+        new KitItem(
+            StaticItems.mainGuiLegsPlaceholderIcon(), hasArmor ? kitData.getArmor()[1] : null);
+    boots =
+        new KitItem(
+            StaticItems.mainGuiBootsPlaceholderIcon(), hasArmor ? kitData.getArmor()[0] : null);
 
-    if (kitData.getExtra() != null) {
-      offhand = new KitItem(StaticItems.mainGuiOffHandPlaceholderIcon(), kitData.getExtra()[0]);
-    } else {
-      offhand = new KitItem(StaticItems.mainGuiOffHandPlaceholderIcon());
-    }
+    offhand =
+        new KitItem(
+            StaticItems.mainGuiOffHandPlaceholderIcon(),
+            kitData.getExtra() != null ? kitData.getExtra()[0] : null);
 
-    if (kitData.getStorage() != null) {
-      for (int i = 0; i < 9; i++) {
-        hotbar.put(
-            i, new KitItem(StaticItems.mainGuiHotbarPlaceholderIcon(), kitData.getStorage()[i]));
-      }
-      for (int i = 9; i < 36; i++) {
-        inventory.put(
-            i - 9,
-            new KitItem(StaticItems.mainGuiInventoryPlaceholderIcon(), kitData.getStorage()[i]));
-      }
-    } else {
-      for (int i = 0; i < 9; i++) {
-        hotbar.put(i, new KitItem(StaticItems.mainGuiHotbarPlaceholderIcon()));
-      }
-      for (int i = 9; i < 36; i++) {
-        inventory.put(i - 9, new KitItem(StaticItems.mainGuiInventoryPlaceholderIcon()));
-      }
+    ItemStack[] storage = kitData.getStorage();
+    for (int i = 0; i < 9; i++) {
+      hotbar.put(
+          i,
+          new KitItem(
+              StaticItems.mainGuiHotbarPlaceholderIcon(), storage != null ? storage[i] : null));
+    }
+    for (int i = 9; i < 36; i++) {
+      inventory.put(
+          i - 9,
+          new KitItem(
+              StaticItems.mainGuiInventoryPlaceholderIcon(), storage != null ? storage[i] : null));
     }
 
     this.assignSlots();
@@ -85,34 +81,22 @@ public class KitItems {
   }
 
   public List<ItemStack> getInventoryContent() {
-    List<ItemStack> inventoryContent = new ArrayList<>();
-
+    List<ItemStack> inventoryContent = new ArrayList<>(hotbar.size() + inventory.size());
     for (KitItem kitItem : hotbar.values()) {
       inventoryContent.add(kitItem.get());
     }
-
     for (KitItem kitItem : inventory.values()) {
       inventoryContent.add(kitItem.get());
     }
-
     return inventoryContent;
   }
 
   public List<ItemStack> getArmorContent() {
-    List<ItemStack> armorContent = new ArrayList<>();
-
-    armorContent.add(boots.get());
-    armorContent.add(legs.get());
-    armorContent.add(chest.get());
-    armorContent.add(helmet.get());
-
-    return armorContent;
+    return List.of(boots.get(), legs.get(), chest.get(), helmet.get());
   }
 
   public void reset() {
-    for (KitItem kitItem : slots.values()) {
-      kitItem.reset();
-    }
+    slots.values().forEach(KitItem::reset);
   }
 
   public void resetNull() {
@@ -124,10 +108,8 @@ public class KitItems {
   }
 
   public void save() {
-    List<ItemStack> extraContent = new ArrayList<>();
-    extraContent.add(offhand.get());
-    this.kitData.setExtra(extraContent.toArray(new ItemStack[0]));
-    this.kitData.setStorage(this.getInventoryContent().toArray(new ItemStack[0]));
-    this.kitData.setArmor(this.getArmorContent().toArray(new ItemStack[0]));
+    this.kitData.setExtra(new ItemStack[] {offhand.get()});
+    this.kitData.setStorage(this.getInventoryContent().toArray(ItemStack[]::new));
+    this.kitData.setArmor(this.getArmorContent().toArray(ItemStack[]::new));
   }
 }

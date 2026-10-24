@@ -85,13 +85,7 @@ public class ProfileManager {
   }
 
   public Profile getProfile(Entity entity) {
-    if (entity == null) {
-      return null;
-    }
-    if (entity instanceof Player) {
-      return getProfile((Player) entity);
-    }
-    return null;
+    return entity instanceof Player player ? getProfile(player) : null;
   }
 
   public Profile newProfile(Player player, UUID uuid) {
@@ -280,13 +274,7 @@ public class ProfileManager {
   }
 
   public void saveProfiles() {
-    // Iterate over a stable snapshot to avoid ConcurrentModificationException
-    // when autosave overlaps joins/quits/profile updates.
-    for (Profile profile : new ArrayList<>(profiles.values())) {
-      if (profile != null) {
-        profile.save();
-      }
-    }
+    profiles.values().forEach(Profile::save);
   }
 
   /**
@@ -300,8 +288,7 @@ public class ProfileManager {
       return CompletableFuture.completedFuture(null);
     }
 
-    List<Profile> present = new ArrayList<>(profiles.values());
-    present.removeIf(Objects::isNull);
+    List<Profile> present = profiles.values().stream().filter(Objects::nonNull).toList();
     if (present.isEmpty()) {
       return CompletableFuture.completedFuture(null);
     }

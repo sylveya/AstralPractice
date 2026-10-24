@@ -22,6 +22,7 @@ import dev.lokspel.practice.manager.fight.match.enums.TeamEnum;
 import dev.lokspel.practice.manager.fight.match.enums.WeightClass;
 import dev.lokspel.practice.manager.fight.match.type.duel.Duel;
 import dev.lokspel.practice.manager.fight.match.type.partyffa.PartyFfa;
+import dev.lokspel.practice.manager.fight.match.type.playersvsplayers.PlayersVsPlayers;
 import dev.lokspel.practice.manager.fight.match.type.playersvsplayers.partysplit.PartySplit;
 import dev.lokspel.practice.manager.fight.match.type.playersvsplayers.partyvsparty.PartyVsParty;
 import dev.lokspel.practice.manager.fight.match.util.MatchUtil;
@@ -48,11 +49,11 @@ import dev.lokspel.practice.util.interfaces.Spectatable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextReplacementConfig;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.intellij.lang.annotations.RegExp;
 
 public class PracticeAdapter implements SidebarAdapter {
 
@@ -60,30 +61,43 @@ public class PracticeAdapter implements SidebarAdapter {
     return value != null ? value : "0";
   }
 
-  private static Component displayName(Player target) {
-    Profile targetProfile = ProfileManager.getInstance().getProfile(target);
-    if (targetProfile == null) {
-      return Component.text(target.getName());
-    }
+  private static TextReplacementConfig match(@RegExp String placeholder, String value) {
+    return TextReplacementConfig.builder()
+        .match(placeholder)
+        .replacement(value != null ? value : "")
+        .build();
+  }
 
-    // Read the SIDEBAR-NAME-FORMAT config option to determine how names should be displayed.
-    String format = PracticeConfig.sidebar().getSidebarNameFormat();
-    return switch (format.toUpperCase()) {
-      case "NAME_ONLY" -> NameFormatUtil.resolveName(targetProfile, target.getName(), target, null);
-      case "PREFIX_NAME" ->
-          NameFormatUtil.resolvePrefix(targetProfile, target)
-              .append(
-                  NameFormatUtil.resolveName(
-                      targetProfile,
-                      target.getName(),
-                      target,
-                      NameFormatUtil.extractTrailingColor(
-                          NameFormatUtil.resolvePrefix(targetProfile, target))));
-      case "NAME_SUFFIX" ->
-          NameFormatUtil.resolveName(targetProfile, target.getName(), target, null)
-              .append(NameFormatUtil.resolveSuffix(targetProfile, target));
-      default -> NameFormatUtil.resolveFullName(targetProfile, target.getName(), target);
-    };
+  private static TextReplacementConfig match(@RegExp String placeholder, Component value) {
+    return TextReplacementConfig.builder()
+        .match(placeholder)
+        .replacement(value != null ? value : Component.empty())
+        .build();
+  }
+
+  private static TextReplacementConfig literal(String placeholder, String value) {
+    return TextReplacementConfig.builder()
+        .matchLiteral(placeholder)
+        .replacement(value != null ? value : "")
+        .build();
+  }
+
+  private static TextReplacementConfig literal(String placeholder, Component value) {
+    return TextReplacementConfig.builder()
+        .matchLiteral(placeholder)
+        .replacement(value != null ? value : Component.empty())
+        .build();
+  }
+
+  private static String bedStatusString(SidebarConfig config, Round round, TeamEnum team) {
+    return round != null && Boolean.TRUE.equals(round.getBedStatus().get(team))
+        ? config.getMatch().getBedStatus().getNotDestroyed()
+        : config.getMatch().getBedStatus().getDestroyed();
+  }
+
+  private static Component bedStatusComponent(SidebarConfig config, Round round, TeamEnum team) {
+    return Common.deserializeMiniMessage(
+        StringUtil.legacyToMiniMessage(bedStatusString(config, round, team)));
   }
 
   private static List<String> orEmpty(List<String> lines) {
@@ -155,103 +169,46 @@ public class PracticeAdapter implements SidebarAdapter {
   private void buildLobbyLines(
       Player player, SidebarConfig config, Profile profile, List<Component> sidebar) {
     Party party = PartyManager.getInstance().getParty(player);
+    List<String> lines =
+        party == null ? config.getLobby().getNormal() : config.getLobby().getParty();
 
-    if (party == null) {
-      for (String line : orEmpty(config.getLobby().getNormal())) {
-        Component component =
-            PapiUtil.format(player, line)
+    for (String line : orEmpty(lines)) {
+      Component component =
+          PapiUtil.format(player, line)
+              .replaceText(
+                  match("%onlinePlayers%", String.valueOf(Bukkit.getOnlinePlayers().size())))
+              .replaceText(
+                  match(
+                      "%inFightPlayers%",
+                      String.valueOf(MatchManager.getInstance().getPlayerInMatchSize())))
+              .replaceText(
+                  match(
+                      "%inQueuePlayer%",
+                      String.valueOf(QueueManager.getInstance().getQueues().size())))
+              .replaceText(
+                  match(
+                      "%division%",
+                      profile.getStats().getDivision() != null
+                          ? profile.getStats().getDivision().getComponentFullName()
+                          : Component.empty()))
+              .replaceText(
+                  match(
+                      "%division_short%",
+                      profile.getStats().getDivision() != null
+                          ? profile.getStats().getDivision().getComponentShortName()
+                          : Component.empty()));
+
+      if (party != null) {
+        component =
+            component
+                .replaceText(match("%partyLeader%", AdapterUtil.getSidebarName(party.getLeader())))
                 .replaceText(
-                    TextReplacementConfig.builder()
-                        .match("%onlinePlayers%")
-                        .replacement(String.valueOf(Bukkit.getOnlinePlayers().size()))
-                        .build())
-                .replaceText(
-                    TextReplacementConfig.builder()
-                        .match("%inFightPlayers%")
-                        .replacement(
-                            String.valueOf(MatchManager.getInstance().getPlayerInMatchSize()))
-                        .build())
-                .replaceText(
-                    TextReplacementConfig.builder()
-                        .match("%inQueuePlayer%")
-                        .replacement(String.valueOf(QueueManager.getInstance().getQueues().size()))
-                        .build())
-                .replaceText(
-                    TextReplacementConfig.builder()
-                        .match("%division%")
-                        .replacement(
-                            profile.getStats().getDivision() != null
-                                ? profile.getStats().getDivision().getComponentFullName()
-                                : Component.empty())
-                        .build())
-                .replaceText(
-                    TextReplacementConfig.builder()
-                        .match("%division_short%")
-                        .replacement(
-                            profile.getStats().getDivision() != null
-                                ? profile.getStats().getDivision().getComponentShortName()
-                                : Component.empty())
-                        .build());
-        sidebar.add(AdapterUtil.replaceArenaPlaceholders(component));
+                    match(
+                        "%partyLeaderNameOnly%", AdapterUtil.getSidebarNameOnly(party.getLeader())))
+                .replaceText(match("%maxMember%", String.valueOf(party.getMaxPlayerLimit())))
+                .replaceText(match("%members%", String.valueOf(party.getMembers().size())));
       }
-    } else {
-      for (String line : orEmpty(config.getLobby().getParty())) {
-        Component component =
-            PapiUtil.format(player, line)
-                .replaceText(
-                    TextReplacementConfig.builder()
-                        .match("%onlinePlayers%")
-                        .replacement(String.valueOf(Bukkit.getOnlinePlayers().size()))
-                        .build())
-                .replaceText(
-                    TextReplacementConfig.builder()
-                        .match("%inFightPlayers%")
-                        .replacement(
-                            String.valueOf(MatchManager.getInstance().getPlayerInMatchSize()))
-                        .build())
-                .replaceText(
-                    TextReplacementConfig.builder()
-                        .match("%inQueuePlayer%")
-                        .replacement(String.valueOf(QueueManager.getInstance().getQueues().size()))
-                        .build())
-                .replaceText(
-                    TextReplacementConfig.builder()
-                        .match("%partyLeader%")
-                        .replacement(displayName(party.getLeader()))
-                        .build())
-                .replaceText(
-                    TextReplacementConfig.builder()
-                        .match("%partyLeaderNameOnly%")
-                        .replacement(AdapterUtil.getSidebarNameOnly(party.getLeader()))
-                        .build())
-                .replaceText(
-                    TextReplacementConfig.builder()
-                        .match("%maxMember%")
-                        .replacement(String.valueOf(party.getMaxPlayerLimit()))
-                        .build())
-                .replaceText(
-                    TextReplacementConfig.builder()
-                        .match("%members%")
-                        .replacement(String.valueOf(party.getMembers().size()))
-                        .build())
-                .replaceText(
-                    TextReplacementConfig.builder()
-                        .match("%division%")
-                        .replacement(
-                            profile.getStats().getDivision() != null
-                                ? profile.getStats().getDivision().getComponentFullName()
-                                : Component.empty())
-                        .build())
-                .replaceText(
-                    TextReplacementConfig.builder()
-                        .match("%division_short%")
-                        .replacement(
-                            profile.getStats().getDivision() != null
-                                ? profile.getStats().getDivision().getComponentShortName()
-                                : Component.empty())
-                        .build());
-        sidebar.add(AdapterUtil.replaceArenaPlaceholders(component));
-      }
+      sidebar.add(AdapterUtil.replaceArenaPlaceholders(component));
     }
   }
 
@@ -263,6 +220,17 @@ public class PracticeAdapter implements SidebarAdapter {
         CustomKitQueueManager.getInstance().getHostedQueue(player);
     CustomKitSearchRunnable customKitJoinSearch =
         CustomKitQueueManager.getInstance().getJoinSearch(player);
+
+    Component divisionFull =
+        profile.getStats().getDivision() != null
+            ? profile.getStats().getDivision().getComponentFullName()
+            : Component.empty();
+    Component divisionShort =
+        profile.getStats().getDivision() != null
+            ? profile.getStats().getDivision().getComponentShortName()
+            : Component.empty();
+    String online = String.valueOf(Bukkit.getOnlinePlayers().size());
+    String inFight = String.valueOf(MatchManager.getInstance().getPlayerInMatchSize());
 
     if (queue != null) {
       boolean multiQueue = queue.getQueuedLadders().size() > 1;
@@ -298,263 +266,88 @@ public class PracticeAdapter implements SidebarAdapter {
       for (String line : orEmpty(duelQueueLines)) {
         sidebar.add(
             PapiUtil.format(player, line)
+                .replaceText(match("%onlinePlayers%", online))
+                .replaceText(match("%inFightPlayers%", inFight))
                 .replaceText(
-                    TextReplacementConfig.builder()
-                        .match("%onlinePlayers%")
-                        .replacement(String.valueOf(Bukkit.getOnlinePlayers().size()))
-                        .build())
+                    match(
+                        "%inQueuePlayer%",
+                        String.valueOf(QueueManager.getInstance().getQueues().size())))
                 .replaceText(
-                    TextReplacementConfig.builder()
-                        .match("%inFightPlayers%")
-                        .replacement(
-                            String.valueOf(MatchManager.getInstance().getPlayerInMatchSize()))
-                        .build())
+                    match(
+                        "%weightClass%",
+                        queue.isRanked()
+                            ? WeightClass.RANKED.getName()
+                            : WeightClass.UNRANKED.getName()))
+                .replaceText(match("%ladderDisplayName%", parseColoredText(ladderDisplayName)))
+                .replaceText(match("%multiQueueLabel%", parseColoredText(multiQueueLabel)))
                 .replaceText(
-                    TextReplacementConfig.builder()
-                        .match("%inQueuePlayer%")
-                        .replacement(String.valueOf(QueueManager.getInstance().getQueues().size()))
-                        .build())
-                .replaceText(
-                    TextReplacementConfig.builder()
-                        .match("%weightClass%")
-                        .replacement(
-                            queue.isRanked()
-                                ? WeightClass.RANKED.getName()
-                                : WeightClass.UNRANKED.getName())
-                        .build())
-                .replaceText(
-                    TextReplacementConfig.builder()
-                        .match("%ladderDisplayName%")
-                        .replacement(parseColoredText(ladderDisplayName))
-                        .build())
-                .replaceText(
-                    TextReplacementConfig.builder()
-                        .match("%multiQueueLabel%")
-                        .replacement(parseColoredText(multiQueueLabel))
-                        .build())
-                .replaceText(
-                    TextReplacementConfig.builder()
-                        .match("%multiQueueCurrentLadder%")
-                        .replacement(parseColoredText(multiQueueCurrent))
-                        .build())
-                .replaceText(
-                    TextReplacementConfig.builder()
-                        .match("%elapsedTime%")
-                        .replacement(queue.getFormattedDuration())
-                        .build())
-                .replaceText(
-                    TextReplacementConfig.builder()
-                        .match("%division%")
-                        .replacement(
-                            profile.getStats().getDivision() != null
-                                ? profile.getStats().getDivision().getComponentFullName()
-                                : Component.empty())
-                        .build())
-                .replaceText(
-                    TextReplacementConfig.builder()
-                        .match("%division_short%")
-                        .replacement(
-                            profile.getStats().getDivision() != null
-                                ? profile.getStats().getDivision().getComponentShortName()
-                                : Component.empty())
-                        .build()));
+                    match("%multiQueueCurrentLadder%", parseColoredText(multiQueueCurrent)))
+                .replaceText(match("%elapsedTime%", queue.getFormattedDuration()))
+                .replaceText(match("%division%", divisionFull))
+                .replaceText(match("%division_short%", divisionShort)));
       }
       return true;
     } else if (hostedCustomKitQueue != null) {
+      String totalQueue =
+          String.valueOf(
+              QueueManager.getInstance().getQueues().size()
+                  + CustomKitQueueManager.getInstance().getHostedQueues().size()
+                  + CustomKitQueueManager.getInstance().getJoinSearches().size());
       for (String line : orEmpty(config.getLobby().getCustomKitQueue().getHosting())) {
         sidebar.add(
             PapiUtil.format(player, line)
+                .replaceText(match("%onlinePlayers%", online))
+                .replaceText(match("%inFightPlayers%", inFight))
+                .replaceText(match("%inQueuePlayer%", totalQueue))
+                .replaceText(match("%weightClass%", WeightClass.UNRANKED.getName()))
                 .replaceText(
-                    TextReplacementConfig.builder()
-                        .match("%onlinePlayers%")
-                        .replacement(String.valueOf(Bukkit.getOnlinePlayers().size()))
-                        .build())
-                .replaceText(
-                    TextReplacementConfig.builder()
-                        .match("%inFightPlayers%")
-                        .replacement(
-                            String.valueOf(MatchManager.getInstance().getPlayerInMatchSize()))
-                        .build())
-                .replaceText(
-                    TextReplacementConfig.builder()
-                        .match("%inQueuePlayer%")
-                        .replacement(
-                            String.valueOf(
-                                QueueManager.getInstance().getQueues().size()
-                                    + CustomKitQueueManager.getInstance().getHostedQueues().size()
-                                    + CustomKitQueueManager.getInstance().getJoinSearches().size()))
-                        .build())
-                .replaceText(
-                    TextReplacementConfig.builder()
-                        .match("%weightClass%")
-                        .replacement(WeightClass.UNRANKED.getName())
-                        .build())
-                .replaceText(
-                    TextReplacementConfig.builder()
-                        .match("%ladderDisplayName%")
-                        .replacement(hostedCustomKitQueue.customLadder().getDisplayName())
-                        .build())
-                .replaceText(
-                    TextReplacementConfig.builder()
-                        .match("%elapsedTime%")
-                        .replacement(hostedCustomKitQueue.getElapsedSeconds() + "s")
-                        .build())
-                .replaceText(
-                    TextReplacementConfig.builder()
-                        .match("%division%")
-                        .replacement(
-                            profile.getStats().getDivision() != null
-                                ? profile.getStats().getDivision().getComponentFullName()
-                                : Component.empty())
-                        .build())
-                .replaceText(
-                    TextReplacementConfig.builder()
-                        .match("%division_short%")
-                        .replacement(
-                            profile.getStats().getDivision() != null
-                                ? profile.getStats().getDivision().getComponentShortName()
-                                : Component.empty())
-                        .build()));
+                    match(
+                        "%ladderDisplayName%",
+                        hostedCustomKitQueue.customLadder().getDisplayName()))
+                .replaceText(match("%elapsedTime%", hostedCustomKitQueue.getElapsedSeconds() + "s"))
+                .replaceText(match("%division%", divisionFull))
+                .replaceText(match("%division_short%", divisionShort)));
       }
       return true;
     } else if (customKitJoinSearch != null) {
+      String totalQueue =
+          String.valueOf(
+              QueueManager.getInstance().getQueues().size()
+                  + CustomKitQueueManager.getInstance().getHostedQueues().size()
+                  + CustomKitQueueManager.getInstance().getJoinSearches().size());
       for (String line : orEmpty(config.getLobby().getCustomKitQueue().getJoinSearch())) {
         sidebar.add(
             PapiUtil.format(player, line)
-                .replaceText(
-                    TextReplacementConfig.builder()
-                        .match("%onlinePlayers%")
-                        .replacement(String.valueOf(Bukkit.getOnlinePlayers().size()))
-                        .build())
-                .replaceText(
-                    TextReplacementConfig.builder()
-                        .match("%inFightPlayers%")
-                        .replacement(
-                            String.valueOf(MatchManager.getInstance().getPlayerInMatchSize()))
-                        .build())
-                .replaceText(
-                    TextReplacementConfig.builder()
-                        .match("%inQueuePlayer%")
-                        .replacement(
-                            String.valueOf(
-                                QueueManager.getInstance().getQueues().size()
-                                    + CustomKitQueueManager.getInstance().getHostedQueues().size()
-                                    + CustomKitQueueManager.getInstance().getJoinSearches().size()))
-                        .build())
-                .replaceText(
-                    TextReplacementConfig.builder()
-                        .match("%weightClass%")
-                        .replacement(WeightClass.UNRANKED.getName())
-                        .build())
-                .replaceText(
-                    TextReplacementConfig.builder()
-                        .match("%ladderDisplayName%")
-                        .replacement("Any Hosted Kit")
-                        .build())
-                .replaceText(
-                    TextReplacementConfig.builder()
-                        .match("%elapsedTime%")
-                        .replacement(customKitJoinSearch.getElapsedSeconds() + "s")
-                        .build())
-                .replaceText(
-                    TextReplacementConfig.builder()
-                        .match("%division%")
-                        .replacement(
-                            profile.getStats().getDivision() != null
-                                ? profile.getStats().getDivision().getComponentFullName()
-                                : Component.empty())
-                        .build())
-                .replaceText(
-                    TextReplacementConfig.builder()
-                        .match("%division_short%")
-                        .replacement(
-                            profile.getStats().getDivision() != null
-                                ? profile.getStats().getDivision().getComponentShortName()
-                                : Component.empty())
-                        .build()));
+                .replaceText(match("%onlinePlayers%", online))
+                .replaceText(match("%inFightPlayers%", inFight))
+                .replaceText(match("%inQueuePlayer%", totalQueue))
+                .replaceText(match("%weightClass%", WeightClass.UNRANKED.getName()))
+                .replaceText(match("%ladderDisplayName%", "Any Hosted Kit"))
+                .replaceText(match("%elapsedTime%", customKitJoinSearch.getElapsedSeconds() + "s"))
+                .replaceText(match("%division%", divisionFull))
+                .replaceText(match("%division_short%", divisionShort)));
       }
       return true;
     } else if (event != null) {
       String eventQueueTimeLeft =
           event.getQueueRunnable() != null ? event.getQueueRunnable().getFormattedTime() : null;
+      List<String> eventLines =
+          eventQueueTimeLeft != null
+              ? config.getLobby().getEventQueue().getStarting()
+              : config.getLobby().getEventQueue().getIdle();
 
-      if (eventQueueTimeLeft != null) {
-        for (String line : orEmpty(config.getLobby().getEventQueue().getStarting())) {
-          sidebar.add(
-              PapiUtil.format(player, line)
-                  .replaceText(
-                      TextReplacementConfig.builder()
-                          .match("%eventName%")
-                          .replacement(event.getType().getName())
-                          .build())
-                  .replaceText(
-                      TextReplacementConfig.builder()
-                          .match("%maxPlayer%")
-                          .replacement(String.valueOf(event.getType().getMaxPlayer()))
-                          .build())
-                  .replaceText(
-                      TextReplacementConfig.builder()
-                          .match("%player%")
-                          .replacement(String.valueOf(event.getPlayers().size()))
-                          .build())
-                  .replaceText(
-                      TextReplacementConfig.builder()
-                          .match("%timeLeft%")
-                          .replacement(fallbackToZero(eventQueueTimeLeft))
-                          .build())
-                  .replaceText(
-                      TextReplacementConfig.builder()
-                          .match("%division%")
-                          .replacement(
-                              profile.getStats().getDivision() != null
-                                  ? profile.getStats().getDivision().getComponentFullName()
-                                  : Component.empty())
-                          .build())
-                  .replaceText(
-                      TextReplacementConfig.builder()
-                          .match("%division_short%")
-                          .replacement(
-                              profile.getStats().getDivision() != null
-                                  ? profile.getStats().getDivision().getComponentShortName()
-                                  : Component.empty())
-                          .build()));
+      for (String line : orEmpty(eventLines)) {
+        Component c =
+            PapiUtil.format(player, line)
+                .replaceText(match("%eventName%", event.getType().getName()))
+                .replaceText(match("%maxPlayer%", String.valueOf(event.getType().getMaxPlayer())))
+                .replaceText(match("%player%", String.valueOf(event.getPlayers().size())))
+                .replaceText(match("%division%", divisionFull))
+                .replaceText(match("%division_short%", divisionShort));
+        if (eventQueueTimeLeft != null) {
+          c = c.replaceText(match("%timeLeft%", fallbackToZero(eventQueueTimeLeft)));
         }
-      } else {
-        for (String line : orEmpty(config.getLobby().getEventQueue().getIdle())) {
-          sidebar.add(
-              PapiUtil.format(player, line)
-                  .replaceText(
-                      TextReplacementConfig.builder()
-                          .match("%eventName%")
-                          .replacement(event.getType().getName())
-                          .build())
-                  .replaceText(
-                      TextReplacementConfig.builder()
-                          .match("%maxPlayer%")
-                          .replacement(String.valueOf(event.getType().getMaxPlayer()))
-                          .build())
-                  .replaceText(
-                      TextReplacementConfig.builder()
-                          .match("%player%")
-                          .replacement(String.valueOf(event.getPlayers().size()))
-                          .build())
-                  .replaceText(
-                      TextReplacementConfig.builder()
-                          .match("%division%")
-                          .replacement(
-                              profile.getStats().getDivision() != null
-                                  ? profile.getStats().getDivision().getComponentFullName()
-                                  : Component.empty())
-                          .build())
-                  .replaceText(
-                      TextReplacementConfig.builder()
-                          .match("%division_short%")
-                          .replacement(
-                              profile.getStats().getDivision() != null
-                                  ? profile.getStats().getDivision().getComponentShortName()
-                                  : Component.empty())
-                          .build()));
-        }
+        sidebar.add(c);
       }
     }
     return false;
@@ -570,27 +363,24 @@ public class PracticeAdapter implements SidebarAdapter {
     LadderType ladderType = ladder.getType();
 
     List<String> configLines = ladderLines(config.getMatch().getLadder(), match);
-    boolean useLadderSpecificConfig = !configLines.isEmpty();
-
-    if (useLadderSpecificConfig) {
+    if (!configLines.isEmpty()) {
       switch (match.getType()) {
         case DUEL -> buildDuelMatchLines(player, config, sidebar, match, ladderType);
         case PARTY_FFA -> buildPartyFfaMatchLines(player, config, sidebar, match, ladderType);
         case PARTY_SPLIT -> buildPartySplitMatchLines(player, config, sidebar, match, ladderType);
         case PARTY_VS_PARTY ->
             buildPartyVsPartyMatchLines(player, config, sidebar, match, ladderType);
-
         default -> {}
       }
     } else {
-      for (String line :
-          orEmpty(
-              switch (match.getType()) {
-                case DUEL -> config.getMatch().getDuel();
-                case PARTY_FFA -> config.getMatch().getPartyFfa();
-                case PARTY_SPLIT -> config.getMatch().getPartySplit();
-                case PARTY_VS_PARTY -> config.getMatch().getPartyVsParty();
-              })) {
+      List<String> defaultLines =
+          switch (match.getType()) {
+            case DUEL -> config.getMatch().getDuel();
+            case PARTY_FFA -> config.getMatch().getPartyFfa();
+            case PARTY_SPLIT -> config.getMatch().getPartySplit();
+            case PARTY_VS_PARTY -> config.getMatch().getPartyVsParty();
+          };
+      for (String line : orEmpty(defaultLines)) {
         sidebar.add(
             AdapterUtil.replaceMatchPlaceholders(player, PapiUtil.format(player, line), match));
       }
@@ -607,91 +397,39 @@ public class PracticeAdapter implements SidebarAdapter {
     Round round = duel.getCurrentRound();
     Player enemy = duel.getOppositePlayer(player);
 
+    int playerHits =
+        match.getCurrentStat(player) != null ? match.getCurrentStat(player).getHit() : 0;
+    int enemyHits = match.getCurrentStat(enemy) != null ? match.getCurrentStat(enemy).getHit() : 0;
+    int overAllHits = playerHits - enemyHits;
+
     for (String line : ladderLines(config.getMatch().getLadder(), match)) {
       Component component =
           AdapterUtil.replaceMatchPlaceholders(player, PapiUtil.format(player, line), duel);
 
-      switch (ladderType) {
-        case BOXING:
-          int playerHits =
-              match.getCurrentStat(player) != null ? match.getCurrentStat(player).getHit() : 0;
-          int enemyHits =
-              match.getCurrentStat(enemy) != null ? match.getCurrentStat(enemy).getHit() : 0;
-          int overAllHits = playerHits - enemyHits;
-
-          component =
-              component
-                  .replaceText(
-                      TextReplacementConfig.builder()
-                          .matchLiteral("%overAllHits%")
-                          .replacement(
-                              AstralPractice.getMiniMessage()
-                                  .deserialize((overAllHits < 0 ? "<red>" : "<green>"))
-                                  .append(Component.text(overAllHits)))
-                          .build())
-                  .replaceText(
-                      TextReplacementConfig.builder()
-                          .matchLiteral("%hits%")
-                          .replacement(String.valueOf(playerHits))
-                          .build())
-                  .replaceText(
-                      TextReplacementConfig.builder()
-                          .matchLiteral("%enemyHits%")
-                          .replacement(String.valueOf(enemyHits))
-                          .build());
-          break;
-        case BEDWARS:
-        case FIREBALL_FIGHT:
-        case MLG_RUSH:
-          component =
-              component
-                  .replaceText(
-                      TextReplacementConfig.builder()
-                          .matchLiteral("%playerBedStatus%")
-                          .replacement(
-                              AstralPractice.getMiniMessage()
-                                  .deserialize(
-                                      StringUtil.legacyToMiniMessage(
-                                          Objects.requireNonNull(
-                                              round != null
-                                                      && round
-                                                          .getBedStatus()
-                                                          .get(duel.getTeam(player))
-                                                  ? config
-                                                      .getMatch()
-                                                      .getBedStatus()
-                                                      .getNotDestroyed()
-                                                  : config
-                                                      .getMatch()
-                                                      .getBedStatus()
-                                                      .getDestroyed()))))
-                          .build())
-                  .replaceText(
-                      TextReplacementConfig.builder()
-                          .matchLiteral("%enemyBedStatus%")
-                          .replacement(
-                              AstralPractice.getMiniMessage()
-                                  .deserialize(
-                                      StringUtil.legacyToMiniMessage(
-                                          Objects.requireNonNull(
-                                              round != null
-                                                      && round
-                                                          .getBedStatus()
-                                                          .get(duel.getTeam(enemy))
-                                                  ? config
-                                                      .getMatch()
-                                                      .getBedStatus()
-                                                      .getNotDestroyed()
-                                                  : config
-                                                      .getMatch()
-                                                      .getBedStatus()
-                                                      .getDestroyed()))))
-                          .build());
-          break;
-
-        default:
-          break;
-      }
+      component =
+          switch (ladderType) {
+            case BOXING ->
+                component
+                    .replaceText(
+                        literal(
+                            "%overAllHits%",
+                            AstralPractice.getMiniMessage()
+                                .deserialize(overAllHits < 0 ? "<red>" : "<green>")
+                                .append(Component.text(overAllHits))))
+                    .replaceText(literal("%hits%", String.valueOf(playerHits)))
+                    .replaceText(literal("%enemyHits%", String.valueOf(enemyHits)));
+            case BEDWARS, FIREBALL_FIGHT, MLG_RUSH ->
+                component
+                    .replaceText(
+                        literal(
+                            "%playerBedStatus%",
+                            bedStatusComponent(config, round, duel.getTeam(player))))
+                    .replaceText(
+                        literal(
+                            "%enemyBedStatus%",
+                            bedStatusComponent(config, round, duel.getTeam(enemy))));
+            default -> component;
+          };
 
       sidebar.add(component);
     }
@@ -714,25 +452,17 @@ public class PracticeAdapter implements SidebarAdapter {
           Player topPlayer = MatchUtil.getBoxingTopPlayer(partyFfa, i);
           Component playerName =
               topPlayer != null
-                  ? displayName(topPlayer)
-                  : AstralPractice.getMiniMessage().deserialize("<red>N/A");
+                  ? AdapterUtil.getSidebarName(topPlayer)
+                  : Common.deserializeMiniMessage("<red>N/A");
           Component playerHits =
               topPlayer != null && match.getCurrentStat(topPlayer) != null
                   ? Component.text(match.getCurrentStat(topPlayer).getHit())
-                  : AstralPractice.getMiniMessage().deserialize("<red>N/A");
+                  : Common.deserializeMiniMessage("<red>N/A");
 
           component =
               component
-                  .replaceText(
-                      TextReplacementConfig.builder()
-                          .matchLiteral("%player" + i + "boxing%")
-                          .replacement(playerName)
-                          .build())
-                  .replaceText(
-                      TextReplacementConfig.builder()
-                          .matchLiteral("%player" + i + "boxingHits%")
-                          .replacement(playerHits)
-                          .build());
+                  .replaceText(literal("%player" + i + "boxing%", playerName))
+                  .replaceText(literal("%player" + i + "boxingHits%", playerHits));
         }
       }
 
@@ -758,61 +488,25 @@ public class PracticeAdapter implements SidebarAdapter {
             case BOXING ->
                 component
                     .replaceText(
-                        TextReplacementConfig.builder()
-                            .matchLiteral("%team1boxingHits%")
-                            .replacement(
-                                String.valueOf(
-                                    Boxing.getTeamBoxingStrokes(
-                                        match, partySplit.getTeamPlayers(TeamEnum.TEAM1))))
-                            .build())
+                        literal(
+                            "%team1boxingHits%",
+                            String.valueOf(
+                                Boxing.getTeamBoxingStrokes(
+                                    match, partySplit.getTeamPlayers(TeamEnum.TEAM1)))))
                     .replaceText(
-                        TextReplacementConfig.builder()
-                            .matchLiteral("%team2boxingHits%")
-                            .replacement(
-                                String.valueOf(
-                                    Boxing.getTeamBoxingStrokes(
-                                        match, partySplit.getTeamPlayers(TeamEnum.TEAM2))))
-                            .build());
+                        literal(
+                            "%team2boxingHits%",
+                            String.valueOf(
+                                Boxing.getTeamBoxingStrokes(
+                                    match, partySplit.getTeamPlayers(TeamEnum.TEAM2)))));
             case BEDWARS, FIREBALL_FIGHT, MLG_RUSH ->
                 component
                     .replaceText(
-                        TextReplacementConfig.builder()
-                            .matchLiteral("%team1BedStatus%")
-                            .replacement(
-                                AstralPractice.getMiniMessage()
-                                    .deserialize(
-                                        StringUtil.legacyToMiniMessage(
-                                            Objects.requireNonNull(
-                                                round != null
-                                                        && round.getBedStatus().get(TeamEnum.TEAM1)
-                                                    ? config
-                                                        .getMatch()
-                                                        .getBedStatus()
-                                                        .getNotDestroyed()
-                                                    : config
-                                                        .getMatch()
-                                                        .getBedStatus()
-                                                        .getDestroyed()))))
-                            .build())
+                        literal(
+                            "%team1BedStatus%", bedStatusComponent(config, round, TeamEnum.TEAM1)))
                     .replaceText(
-                        TextReplacementConfig.builder()
-                            .matchLiteral("%team2BedStatus%")
-                            .replacement(
-                                AstralPractice.getMiniMessage()
-                                    .deserialize(
-                                        StringUtil.legacyToMiniMessage(
-                                            Objects.requireNonNull(
-                                                round != null
-                                                        && round.getBedStatus().get(TeamEnum.TEAM2)
-                                                    ? config
-                                                        .getMatch()
-                                                        .getBedStatus()
-                                                        .getNotDestroyed()
-                                                    : config
-                                                        .getMatch()
-                                                        .getBedStatus()
-                                                        .getDestroyed()))))
-                            .build());
+                        literal(
+                            "%team2BedStatus%", bedStatusComponent(config, round, TeamEnum.TEAM2)));
             default -> component;
           };
 
@@ -840,41 +534,24 @@ public class PracticeAdapter implements SidebarAdapter {
             case BOXING ->
                 component
                     .replaceText(
-                        TextReplacementConfig.builder()
-                            .matchLiteral("%partyTeamBoxingHits%")
-                            .replacement(
-                                String.valueOf(
-                                    Boxing.getTeamBoxingStrokes(
-                                        match, partyVsParty.getTeamPlayers(team))))
-                            .build())
+                        literal(
+                            "%partyTeamBoxingHits%",
+                            String.valueOf(
+                                Boxing.getTeamBoxingStrokes(
+                                    match, partyVsParty.getTeamPlayers(team)))))
                     .replaceText(
-                        TextReplacementConfig.builder()
-                            .matchLiteral("%enemyTeamBoxingHits%")
-                            .replacement(
-                                String.valueOf(
-                                    Boxing.getTeamBoxingStrokes(
-                                        match, partyVsParty.getTeamPlayers(enemyTeam))))
-                            .build());
+                        literal(
+                            "%enemyTeamBoxingHits%",
+                            String.valueOf(
+                                Boxing.getTeamBoxingStrokes(
+                                    match, partyVsParty.getTeamPlayers(enemyTeam)))));
             case BEDWARS, FIREBALL_FIGHT, MLG_RUSH ->
                 component
                     .replaceText(
-                        TextReplacementConfig.builder()
-                            .matchLiteral("%partyTeamBedStatus%")
-                            .replacement(
-                                Objects.requireNonNull(
-                                    round != null && round.getBedStatus().get(team)
-                                        ? config.getMatch().getBedStatus().getNotDestroyed()
-                                        : config.getMatch().getBedStatus().getDestroyed()))
-                            .build())
+                        literal("%partyTeamBedStatus%", bedStatusComponent(config, round, team)))
                     .replaceText(
-                        TextReplacementConfig.builder()
-                            .matchLiteral("%enemyTeamBedStatus%")
-                            .replacement(
-                                Objects.requireNonNull(
-                                    round != null && round.getBedStatus().get(enemyTeam)
-                                        ? config.getMatch().getBedStatus().getNotDestroyed()
-                                        : config.getMatch().getBedStatus().getDestroyed()))
-                            .build());
+                        literal(
+                            "%enemyTeamBedStatus%", bedStatusComponent(config, round, enemyTeam)));
             default -> component;
           };
 
@@ -888,14 +565,12 @@ public class PracticeAdapter implements SidebarAdapter {
       return;
     }
 
-    if (ffa.getBuildRollback() != null) {
-      for (String line : orEmpty(config.getFfa().getGame().getBuild())) {
-        sidebar.add(AdapterUtil.replaceFfaPlaceholders(player, PapiUtil.format(player, line), ffa));
-      }
-    } else {
-      for (String line : orEmpty(config.getFfa().getGame().getNonBuild())) {
-        sidebar.add(AdapterUtil.replaceFfaPlaceholders(player, PapiUtil.format(player, line), ffa));
-      }
+    List<String> lines =
+        ffa.getBuildRollback() != null
+            ? config.getFfa().getGame().getBuild()
+            : config.getFfa().getGame().getNonBuild();
+    for (String line : orEmpty(lines)) {
+      sidebar.add(AdapterUtil.replaceFfaPlaceholders(player, PapiUtil.format(player, line), ffa));
     }
   }
 
@@ -912,21 +587,10 @@ public class PracticeAdapter implements SidebarAdapter {
         for (String line : eventLines) {
           sidebar.add(
               PapiUtil.format(player, line)
+                  .replaceText(literal("%players%", String.valueOf(lms.getStartPlayerCount())))
+                  .replaceText(literal("%alivePlayers%", String.valueOf(lms.getPlayers().size())))
                   .replaceText(
-                      TextReplacementConfig.builder()
-                          .matchLiteral("%players%")
-                          .replacement(String.valueOf(lms.getStartPlayerCount()))
-                          .build())
-                  .replaceText(
-                      TextReplacementConfig.builder()
-                          .matchLiteral("%alivePlayers%")
-                          .replacement(String.valueOf(lms.getPlayers().size()))
-                          .build())
-                  .replaceText(
-                      TextReplacementConfig.builder()
-                          .matchLiteral("%duration%")
-                          .replacement(lms.getDurationRunnable().getFormattedTime())
-                          .build()));
+                      literal("%duration%", lms.getDurationRunnable().getFormattedTime())));
         }
       }
       case OITC -> {
@@ -934,8 +598,8 @@ public class PracticeAdapter implements SidebarAdapter {
         Player highestPointPlayer = oitc.getHighestPointPlayer();
         Component topPlayerName =
             highestPointPlayer != null
-                ? displayName(highestPointPlayer)
-                : AstralPractice.getMiniMessage().deserialize("<red>N/A");
+                ? AdapterUtil.getSidebarName(highestPointPlayer)
+                : Common.deserializeMiniMessage("<red>N/A");
         String topPlayerScore =
             highestPointPlayer != null
                 ? String.valueOf(oitc.getPlayerPoints().get(highestPointPlayer))
@@ -944,157 +608,76 @@ public class PracticeAdapter implements SidebarAdapter {
         for (String line : eventLines) {
           sidebar.add(
               PapiUtil.format(player, line)
+                  .replaceText(literal("%topPlayer%", topPlayerName))
+                  .replaceText(literal("%topScore%", topPlayerScore))
+                  .replaceText(literal("%players%", String.valueOf(oitc.getPlayerPoints().size())))
                   .replaceText(
-                      TextReplacementConfig.builder()
-                          .matchLiteral("%topPlayer%")
-                          .replacement(topPlayerName)
-                          .build())
+                      literal("%lives%", String.valueOf(oitc.getPlayerLives().get(player))))
+                  .replaceText(literal("%alivePlayers%", String.valueOf(oitc.getPlayers().size())))
                   .replaceText(
-                      TextReplacementConfig.builder()
-                          .matchLiteral("%topScore%")
-                          .replacement(topPlayerScore)
-                          .build())
-                  .replaceText(
-                      TextReplacementConfig.builder()
-                          .matchLiteral("%players%")
-                          .replacement(String.valueOf(oitc.getPlayerPoints().size()))
-                          .build())
-                  .replaceText(
-                      TextReplacementConfig.builder()
-                          .matchLiteral("%lives%")
-                          .replacement(String.valueOf(oitc.getPlayerLives().get(player)))
-                          .build())
-                  .replaceText(
-                      TextReplacementConfig.builder()
-                          .matchLiteral("%alivePlayers%")
-                          .replacement(String.valueOf(oitc.getPlayers().size()))
-                          .build())
-                  .replaceText(
-                      TextReplacementConfig.builder()
-                          .matchLiteral("%duration%")
-                          .replacement(oitc.getDurationRunnable().getFormattedTime())
-                          .build()));
+                      literal("%duration%", oitc.getDurationRunnable().getFormattedTime())));
         }
       }
       case TNTTAG -> {
         TntTag tntTag = (TntTag) event;
+        String explosionTime =
+            tntTag.getDurationRunnable() != null
+                ? String.valueOf(tntTag.getDurationRunnable().getSeconds())
+                : "0";
         for (String line : eventLines) {
           sidebar.add(
               PapiUtil.format(player, line)
+                  .replaceText(literal("%explosionTime%", explosionTime))
                   .replaceText(
-                      TextReplacementConfig.builder()
-                          .matchLiteral("%explosionTime%")
-                          .replacement(
-                              tntTag.getDurationRunnable() != null
-                                  ? String.valueOf(tntTag.getDurationRunnable().getSeconds())
-                                  : "0")
-                          .build())
-                  .replaceText(
-                      TextReplacementConfig.builder()
-                          .matchLiteral("%alivePlayers%")
-                          .replacement(String.valueOf(tntTag.getPlayers().size()))
-                          .build()));
+                      literal("%alivePlayers%", String.valueOf(tntTag.getPlayers().size()))));
         }
       }
       case BRACKETS, SUMO -> {
         DuelEvent duelEvent = (DuelEvent) event;
         DuelFight bracketFight = duelEvent.getFight(player);
-        if (bracketFight != null) {
-          for (String line : eventLines) {
-            sidebar.add(
-                PapiUtil.format(player, line)
-                    .replaceText(
-                        TextReplacementConfig.builder()
-                            .matchLiteral("%enemy%")
-                            .replacement(displayName(bracketFight.getOtherPlayer(player)))
-                            .build())
-                    .replaceText(
-                        TextReplacementConfig.builder()
-                            .matchLiteral("%players%")
-                            .replacement(String.valueOf(duelEvent.getStartPlayerCount()))
-                            .build())
-                    .replaceText(
-                        TextReplacementConfig.builder()
-                            .matchLiteral("%alivePlayers%")
-                            .replacement(String.valueOf(duelEvent.getPlayers().size()))
-                            .build())
-                    .replaceText(
-                        TextReplacementConfig.builder()
-                            .matchLiteral("%timeLeft%")
-                            .replacement(
-                                duelEvent.getDurationRunnable() != null
-                                    ? duelEvent.getDurationRunnable().getFormattedTime()
-                                    : "0")
-                            .build())
-                    .replaceText(
-                        TextReplacementConfig.builder()
-                            .matchLiteral("%round%")
-                            .replacement(String.valueOf(duelEvent.getRound()))
-                            .build()));
+        List<String> lines =
+            bracketFight != null ? eventLines : eventLines(config.getSpectate().getEvent(), event);
+        Component enemyComp =
+            bracketFight != null
+                ? AdapterUtil.getSidebarName(bracketFight.getOtherPlayer(player))
+                : Component.empty();
+        String timeLeft =
+            duelEvent.getDurationRunnable() != null
+                ? duelEvent.getDurationRunnable().getFormattedTime()
+                : "0";
+
+        for (String line : lines) {
+          Component c = PapiUtil.format(player, line);
+          if (bracketFight != null) {
+            c = c.replaceText(literal("%enemy%", enemyComp));
           }
-        } else {
-          for (String line : eventLines(config.getSpectate().getEvent(), event)) {
-            sidebar.add(
-                PapiUtil.format(player, line)
-                    .replaceText(
-                        TextReplacementConfig.builder()
-                            .matchLiteral("%players%")
-                            .replacement(String.valueOf(duelEvent.getStartPlayerCount()))
-                            .build())
-                    .replaceText(
-                        TextReplacementConfig.builder()
-                            .matchLiteral("%alivePlayers%")
-                            .replacement(String.valueOf(duelEvent.getPlayers().size()))
-                            .build())
-                    .replaceText(
-                        TextReplacementConfig.builder()
-                            .matchLiteral("%timeLeft%")
-                            .replacement(
-                                duelEvent.getDurationRunnable() != null
-                                    ? duelEvent.getDurationRunnable().getFormattedTime()
-                                    : "0")
-                            .build())
-                    .replaceText(
-                        TextReplacementConfig.builder()
-                            .matchLiteral("%round%")
-                            .replacement(String.valueOf(duelEvent.getRound()))
-                            .build()));
-          }
+          c =
+              c.replaceText(literal("%players%", String.valueOf(duelEvent.getStartPlayerCount())))
+                  .replaceText(
+                      literal("%alivePlayers%", String.valueOf(duelEvent.getPlayers().size())))
+                  .replaceText(literal("%timeLeft%", timeLeft))
+                  .replaceText(literal("%round%", String.valueOf(duelEvent.getRound())));
+          sidebar.add(c);
         }
       }
       case SPLEGG -> {
         Splegg splegg = (Splegg) event;
+        String timeLeft =
+            splegg.getDurationRunnable() != null
+                ? splegg.getDurationRunnable().getFormattedTime()
+                : "0";
         for (String line : eventLines) {
           sidebar.add(
               PapiUtil.format(player, line)
+                  .replaceText(literal("%players%", String.valueOf(splegg.getStartPlayerCount())))
                   .replaceText(
-                      TextReplacementConfig.builder()
-                          .matchLiteral("%players%")
-                          .replacement(String.valueOf(splegg.getStartPlayerCount()))
-                          .build())
+                      literal("%alivePlayers%", String.valueOf(splegg.getPlayers().size())))
+                  .replaceText(literal("%timeLeft%", timeLeft))
                   .replaceText(
-                      TextReplacementConfig.builder()
-                          .matchLiteral("%alivePlayers%")
-                          .replacement(String.valueOf(splegg.getPlayers().size()))
-                          .build())
+                      literal("%firedEggs%", String.valueOf(splegg.getShotEggs().get(player))))
                   .replaceText(
-                      TextReplacementConfig.builder()
-                          .matchLiteral("%timeLeft%")
-                          .replacement(
-                              splegg.getDurationRunnable() != null
-                                  ? splegg.getDurationRunnable().getFormattedTime()
-                                  : "0")
-                          .build())
-                  .replaceText(
-                      TextReplacementConfig.builder()
-                          .matchLiteral("%firedEggs%")
-                          .replacement(String.valueOf(splegg.getShotEggs().get(player)))
-                          .build())
-                  .replaceText(
-                      TextReplacementConfig.builder()
-                          .matchLiteral("%brokenBlocks%")
-                          .replacement(String.valueOf(splegg.getShotBlocks().get(player)))
-                          .build()));
+                      literal(
+                          "%brokenBlocks%", String.valueOf(splegg.getShotBlocks().get(player)))));
         }
       }
       case JUGGERNAUT -> {
@@ -1103,20 +686,11 @@ public class PracticeAdapter implements SidebarAdapter {
           sidebar.add(
               PapiUtil.format(player, line)
                   .replaceText(
-                      TextReplacementConfig.builder()
-                          .matchLiteral("%players%")
-                          .replacement(String.valueOf(juggernaut.getStartPlayerCount()))
-                          .build())
+                      literal("%players%", String.valueOf(juggernaut.getStartPlayerCount())))
                   .replaceText(
-                      TextReplacementConfig.builder()
-                          .matchLiteral("%alivePlayers%")
-                          .replacement(String.valueOf(juggernaut.getPlayers().size() - 1))
-                          .build())
+                      literal("%alivePlayers%", String.valueOf(juggernaut.getPlayers().size() - 1)))
                   .replaceText(
-                      TextReplacementConfig.builder()
-                          .matchLiteral("%duration%")
-                          .replacement(juggernaut.getDurationRunnable().getFormattedTime())
-                          .build()));
+                      literal("%duration%", juggernaut.getDurationRunnable().getFormattedTime())));
         }
       }
 
@@ -1137,14 +711,12 @@ public class PracticeAdapter implements SidebarAdapter {
     if (spectatable instanceof Match match) {
       buildSpectateMatchLines(player, config, sidebar, match);
     } else if (spectatable instanceof Ffa ffa) {
-      if (ffa.getBuildRollback() != null) {
-        for (String line : orEmpty(config.getFfa().getSpectate().getBuild())) {
-          sidebar.add(AdapterUtil.replaceFfaSpecPlaceholders(PapiUtil.format(player, line), ffa));
-        }
-      } else {
-        for (String line : orEmpty(config.getFfa().getSpectate().getNonBuild())) {
-          sidebar.add(AdapterUtil.replaceFfaSpecPlaceholders(PapiUtil.format(player, line), ffa));
-        }
+      List<String> lines =
+          ffa.getBuildRollback() != null
+              ? config.getFfa().getSpectate().getBuild()
+              : config.getFfa().getSpectate().getNonBuild();
+      for (String line : orEmpty(lines)) {
+        sidebar.add(AdapterUtil.replaceFfaSpecPlaceholders(PapiUtil.format(player, line), ffa));
       }
     } else if (spectatable instanceof Event event) {
       buildSpectateEventLines(player, config, sidebar, event);
@@ -1153,106 +725,58 @@ public class PracticeAdapter implements SidebarAdapter {
 
   private void buildSpectateMatchLines(
       Player player, SidebarConfig config, List<Component> sidebar, Match match) {
-    Round round;
     List<String> configLines = ladderLines(config.getSpectate().getMatch().getLadder(), match);
-    boolean useLadderSpecificConfig = !configLines.isEmpty();
+    if (!configLines.isEmpty()) {
+      Round round = match.getCurrentRound();
+      LadderType ladderType = match.getLadder().getType();
 
-    if (useLadderSpecificConfig) {
       switch (match.getType()) {
         case DUEL -> {
           Duel duel = (Duel) match;
-          round = duel.getCurrentRound();
-          LadderType ladderType = match.getLadder().getType();
+          Statistic p1Stats = match.getCurrentStat(duel.getPlayer1());
+          Statistic p2Stats = match.getCurrentStat(duel.getPlayer2());
 
           for (String line : configLines) {
-            switch (ladderType) {
-              case BOXING:
-                Statistic player1stats = match.getCurrentStat(duel.getPlayer1());
-                Statistic player2stats = match.getCurrentStat(duel.getPlayer2());
-                line =
-                    line.replace(
-                            "%player1hits%",
-                            String.valueOf(player1stats != null ? player1stats.getHit() : 0))
-                        .replace(
-                            "%player2hits%",
-                            String.valueOf(player2stats != null ? player2stats.getHit() : 0));
-                break;
-              case BEDWARS:
-              case FIREBALL_FIGHT:
-              case MLG_RUSH:
-                line =
-                    line.replace(
-                            "%player1BedStatus%",
-                            (Objects.requireNonNull(
-                                round != null
-                                        && round.getBedStatus().get(duel.getTeam(duel.getPlayer1()))
-                                    ? config.getMatch().getBedStatus().getNotDestroyed()
-                                    : config.getMatch().getBedStatus().getDestroyed())))
-                        .replace(
-                            "%player2BedStatus%",
-                            (Objects.requireNonNull(
-                                round != null
-                                        && round.getBedStatus().get(duel.getTeam(duel.getPlayer2()))
-                                    ? config.getMatch().getBedStatus().getNotDestroyed()
-                                    : config.getMatch().getBedStatus().getDestroyed())));
-                break;
-
-              default:
-                break;
-            }
+            line =
+                switch (ladderType) {
+                  case BOXING ->
+                      line.replace(
+                              "%player1hits%",
+                              String.valueOf(p1Stats != null ? p1Stats.getHit() : 0))
+                          .replace(
+                              "%player2hits%",
+                              String.valueOf(p2Stats != null ? p2Stats.getHit() : 0));
+                  case BEDWARS, FIREBALL_FIGHT, MLG_RUSH ->
+                      line.replace(
+                              "%player1BedStatus%",
+                              bedStatusString(config, round, duel.getTeam(duel.getPlayer1())))
+                          .replace(
+                              "%player2BedStatus%",
+                              bedStatusString(config, round, duel.getTeam(duel.getPlayer2())));
+                  default -> line;
+                };
             sidebar.add(
                 AdapterUtil.replaceMatchSpectatePlaceholders(PapiUtil.format(player, line), duel));
           }
         }
         case PARTY_FFA -> {
           PartyFfa partyFfa = (PartyFfa) match;
-          LadderType ladderType = match.getLadder().getType();
 
           for (String line : configLines) {
             if (ladderType == LadderType.BOXING) {
-              Player player1 = MatchUtil.getBoxingTopPlayer(partyFfa, 1);
-              if (player1 != null) {
+              for (int i = 1; i <= 3; i++) {
+                Player top = MatchUtil.getBoxingTopPlayer(partyFfa, i);
+                String name =
+                    top != null
+                        ? AstralPractice.getMiniMessage().serialize(AdapterUtil.getSidebarName(top))
+                        : "<red>N/A";
+                String hits =
+                    top != null && match.getCurrentStat(top) != null
+                        ? String.valueOf(match.getCurrentStat(top).getHit())
+                        : "<red>N/A";
                 line =
-                    line.replace(
-                            "%player1boxing%",
-                            AstralPractice.getMiniMessage().serialize(displayName(player1)))
-                        .replace(
-                            "%player1boxingHits%",
-                            String.valueOf(match.getCurrentStat(player1).getHit()));
-              } else {
-                line =
-                    line.replace("%player1boxing%", "<red>N/A")
-                        .replace("%player1boxingHits%", "<red>N/A");
-              }
-
-              Player player2 = MatchUtil.getBoxingTopPlayer(partyFfa, 2);
-              if (player2 != null) {
-                line =
-                    line.replace(
-                            "%player2boxing%",
-                            AstralPractice.getMiniMessage().serialize(displayName(player2)))
-                        .replace(
-                            "%player2boxingHits%",
-                            String.valueOf(match.getCurrentStat(player2).getHit()));
-              } else {
-                line =
-                    line.replace("%player2boxing%", "<red>N/A")
-                        .replace("%player2boxingHits%", "<red>N/A");
-              }
-
-              Player player3 = MatchUtil.getBoxingTopPlayer(partyFfa, 3);
-              if (player3 != null) {
-                line =
-                    line.replace(
-                            "%player3boxing%",
-                            AstralPractice.getMiniMessage().serialize(displayName(player3)))
-                        .replace(
-                            "%player3boxingHits%",
-                            String.valueOf(match.getCurrentStat(player3).getHit()));
-              } else {
-                line =
-                    line.replace("%player3boxing%", "<red>N/A")
-                        .replace("%player3boxingHits%", "<red>N/A");
+                    line.replace("%player" + i + "boxing%", name)
+                        .replace("%player" + i + "boxingHits%", hits);
               }
             }
             sidebar.add(
@@ -1260,110 +784,45 @@ public class PracticeAdapter implements SidebarAdapter {
                     PapiUtil.format(player, line), partyFfa));
           }
         }
-        case PARTY_SPLIT -> {
-          PartySplit partySplit = (PartySplit) match;
-          round = partySplit.getCurrentRound();
-          LadderType ladderType = match.getLadder().getType();
+        case PARTY_SPLIT, PARTY_VS_PARTY -> {
+          PlayersVsPlayers pvp = (PlayersVsPlayers) match;
 
           for (String line : configLines) {
-            switch (ladderType) {
-              case BOXING:
-                line =
-                    line.replace(
-                            "%team1boxingHits%",
-                            String.valueOf(
-                                Boxing.getTeamBoxingStrokes(
-                                    match, partySplit.getTeamPlayers(TeamEnum.TEAM1))))
-                        .replace(
-                            "%team2boxingHits%",
-                            String.valueOf(
-                                Boxing.getTeamBoxingStrokes(
-                                    match, partySplit.getTeamPlayers(TeamEnum.TEAM2))));
-                break;
-              case BEDWARS:
-              case FIREBALL_FIGHT:
-              case MLG_RUSH:
-                line =
-                    line.replace(
-                            "%team1BedStatus%",
-                            (Objects.requireNonNull(
-                                round != null && round.getBedStatus().get(TeamEnum.TEAM1)
-                                    ? config.getMatch().getBedStatus().getNotDestroyed()
-                                    : config.getMatch().getBedStatus().getDestroyed())))
-                        .replace(
-                            "%team2BedStatus%",
-                            (Objects.requireNonNull(
-                                round != null && round.getBedStatus().get(TeamEnum.TEAM2)
-                                    ? config.getMatch().getBedStatus().getNotDestroyed()
-                                    : config.getMatch().getBedStatus().getDestroyed())));
-                break;
-
-              default:
-                break;
-            }
+            line =
+                switch (ladderType) {
+                  case BOXING ->
+                      line.replace(
+                              "%team1boxingHits%",
+                              String.valueOf(
+                                  Boxing.getTeamBoxingStrokes(
+                                      match, pvp.getTeamPlayers(TeamEnum.TEAM1))))
+                          .replace(
+                              "%team2boxingHits%",
+                              String.valueOf(
+                                  Boxing.getTeamBoxingStrokes(
+                                      match, pvp.getTeamPlayers(TeamEnum.TEAM2))));
+                  case BEDWARS, FIREBALL_FIGHT, MLG_RUSH ->
+                      line.replace(
+                              "%team1BedStatus%", bedStatusString(config, round, TeamEnum.TEAM1))
+                          .replace(
+                              "%team2BedStatus%", bedStatusString(config, round, TeamEnum.TEAM2));
+                  default -> line;
+                };
             sidebar.add(
-                AdapterUtil.replaceMatchSpectatePlaceholders(
-                    PapiUtil.format(player, line), partySplit));
+                AdapterUtil.replaceMatchSpectatePlaceholders(PapiUtil.format(player, line), match));
           }
         }
-        case PARTY_VS_PARTY -> {
-          PartyVsParty partyVsParty = (PartyVsParty) match;
-          round = partyVsParty.getCurrentRound();
-          LadderType ladderType = match.getLadder().getType();
-
-          for (String line : configLines) {
-            switch (ladderType) {
-              case BOXING:
-                line =
-                    line.replace(
-                            "%team1boxingHits%",
-                            String.valueOf(
-                                Boxing.getTeamBoxingStrokes(
-                                    match, partyVsParty.getTeamPlayers(TeamEnum.TEAM1))))
-                        .replace(
-                            "%team2boxingHits%",
-                            String.valueOf(
-                                Boxing.getTeamBoxingStrokes(
-                                    match, partyVsParty.getTeamPlayers(TeamEnum.TEAM2))));
-                break;
-              case BEDWARS:
-              case FIREBALL_FIGHT:
-              case MLG_RUSH:
-                line =
-                    line.replace(
-                            "%team1BedStatus%",
-                            (Objects.requireNonNull(
-                                round.getBedStatus().get(TeamEnum.TEAM1)
-                                    ? config.getMatch().getBedStatus().getNotDestroyed()
-                                    : config.getMatch().getBedStatus().getDestroyed())))
-                        .replace(
-                            "%team2BedStatus%",
-                            (Objects.requireNonNull(
-                                round.getBedStatus().get(TeamEnum.TEAM2)
-                                    ? config.getMatch().getBedStatus().getNotDestroyed()
-                                    : config.getMatch().getBedStatus().getDestroyed())));
-                break;
-
-              default:
-                break;
-            }
-            sidebar.add(
-                AdapterUtil.replaceMatchSpectatePlaceholders(
-                    PapiUtil.format(player, line), partyVsParty));
-          }
-        }
-
         default -> {}
       }
     } else {
-      for (String line :
-          orEmpty(
-              switch (match.getType()) {
-                case DUEL -> config.getSpectate().getMatch().getDuel();
-                case PARTY_FFA -> config.getSpectate().getMatch().getPartyFfa();
-                case PARTY_SPLIT -> config.getSpectate().getMatch().getPartySplit();
-                case PARTY_VS_PARTY -> config.getSpectate().getMatch().getPartyVsParty();
-              })) {
+      List<String> defaultLines =
+          switch (match.getType()) {
+            case DUEL -> config.getSpectate().getMatch().getDuel();
+            case PARTY_FFA -> config.getSpectate().getMatch().getPartyFfa();
+            case PARTY_SPLIT -> config.getSpectate().getMatch().getPartySplit();
+            case PARTY_VS_PARTY -> config.getSpectate().getMatch().getPartyVsParty();
+          };
+      for (String line : orEmpty(defaultLines)) {
         sidebar.add(
             AdapterUtil.replaceMatchSpectatePlaceholders(PapiUtil.format(player, line), match));
       }
@@ -1389,7 +848,8 @@ public class PracticeAdapter implements SidebarAdapter {
         Player highestPointPlayer = oitc.getHighestPointPlayer();
         String topPlayerName =
             highestPointPlayer != null
-                ? AstralPractice.getMiniMessage().serialize(displayName(highestPointPlayer))
+                ? AstralPractice.getMiniMessage()
+                    .serialize(AdapterUtil.getSidebarName(highestPointPlayer))
                 : "<red>N/A";
         String topPlayerScore =
             highestPointPlayer != null
@@ -1408,43 +868,43 @@ public class PracticeAdapter implements SidebarAdapter {
       }
       case TNTTAG -> {
         TntTag tntTag = (TntTag) event;
+        String explosionTime =
+            tntTag.getDurationRunnable() != null
+                ? String.valueOf(tntTag.getDurationRunnable().getSeconds())
+                : "0";
         for (String line : eventLines) {
           line =
-              line.replace(
-                      "%explosionTime%",
-                      (tntTag.getDurationRunnable() != null
-                          ? String.valueOf(tntTag.getDurationRunnable().getSeconds())
-                          : "0"))
+              line.replace("%explosionTime%", explosionTime)
                   .replace("%alivePlayers%", String.valueOf(tntTag.getPlayers().size()));
           sidebar.add(PapiUtil.format(player, line));
         }
       }
       case BRACKETS, SUMO -> {
         DuelEvent duelEvent = (DuelEvent) event;
+        String timeLeft =
+            duelEvent.getDurationRunnable() != null
+                ? duelEvent.getDurationRunnable().getFormattedTime()
+                : "0";
         for (String line : eventLines) {
           line =
               line.replace("%players%", String.valueOf(duelEvent.getStartPlayerCount()))
                   .replace("%alivePlayers%", String.valueOf(duelEvent.getPlayers().size()))
-                  .replace(
-                      "%timeLeft%",
-                      (duelEvent.getDurationRunnable() != null
-                          ? duelEvent.getDurationRunnable().getFormattedTime()
-                          : "0"))
+                  .replace("%timeLeft%", timeLeft)
                   .replace("%round%", String.valueOf(duelEvent.getRound()));
           sidebar.add(PapiUtil.format(player, line));
         }
       }
       case SPLEGG -> {
         Splegg splegg = (Splegg) event;
+        String timeLeft =
+            splegg.getDurationRunnable() != null
+                ? splegg.getDurationRunnable().getFormattedTime()
+                : "0";
         for (String line : eventLines) {
           line =
               line.replace("%players%", String.valueOf(splegg.getStartPlayerCount()))
                   .replace("%alivePlayers%", String.valueOf(splegg.getPlayers().size()))
-                  .replace(
-                      "%timeLeft%",
-                      (splegg.getDurationRunnable() != null
-                          ? splegg.getDurationRunnable().getFormattedTime()
-                          : "0"));
+                  .replace("%timeLeft%", timeLeft);
           sidebar.add(PapiUtil.format(player, line));
         }
       }
