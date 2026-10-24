@@ -32,7 +32,6 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
   @Override
   public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
     if (!(sender instanceof Player player)) {
-      Common.sendConsoleMmMessage(PracticeConfig.language().getCantUseConsole());
       return false;
     }
 
@@ -46,41 +45,18 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
 
     if (args.length > 0) {
       switch (args[0]) {
-        case "accept":
-          PartyAcceptArg.acceptCommand(player, label, args);
-          break;
-        case "chat":
-          PartyChatArg.chatCommand(player, args);
-          break;
-        case "disband":
-          PartyDisbandArg.disbandCommand(player, label, args);
-          break;
-        case "info":
-          PartyInfoArg.infoCommand(player, label, args);
-          break;
-        case "invite":
-          PartyInviteArg.inviteCommand(player, label, args);
-          break;
-        case "join":
-          PartyJoinArg.joinCommand(player, label, args);
-          break;
-        case "public":
-          PartyPublicArg.publicCommand(player);
-          break;
-        case "create":
-          PartyManager.getInstance().createParty(player);
-          break;
-        case "kick":
-          PartyKickArg.kickCommand(player, label, args);
-          break;
-        case "leader":
-          PartyLeaderArg.leaderCommand(player, label, args);
-          break;
-        case "leave":
-          PartyLeaveArg.leaveCommand(player, label, args);
-          break;
-        default:
-          PartyHelpArg.helpCommand(player, label);
+        case "accept" -> PartyAcceptArg.acceptCommand(player, label, args);
+        case "chat" -> PartyChatArg.chatCommand(player, args);
+        case "disband" -> PartyDisbandArg.disbandCommand(player, label, args);
+        case "info" -> PartyInfoArg.infoCommand(player, label, args);
+        case "invite" -> PartyInviteArg.inviteCommand(player, label, args);
+        case "join" -> PartyJoinArg.joinCommand(player, label, args);
+        case "public" -> PartyPublicArg.publicCommand(player);
+        case "create" -> PartyManager.getInstance().createParty(player);
+        case "kick" -> PartyKickArg.kickCommand(player, label, args);
+        case "leader" -> PartyLeaderArg.leaderCommand(player, label, args);
+        case "leave" -> PartyLeaveArg.leaveCommand(player, label, args);
+        default -> PartyHelpArg.helpCommand(player, label);
       }
     } else {
       PartyHelpArg.helpCommand(player, label);
@@ -125,20 +101,13 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
 
       StringUtil.copyPartialMatches(args[0], arguments, completion);
     } else {
-      switch (args[0]) {
-        case "invite":
-          completion = PartyInviteArg.tabComplete(player, args);
-          break;
-        case "kick":
-          completion = PartyKickArg.tabComplete(player, args);
-          break;
-        case "leader":
-          completion = PartyLeaderArg.tabComplete(player, args);
-          break;
-
-        default:
-          break;
-      }
+      completion =
+          switch (args[0]) {
+            case "invite" -> PartyInviteArg.tabComplete(player, args);
+            case "kick" -> PartyKickArg.tabComplete(player, args);
+            case "leader" -> PartyLeaderArg.tabComplete(player, args);
+            default -> completion;
+          };
     }
 
     Collections.sort(completion);

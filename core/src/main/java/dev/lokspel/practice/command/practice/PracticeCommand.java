@@ -32,72 +32,24 @@ public class PracticeCommand implements CommandExecutor, TabCompleter {
   @Override
   public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
     if (sender instanceof Player player) {
-
       if (args.length > 0) {
         switch (args[0]) {
-          case "arenas":
-            ArenasArg.run(player);
-            break;
-          case "lobby":
-            LobbyArg.run(player, label, args);
-            break;
-          case "rename":
-            RenameArg.run(player, label, args);
-            break;
-          case "preset":
-            PresetArg.run(player, label, args);
-            break;
-          case "info":
-            InfoArg.run(player, label, args);
-            break;
-          case "goldenhead":
-            GoldenHeadArg.run(player, label, args);
-            break;
-          case "elo":
-            EloArg.run(player, label, args);
-            break;
-          case "ranked":
-            RankedArg.run(player, label, args);
-            break;
-          case "unranked":
-            UnrankedArg.run(player, label, args);
-            break;
-          case "exp":
-            Exp.run(player, label, args);
-            break;
-          case "reset":
-            ResetArg.run(player, label, args);
-            break;
-          case "nametag":
-            NametagArg.run(player, label, args);
-            break;
-          case "teleport":
-            TeleportArg.run(player, label, args);
-            break;
-          case "hologram":
-            HologramArg.run(player, label, args);
-            break;
-          case "reload":
-            ReloadArg.run(player, label, args);
-            break;
-          /*
-           * case "test":
-           * Profile profile = ProfileManager.getInstance().getProfile(player);
-           * List<Player> players = new ArrayList<>();
-           * players.add(player);
-           * Duel duel = new Duel(
-           * profile.getSelectedCustomLadder(),
-           * profile.getSelectedCustomLadder().getAvailableArenas().get(0),
-           * players,
-           * false,
-           * 1
-           * );
-           * duel.startMatch();
-           * break;
-           */
-          default:
-            HelpArg.run(player, label);
-            break;
+          case "arenas" -> ArenasArg.run(player);
+          case "lobby" -> LobbyArg.run(player, label, args);
+          case "rename" -> RenameArg.run(player, label, args);
+          case "preset" -> PresetArg.run(player, label, args);
+          case "info" -> InfoArg.run(player, label, args);
+          case "goldenhead" -> GoldenHeadArg.run(player, label, args);
+          case "elo" -> EloArg.run(player, label, args);
+          case "ranked" -> RankedArg.run(player, label, args);
+          case "unranked" -> UnrankedArg.run(player, label, args);
+          case "exp" -> Exp.run(player, label, args);
+          case "reset" -> ResetArg.run(player, label, args);
+          case "nametag" -> NametagArg.run(player, label, args);
+          case "teleport" -> TeleportArg.run(player, label, args);
+          case "hologram" -> HologramArg.run(player, label, args);
+          case "reload" -> ReloadArg.run(player, label, args);
+          default -> HelpArg.run(player, label);
         }
       } else {
         HelpArg.run(player, label);
@@ -105,30 +57,14 @@ public class PracticeCommand implements CommandExecutor, TabCompleter {
     } else if (sender instanceof ConsoleCommandSender) {
       if (args.length > 0) {
         switch (args[0]) {
-          case "elo":
-            EloArg.run(label, args);
-            break;
-          case "ranked":
-            RankedArg.run(label, args);
-            break;
-          case "unranked":
-            UnrankedArg.run(label, args);
-            break;
-          case "exp":
-            Exp.run(label, args);
-            break;
-          case "reset":
-            ResetArg.run(label, args);
-            break;
-          case "nametag":
-            NametagArg.run(label, args);
-            break;
-          case "reload":
-            ReloadArg.run(label, args);
-            break;
-          default:
-            HelpArg.run(label);
-            break;
+          case "elo" -> EloArg.run(label, args);
+          case "ranked" -> RankedArg.run(label, args);
+          case "unranked" -> UnrankedArg.run(label, args);
+          case "exp" -> Exp.run(label, args);
+          case "reset" -> ResetArg.run(label, args);
+          case "nametag" -> NametagArg.run(label, args);
+          case "reload" -> ReloadArg.run(label, args);
+          default -> HelpArg.run(label);
         }
       } else {
         HelpArg.run(label);

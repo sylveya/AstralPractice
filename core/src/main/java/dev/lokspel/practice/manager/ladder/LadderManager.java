@@ -47,22 +47,14 @@ public class LadderManager {
       PracticeConfig.settings().getQueue().getRanked().getDefaultElo();
 
   public NormalLadder getLadder(String ladderName) {
-    for (NormalLadder ladder : ladders) {
-      if (ladder.getName().equalsIgnoreCase(ladderName)) {
-        return ladder;
-      }
-    }
-    return null;
+    return ladders.stream()
+        .filter(ladder -> ladder.getName().equalsIgnoreCase(ladderName))
+        .findFirst()
+        .orElse(null);
   }
 
   public List<NormalLadder> getEnabledLadders() {
-    List<NormalLadder> list = new ArrayList<>();
-    for (NormalLadder ladder : ladders) {
-      if (ladder.isEnabled()) {
-        list.add(ladder);
-      }
-    }
-    return list;
+    return ladders.stream().filter(NormalLadder::isEnabled).toList();
   }
 
   /**
@@ -117,18 +109,12 @@ public class LadderManager {
   }
 
   public void saveLadders() {
-    for (NormalLadder ladder : ladders) {
-      ladder.setData();
-    }
+    ladders.forEach(NormalLadder::setData);
   }
 
   public void loadGuis() {
     LadderSetupManager.getInstance().loadGuis();
-    GuiManager.getInstance().addGui(new UnrankedGui());
-    GuiManager.getInstance().addGui(new RankedGui());
-    GuiManager.getInstance().addGui(new ChooseQueueTypeGui());
-    GuiManager.getInstance().addGui(new CustomLadderSelectorGui());
-    GuiManager.getInstance().addGui(new EditorMenuGui());
+    registerQueueGuis();
   }
 
   /**
@@ -141,6 +127,10 @@ public class LadderManager {
     }
 
     LadderSetupManager.getInstance().reloadGuis();
+    registerQueueGuis();
+  }
+
+  private void registerQueueGuis() {
     GuiManager.getInstance().addGui(new UnrankedGui());
     GuiManager.getInstance().addGui(new RankedGui());
     GuiManager.getInstance().addGui(new ChooseQueueTypeGui());

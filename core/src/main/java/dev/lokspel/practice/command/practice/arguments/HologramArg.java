@@ -37,16 +37,12 @@ public final class HologramArg {
 
     Profile profile = ProfileManager.getInstance().getProfile(player);
     switch (profile.getStatus()) {
-      case MATCH:
-      case FFA:
-      case EVENT:
-      case SPECTATE:
+      case MATCH, FFA, EVENT, SPECTATE -> {
         Common.sendMmMessage(
             player, PracticeConfig.language().getCommand().getHologram().getCantUse());
         return;
-
-      default:
-        break;
+      }
+      default -> {}
     }
 
     if (ServerManager.getLobby() == null) {

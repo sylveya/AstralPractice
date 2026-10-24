@@ -25,8 +25,6 @@ import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.manager.profile.group.Group;
 import dev.lokspel.practice.manager.profile.statistics.FfaStats;
 import dev.lokspel.practice.manager.queue.QueueManager;
-import java.util.ArrayList;
-import java.util.Map;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.clip.placeholderapi.expansion.Relational;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -94,42 +92,28 @@ public class PlayerExpansion extends PlaceholderExpansion implements Relational 
           return null;
         }
 
-        switch (input[1]) {
-          case "name":
-            if (input.length == 2) {
-              return group.getDisplayName();
+        return switch (input[1]) {
+          case "name" -> input.length == 2 ? group.getDisplayName() : null;
+          case "prefix" ->
+              input.length == 2
+                  ? AstralPractice.getMiniMessage().serialize(group.getPrefix())
+                  : null;
+          case "suffix" ->
+              input.length == 2
+                  ? AstralPractice.getMiniMessage().serialize(group.getSuffix())
+                  : null;
+          case "limit" -> {
+            if (input.length != 3) {
+              yield null;
             }
-            break;
-          case "prefix":
-            if (input.length == 2) {
-              return AstralPractice.getMiniMessage().serialize(group.getPrefix());
-            }
-            break;
-          case "suffix":
-            if (input.length == 2) {
-              return AstralPractice.getMiniMessage().serialize(group.getSuffix());
-            }
-            break;
-          case "limit":
-            if (input.length == 2) {
-              return null;
-            }
-
-            switch (input[2]) {
-              case "u":
-                return String.valueOf(group.getUnrankedLimit());
-              case "r":
-                return String.valueOf(group.getRankedLimit());
-
-              default:
-                break;
-            }
-            break;
-
-          default:
-            break;
-        }
-        break;
+            yield switch (input[2]) {
+              case "u" -> String.valueOf(group.getUnrankedLimit());
+              case "r" -> String.valueOf(group.getRankedLimit());
+              default -> null;
+            };
+          }
+          default -> null;
+        };
       case "in":
         if (input.length == 1) {
           return null;
@@ -139,219 +123,93 @@ public class PlayerExpansion extends PlaceholderExpansion implements Relational 
           case "queue":
             if (input.length == 2) {
               return String.valueOf(QueueManager.getInstance().getQueues().size());
-            } else {
-              if (input.length != 3) {
-                return null;
-              }
-
+            } else if (input.length == 3) {
               NormalLadder ladder = LadderManager.getInstance().getLadder(input[2]);
-              if (ladder == null) {
-                return null;
-              }
-
-              return String.valueOf(QueueManager.getInstance().getQueueSize(ladder));
+              return ladder != null
+                  ? String.valueOf(QueueManager.getInstance().getQueueSize(ladder))
+                  : null;
             }
+            return null;
           case "fight":
             if (input.length == 2) {
               return String.valueOf(MatchManager.getInstance().getPlayerInMatchSize());
-            } else {
-              if (input.length != 3) {
-                return null;
-              }
-
+            } else if (input.length == 3) {
               NormalLadder ladder = LadderManager.getInstance().getLadder(input[2]);
-              if (ladder == null) {
-                return null;
-              }
-
-              return String.valueOf(MatchManager.getInstance().getPlayerInMatchSize(ladder));
+              return ladder != null
+                  ? String.valueOf(MatchManager.getInstance().getPlayerInMatchSize(ladder))
+                  : null;
             }
-
+            return null;
           default:
-            break;
+            return null;
         }
-        break;
       case "division":
         if (input.length == 1) {
           return null;
         }
 
         switch (input[1]) {
-          // division_weight
-          case "weight":
-            if (profile.getStats().getDivision() == null) {
-              return null;
-            }
-            return String.valueOf(
-                DivisionManager.getInstance().getDivisionWeight(profile.getStats().getDivision()));
-          // division_short
-          case "short":
-            if (profile.getStats().getDivision() == null) {
-              return null;
-            }
-            return profile.getStats().getDivision().getShortName();
-          // division_full
-          case "full":
-            if (profile.getStats().getDivision() == null) {
-              return null;
-            }
-            return profile.getStats().getDivision().getFullName();
+          case "weight", "short", "full":
+            return formatDivision(profile.getStats().getDivision(), input[1]);
           case "ladder":
             if (input.length != 4) {
               return null;
             }
             NormalLadder ladderByKeyword = LadderManager.getInstance().getLadder(input[2]);
-            if (ladderByKeyword == null) {
-              return null;
-            }
-            Division ladderByKeywordDiv =
-                DivisionManager.getInstance().getLadderDivision(profile, ladderByKeyword);
-            if (ladderByKeywordDiv == null) {
-              return null;
-            }
-            switch (input[3]) {
-              // division_ladder_<ladder>_weight
-              case "weight":
-                return String.valueOf(
-                    DivisionManager.getInstance().getDivisionWeight(ladderByKeywordDiv));
-              // division_ladder_<ladder>_short
-              case "short":
-                return ladderByKeywordDiv.getShortName();
-              // division_ladder_<ladder>_full
-              case "full":
-                return ladderByKeywordDiv.getFullName();
-              default:
-                break;
-            }
-            break;
+            return ladderByKeyword != null
+                ? formatDivision(
+                    DivisionManager.getInstance().getLadderDivision(profile, ladderByKeyword),
+                    input[3])
+                : null;
           default:
             if (input.length == 3) {
               NormalLadder directLadder = LadderManager.getInstance().getLadder(input[1]);
-              if (directLadder == null) {
-                return null;
-              }
-              Division directLadderDiv =
-                  DivisionManager.getInstance().getLadderDivision(profile, directLadder);
-              if (directLadderDiv == null) {
-                return null;
-              }
-              switch (input[2]) {
-                // division_<ladder>_weight
-                case "weight":
-                  return String.valueOf(
-                      DivisionManager.getInstance().getDivisionWeight(directLadderDiv));
-                // division_<ladder>_short
-                case "short":
-                  return directLadderDiv.getShortName();
-                // division_<ladder>_full
-                case "full":
-                  return directLadderDiv.getFullName();
-                default:
-                  break;
-              }
+              return directLadder != null
+                  ? formatDivision(
+                      DivisionManager.getInstance().getLadderDivision(profile, directLadder),
+                      input[2])
+                  : null;
             }
-            break;
+            return null;
         }
-        break;
       case "match":
-        if (input.length == 1) {
+        if (input.length == 1 || !"division".equals(input[1])) {
           return null;
         }
 
-        switch (input[1]) {
-          case "division":
-            Player onlinePlayer = player != null ? player.getPlayer() : null;
-            if (onlinePlayer == null) {
-              return null;
-            }
-            Match liveMatch = MatchManager.getInstance().getLiveMatchByPlayer(onlinePlayer);
-            if (liveMatch == null || !(liveMatch.getLadder() instanceof NormalLadder matchLadder)) {
-              return null;
-            }
-            Division matchDiv =
-                DivisionManager.getInstance().getLadderDivision(profile, matchLadder);
-            if (matchDiv == null) {
-              return null;
-            }
-
-            if (input.length == 2) {
-              // match_division
-              return matchDiv.getFullName();
-            }
-
-            switch (input[2]) {
-              // match_division_short
-              case "short":
-                return matchDiv.getShortName();
-              // match_division_full
-              case "full":
-                return matchDiv.getFullName();
-              // match_division_weight
-              case "weight":
-                return String.valueOf(DivisionManager.getInstance().getDivisionWeight(matchDiv));
-              default:
-                break;
-            }
-            break;
-          default:
-            break;
+        Player onlinePlayer = player != null ? player.getPlayer() : null;
+        if (onlinePlayer == null) {
+          return null;
         }
-        break;
+        Match liveMatch = MatchManager.getInstance().getLiveMatchByPlayer(onlinePlayer);
+        if (liveMatch == null || !(liveMatch.getLadder() instanceof NormalLadder matchLadder)) {
+          return null;
+        }
+        Division matchDiv = DivisionManager.getInstance().getLadderDivision(profile, matchLadder);
+        if (matchDiv == null) {
+          return null;
+        }
+
+        return input.length == 2 ? matchDiv.getFullName() : formatDivision(matchDiv, input[2]);
       case "best":
-        if (input.length == 1) {
+        if (input.length == 1 || !"division".equals(input[1])) {
           return null;
         }
 
-        switch (input[1]) {
-          case "division":
-            Division bestDiv = DivisionManager.getInstance().getBestDivision(profile);
-            if (bestDiv == null) {
-              return null;
-            }
-
-            if (input.length == 2) {
-              // best_division
-              return bestDiv.getFullName();
-            }
-
-            switch (input[2]) {
-              // best_division_short
-              case "short":
-                return bestDiv.getShortName();
-              // best_division_full
-              case "full":
-                return bestDiv.getFullName();
-              // best_division_weight
-              case "weight":
-                return String.valueOf(DivisionManager.getInstance().getDivisionWeight(bestDiv));
-              default:
-                break;
-            }
-            break;
-          default:
-            break;
+        Division bestDiv = DivisionManager.getInstance().getBestDivision(profile);
+        if (bestDiv == null) {
+          return null;
         }
-        break;
+
+        return input.length == 2 ? bestDiv.getFullName() : formatDivision(bestDiv, input[2]);
       case "kills":
-        if (input.length != 2) {
-          break;
-        }
-
-        // kills_global
-        if (input[1].equals("global")) {
-          return String.valueOf(profile.getStats().getKills());
-        }
-        break;
+        return (input.length == 2 && "global".equals(input[1]))
+            ? String.valueOf(profile.getStats().getKills())
+            : null;
       case "deaths":
-        if (input.length != 2) {
-          break;
-        }
-
-        // deaths_global
-        if (input[1].equals("global")) {
-          return String.valueOf(profile.getStats().getDeaths());
-        }
-        break;
+        return (input.length == 2 && "global".equals(input[1]))
+            ? String.valueOf(profile.getStats().getDeaths())
+            : null;
       case "wins":
         if (input.length == 1) {
           return null;
@@ -359,65 +217,40 @@ public class PlayerExpansion extends PlaceholderExpansion implements Relational 
 
         switch (input[1]) {
           case "ranked":
-            if (input.length == 2) {
-              // wins_ranked
-              return String.valueOf(profile.getStats().getWins(true));
-            }
-            break;
+            return input.length == 2 ? String.valueOf(profile.getStats().getWins(true)) : null;
           case "unranked":
-            if (input.length == 2) {
-              // wins_unranked
-              return String.valueOf(profile.getStats().getWins(false));
-            }
-            break;
+            return input.length == 2 ? String.valueOf(profile.getStats().getWins(false)) : null;
           case "global":
             if (input.length == 2) {
-              // wins_global
               return String.valueOf(profile.getStats().getGlobalWins());
             } else if (input.length == 3) {
-              switch (input[2]) {
-                // wins_global_u
-                case "u":
-                  return String.valueOf(profile.getStats().getWins(false));
-                // wins_global_r
-                case "r":
-                  return String.valueOf(profile.getStats().getWins(true));
-
-                default:
-                  break;
-              }
+              return switch (input[2]) {
+                case "u" -> String.valueOf(profile.getStats().getWins(false));
+                case "r" -> String.valueOf(profile.getStats().getWins(true));
+                default -> null;
+              };
             }
-            break;
+            return null;
           case "ladder":
             if (input.length != 4) {
               return null;
             }
-
             NormalLadder ladder = LadderManager.getInstance().getLadder(input[2]);
             if (ladder == null) {
               return null;
             }
-
-            switch (input[3]) {
-              // wins_ladder_<ladder>_u
-              case "u":
-                return String.valueOf(profile.getStats().getLadderStat(ladder).getUnRankedWins());
-              // wins_ladder_<ladder>_r
-              case "r":
-                if (ladder.isRanked()) {
-                  return String.valueOf(profile.getStats().getLadderStat(ladder).getRankedWins());
-                }
-                break;
-
-              default:
-                break;
-            }
-            break;
-
+            return switch (input[3]) {
+              case "u" ->
+                  String.valueOf(profile.getStats().getLadderStat(ladder).getUnRankedWins());
+              case "r" ->
+                  ladder.isRanked()
+                      ? String.valueOf(profile.getStats().getLadderStat(ladder).getRankedWins())
+                      : null;
+              default -> null;
+            };
           default:
-            break;
+            return null;
         }
-        break;
       case "losses":
         if (input.length == 1) {
           return null;
@@ -425,150 +258,87 @@ public class PlayerExpansion extends PlaceholderExpansion implements Relational 
 
         switch (input[1]) {
           case "ranked":
-            if (input.length == 2) {
-              // losses_ranked
-              return String.valueOf(profile.getStats().getLosses(true));
-            }
-            break;
+            return input.length == 2 ? String.valueOf(profile.getStats().getLosses(true)) : null;
           case "unranked":
-            if (input.length == 2) {
-              // losses_unranked
-              return String.valueOf(profile.getStats().getLosses(false));
-            }
-            break;
+            return input.length == 2 ? String.valueOf(profile.getStats().getLosses(false)) : null;
           case "global":
             if (input.length == 2) {
-              // losses_global
               return String.valueOf(profile.getStats().getGlobalLosses());
             } else if (input.length == 3) {
-              switch (input[2]) {
-                // losses_global_u
-                case "u":
-                  return String.valueOf(profile.getStats().getLosses(false));
-                // losses_global_r
-                case "r":
-                  return String.valueOf(profile.getStats().getLosses(true));
-
-                default:
-                  break;
-              }
+              return switch (input[2]) {
+                case "u" -> String.valueOf(profile.getStats().getLosses(false));
+                case "r" -> String.valueOf(profile.getStats().getLosses(true));
+                default -> null;
+              };
             }
-            break;
+            return null;
           case "ladder":
             if (input.length != 4) {
               return null;
             }
-
             NormalLadder ladder = LadderManager.getInstance().getLadder(input[2]);
             if (ladder == null) {
               return null;
             }
-
-            switch (input[3]) {
-              // losses_ladder_<ladder>_u
-              case "u":
-                return String.valueOf(profile.getStats().getLadderStat(ladder).getUnRankedLosses());
-              // losses_ladder_<ladder>_r
-              case "r":
-                if (ladder.isRanked()) {
-                  return String.valueOf(profile.getStats().getLadderStat(ladder).getRankedLosses());
-                }
-                break;
-
-              default:
-                break;
-            }
-            break;
-
+            return switch (input[3]) {
+              case "u" ->
+                  String.valueOf(profile.getStats().getLadderStat(ladder).getUnRankedLosses());
+              case "r" ->
+                  ladder.isRanked()
+                      ? String.valueOf(profile.getStats().getLadderStat(ladder).getRankedLosses())
+                      : null;
+              default -> null;
+            };
           default:
-            break;
+            return null;
         }
-        break;
       case "kdr":
-        if (input.length != 2) {
-          break;
-        }
-
-        // kdr_global
-        if (input[1].equals("global")) {
-          return String.valueOf(profile.getStats().getGlobalKdr());
-        }
-        break;
+        return (input.length == 2 && "global".equals(input[1]))
+            ? String.valueOf(profile.getStats().getGlobalKdr())
+            : null;
       case "winrate":
         if (input.length != 2) {
-          break;
+          return null;
         }
-
-        switch (input[1]) {
-          // winrate_global
-          case "global":
-            return String.valueOf(profile.getStats().getGlobalWinrate());
-          // winrate_ranked
-          case "ranked":
-            return String.valueOf(profile.getStats().getWinrate(true));
-          // winrate_unranked
-          case "unranked":
-            return String.valueOf(profile.getStats().getWinrate(false));
-
-          default:
-            break;
-        }
-        break;
+        return switch (input[1]) {
+          case "global" -> String.valueOf(profile.getStats().getGlobalWinrate());
+          case "ranked" -> String.valueOf(profile.getStats().getWinrate(true));
+          case "unranked" -> String.valueOf(profile.getStats().getWinrate(false));
+          default -> null;
+        };
       case "elo":
         if (input.length == 1) {
           return null;
         }
-
         switch (input[1]) {
-          // elo_global
           case "global":
-            if (input.length == 2) {
-              return String.valueOf(profile.getStats().getGlobalElo());
-            }
-            break;
-          // elo_ladder_<ladder>
+            return input.length == 2 ? String.valueOf(profile.getStats().getGlobalElo()) : null;
           case "ladder":
             if (input.length != 3) {
               return null;
             }
-
             NormalLadder ladder = LadderManager.getInstance().getLadder(input[2]);
-            if (ladder == null || !ladder.isRanked()) {
-              return null;
-            }
-
-            return String.valueOf(profile.getStats().getLadderStat(ladder).getElo());
-
+            return (ladder != null && ladder.isRanked())
+                ? String.valueOf(profile.getStats().getLadderStat(ladder).getElo())
+                : null;
           default:
-            break;
+            return null;
         }
-        break;
       case "lb":
         if (input.length == 1) {
           return null;
         }
-
-        Leaderboard leaderboard;
-        Map<OfflinePlayer, Integer> list;
-        OfflinePlayer lbPlayer;
-        int rank;
 
         switch (input[1]) {
           case "global":
             if (input.length != 5) {
               return null;
             }
-
-            try {
-              rank = Integer.parseInt(input[3]);
-              if (rank < 1 || rank > 10) {
-                return null;
-              }
-            } catch (NumberFormatException e) {
+            int globalRank = parseRank(input[3]);
+            if (globalRank < 0) {
               return null;
             }
-
-            leaderboard =
+            Leaderboard globalLb =
                 switch (input[2]) {
                   case "wins" ->
                       LeaderboardManager.getInstance()
@@ -578,58 +348,28 @@ public class PlayerExpansion extends PlaceholderExpansion implements Relational 
                           .searchLb(LbMainType.GLOBAL, LbSecondaryType.ELO, null);
                   default -> null;
                 };
+            return getLbValue(globalLb, globalRank, input[4]);
 
-            if (leaderboard == null) {
-              return null;
-            }
-            list = leaderboard.getList();
-            if (list.size() < rank) {
-              return null;
-            }
-
-            lbPlayer = new ArrayList<>(list.keySet()).get(rank - 1);
-
-            switch (input[4]) {
-              // lb_global_wins_<1-10>_k || lb_global_elo_<1-10>_k
-              case "k":
-                return lbPlayer.getName();
-              // lb_global_wins_<1-10>_v || lb_global_elo_<1-10>_v
-              case "v":
-                return String.valueOf(list.get(lbPlayer));
-
-              default:
-                break;
-            }
-            break;
           case "ffa", "ffa_global":
             String statType;
             String rankStr;
             String kvStr;
-
             if (input[1].equals("ffa") && input.length == 6 && input[2].equals("global")) {
-              // %ap_lb_ffa_global_<type>_<rank>_<k|v>%
               statType = input[3];
               rankStr = input[4];
               kvStr = input[5];
             } else if (input.length == 5) {
-              // %ap_lb_ffa_<type>_<rank>_<k|v>% or %ap_lb_ffa_global_<type>_<rank>_<k|v>%
               statType = input[2];
               rankStr = input[3];
               kvStr = input[4];
             } else {
               return null;
             }
-
-            try {
-              rank = Integer.parseInt(rankStr);
-              if (rank < 1 || rank > 10) {
-                return null;
-              }
-            } catch (NumberFormatException e) {
+            int ffaRank = parseRank(rankStr);
+            if (ffaRank < 0) {
               return null;
             }
-
-            leaderboard =
+            Leaderboard ffaLb =
                 switch (statType) {
                   case "kills" ->
                       LeaderboardManager.getInstance()
@@ -642,47 +382,21 @@ public class PlayerExpansion extends PlaceholderExpansion implements Relational 
                           .searchLb(LbMainType.FFA_GLOBAL, LbSecondaryType.BEST_WIN_STREAK, null);
                   default -> null;
                 };
+            return getLbValue(ffaLb, ffaRank, kvStr);
 
-            if (leaderboard == null) {
-              return null;
-            }
-            list = leaderboard.getList();
-            if (list.size() < rank) {
-              return null;
-            }
-
-            lbPlayer = new ArrayList<>(list.keySet()).get(rank - 1);
-
-            switch (kvStr) {
-              case "k":
-                return lbPlayer.getName();
-              case "v":
-                return String.valueOf(list.get(lbPlayer));
-
-              default:
-                break;
-            }
-            break;
           case "ladder":
             if (input.length != 6) {
               return null;
             }
-
-            try {
-              rank = Integer.parseInt(input[4]);
-              if (rank < 1 || rank > 10) {
-                return null;
-              }
-            } catch (NumberFormatException e) {
+            int ladderRank = parseRank(input[4]);
+            if (ladderRank < 0) {
               return null;
             }
-
             NormalLadder ladder = LadderManager.getInstance().getLadder(input[2]);
             if (ladder == null) {
               return null;
             }
-
-            leaderboard =
+            Leaderboard ladderLb =
                 switch (input[3]) {
                   case "wins" ->
                       LeaderboardManager.getInstance()
@@ -692,34 +406,11 @@ public class PlayerExpansion extends PlaceholderExpansion implements Relational 
                           .searchLb(LbMainType.LADDER, LbSecondaryType.ELO, ladder);
                   default -> null;
                 };
-
-            if (leaderboard == null) {
-              return null;
-            }
-            list = leaderboard.getList();
-            if (list.size() < rank) {
-              return null;
-            }
-
-            lbPlayer = new ArrayList<>(list.keySet()).get(rank - 1);
-
-            switch (input[5]) {
-              // lb_ladder_<ladder>_wins_<1-10>_k || lb_ladder_<ladder>_elo_<1-10>_k
-              case "k":
-                return lbPlayer.getName();
-              // lb_ladder_<ladder>_wins_<1-10>_v || lb_ladder_<ladder>_elo_<1-10>_v
-              case "v":
-                return String.valueOf(list.get(lbPlayer));
-
-              default:
-                break;
-            }
-            break;
+            return getLbValue(ladderLb, ladderRank, input[5]);
 
           default:
-            break;
+            return null;
         }
-        break;
       case "ffa":
         if (input.length == 1) {
           return null;
@@ -728,19 +419,16 @@ public class PlayerExpansion extends PlaceholderExpansion implements Relational 
         Statistic statistic = getFfaStatistic(player);
         if (statistic != null) {
           switch (input[1]) {
-            // ffa_killstreak
             case "killstreak":
               if (input.length == 2) {
                 return String.valueOf(statistic.getKillStreak());
               }
               break;
-            // ffa_best_killstreak
             case "best":
               if (input.length == 3 && input[2].equals("killstreak")) {
                 return String.valueOf(statistic.getBestKillStreak());
               }
               break;
-            // ffa_session_...
             case "session":
               if (input.length == 3) {
                 switch (input[2]) {
@@ -761,7 +449,6 @@ public class PlayerExpansion extends PlaceholderExpansion implements Relational 
                 return String.valueOf(statistic.getBestKillStreak());
               }
               break;
-
             default:
               break;
           }
@@ -772,7 +459,6 @@ public class PlayerExpansion extends PlaceholderExpansion implements Relational 
         if (ffaProfile != null) {
           FfaStats ffaStats = ffaProfile.getStats().getFfaStats();
           switch (input[1]) {
-            // ffa_global_... or ffa_lifetime_...
             case "global", "lifetime":
               if (input.length == 3) {
                 switch (input[2]) {
@@ -793,17 +479,14 @@ public class PlayerExpansion extends PlaceholderExpansion implements Relational 
               } else if (input.length == 4
                   && input[2].equals("best")
                   && input[3].equals("streak")) {
-                // ffa_global_best_streak or ffa_lifetime_best_streak
                 return String.valueOf(ffaStats.getBestKillStreak());
               }
               break;
-            // ffa_kdr
             case "kdr":
               if (input.length == 2) {
                 return String.valueOf(ffaStats.getKdr());
               }
               break;
-
             default:
               break;
           }
@@ -820,25 +503,18 @@ public class PlayerExpansion extends PlaceholderExpansion implements Relational 
 
         Ffa ffa = ffaArena.getFfa();
         if (ffa != null && ffa.isOpen()) {
-          switch (input[2]) {
-            case "players":
-              return String.valueOf(ffa.getPlayers().size());
-            case "spectators":
-              return String.valueOf(ffa.getSpectators().size());
-            case "ladder":
-              return ffa.getLadderDisplayName();
-
-            default:
-              break;
-          }
+          return switch (input[2]) {
+            case "players" -> String.valueOf(ffa.getPlayers().size());
+            case "spectators" -> String.valueOf(ffa.getSpectators().size());
+            case "ladder" -> ffa.getLadderDisplayName();
+            default -> null;
+          };
         }
-        break;
+        return null;
 
       default:
-        break;
+        return null;
     }
-
-    return null;
   }
 
   @Override
@@ -889,5 +565,44 @@ public class PlayerExpansion extends PlaceholderExpansion implements Relational 
       return null;
     }
     return ffa.getStatistics().get(player);
+  }
+
+  private String formatDivision(Division division, String type) {
+    if (division == null) {
+      return null;
+    }
+    return switch (type) {
+      case "weight" -> String.valueOf(DivisionManager.getInstance().getDivisionWeight(division));
+      case "short" -> division.getShortName();
+      case "full" -> division.getFullName();
+      default -> null;
+    };
+  }
+
+  private int parseRank(String str) {
+    try {
+      int rank = Integer.parseInt(str);
+      return (rank >= 1 && rank <= 10) ? rank : -1;
+    } catch (NumberFormatException e) {
+      return -1;
+    }
+  }
+
+  private String getLbValue(Leaderboard leaderboard, int rank, String kv) {
+    if (leaderboard == null
+        || leaderboard.getList() == null
+        || leaderboard.getList().size() < rank) {
+      return null;
+    }
+    OfflinePlayer lbPlayer =
+        leaderboard.getList().keySet().stream().skip(rank - 1).findFirst().orElse(null);
+    if (lbPlayer == null) {
+      return null;
+    }
+    return switch (kv) {
+      case "k" -> lbPlayer.getName();
+      case "v" -> String.valueOf(leaderboard.getList().get(lbPlayer));
+      default -> null;
+    };
   }
 }
