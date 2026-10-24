@@ -1,6 +1,5 @@
 package dev.lokspel.practice.manager.gui.setup.arena.arenasettings.normal;
 
-import dev.lokspel.practice.AstralPractice;
 import dev.lokspel.practice.config.PracticeConfig;
 import dev.lokspel.practice.manager.arena.arenas.Arena;
 import dev.lokspel.practice.manager.arena.setup.ArenaSetupManager;
@@ -16,7 +15,6 @@ import dev.lokspel.practice.manager.gui.setup.arena.ArenaSummaryGui;
 import dev.lokspel.practice.util.Common;
 import dev.lokspel.practice.util.InventoryUtil;
 import lombok.Getter;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -112,22 +110,17 @@ public class ArenaMainGui extends Gui {
 
   @Override
   public void update() {
-    Bukkit.getScheduler()
-        .runTaskAsynchronously(
-            AstralPractice.getInstance(),
-            () -> {
-              Inventory inventory = gui.get(1);
+    Inventory inventory = gui.get(1);
 
-              inventory.setItem(10, ArenaSetupUtil.getNameItem(arena));
-              inventory.setItem(11, ArenaSetupUtil.getStatusItem(arena));
-              inventory.setItem(16, ArenaSetupUtil.getLocationItem(arena));
-              if (arena.isBuild()) {
-                inventory.setItem(14, ArenaSetupUtil.getArenaCopiesItem(arena));
-              }
-              inventory.setItem(34, ArenaSetupUtil.getFreezeItem(arena));
+    inventory.setItem(10, ArenaSetupUtil.getNameItem(arena));
+    inventory.setItem(11, ArenaSetupUtil.getStatusItem(arena));
+    inventory.setItem(16, ArenaSetupUtil.getLocationItem(arena));
+    if (arena.isBuild()) {
+      inventory.setItem(14, ArenaSetupUtil.getArenaCopiesItem(arena));
+    }
+    inventory.setItem(34, ArenaSetupUtil.getFreezeItem(arena));
 
-              updatePlayers();
-            });
+    updatePlayers();
   }
 
   @Override

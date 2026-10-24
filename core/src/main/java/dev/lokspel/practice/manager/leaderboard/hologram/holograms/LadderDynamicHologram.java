@@ -10,7 +10,6 @@ import dev.lokspel.practice.manager.leaderboard.hologram.HologramData;
 import dev.lokspel.practice.manager.leaderboard.hologram.HologramType;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.Getter;
 import org.bukkit.Location;
 
@@ -53,7 +52,7 @@ public class LadderDynamicHologram extends Hologram {
   @Override
   public void setAbstractData(HologramData data) {
     if (!ladders.isEmpty()) {
-      data.setLadders(ladders.stream().map(Ladder::getName).collect(Collectors.toList()));
+      data.setLadders(ladders.stream().map(Ladder::getName).toList());
     }
   }
 
@@ -84,16 +83,6 @@ public class LadderDynamicHologram extends Hologram {
     }
 
     return ladders.get(currentLadderIndex);
-  }
-
-  /**
-   * Gets the current ladder without advancing rotation.
-   *
-   * @deprecated Use {@link #getCurrentLadder()} instead
-   */
-  @Deprecated
-  public Ladder getNextLadder() {
-    return getCurrentLadder();
   }
 
   /** Advances to the next ladder in rotation. Called by HologramRunnable on timer tick. */

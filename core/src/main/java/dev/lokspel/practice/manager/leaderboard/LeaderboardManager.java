@@ -25,6 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.ToIntFunction;
+import java.util.stream.Collectors;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -51,13 +52,11 @@ public class LeaderboardManager implements Listener {
 
   public Leaderboard searchLb(
       final LbMainType mainType, final LbSecondaryType secondaryType, final Ladder ladder) {
-    for (Leaderboard lb : new ArrayList<>(leaderboards)) {
-      if (lb.getMainType().equals(mainType) && lb.getSecondaryType().equals(secondaryType)) {
-        if (ladder == null && lb.getLadder() == null) {
-          return lb;
-        } else if (ladder != null && lb.getLadder() != null && ladder == lb.getLadder()) {
-          return lb;
-        }
+    for (Leaderboard lb : leaderboards) {
+      if (lb.getMainType() == mainType
+          && lb.getSecondaryType() == secondaryType
+          && lb.getLadder() == ladder) {
+        return lb;
       }
     }
     return null;
@@ -66,19 +65,16 @@ public class LeaderboardManager implements Listener {
   public void createAllLb(final StartUpCallback startUpCallback) {
     for (LbMainType lbMainType : LbMainType.values()) {
       for (LbSecondaryType lbSecondaryType : LbSecondaryType.values()) {
-        if (lbMainType.equals(LbMainType.LADDER)) {
+        if (lbMainType == LbMainType.LADDER) {
           for (NormalLadder ladder : LadderManager.getInstance().getLadders()) {
             if (ladder.isEnabled()) {
               updateLb(lbMainType, lbSecondaryType, ladder);
             }
           }
-        } else if (lbMainType.equals(LbMainType.FFA_GLOBAL)) {
-          if (lbSecondaryType == LbSecondaryType.KILLS
-              || lbSecondaryType == LbSecondaryType.DEATHS
-              || lbSecondaryType == LbSecondaryType.BEST_WIN_STREAK) {
-            updateLb(lbMainType, lbSecondaryType, null);
-          }
-        } else {
+        } else if (lbMainType != LbMainType.FFA_GLOBAL
+            || lbSecondaryType == LbSecondaryType.KILLS
+            || lbSecondaryType == LbSecondaryType.DEATHS
+            || lbSecondaryType == LbSecondaryType.BEST_WIN_STREAK) {
           updateLb(lbMainType, lbSecondaryType, null);
         }
       }
@@ -119,16 +115,6 @@ public class LeaderboardManager implements Listener {
             leaderboard = new Leaderboard(mainType, secondaryType, ladder, list);
             leaderboards.add(leaderboard);
           }
-
-          // NOTE: We do NOT trigger immediate hologram updates here anymore.
-          // The HologramRunnable handles periodic updates on its own timer.
-          // Triggering updates here was causing:
-          // 1. Race conditions with multiple leaderboard updates happening simultaneously
-          // 2. Excessive calls to getNextLeaderboard() which was rotating dynamic hologram ladders
-          // 3. Holograms flickering/disappearing due to overlapping update cycles
-          //
-          // Holograms will show updated data on their next scheduled update cycle,
-          // which is typically within a few seconds (configurable).
         });
   }
 
@@ -223,24 +209,17 @@ public class LeaderboardManager implements Listener {
   }
 
   /**
-   * It takes a HashMap of OfflinePlayers and Integers, sorts it by the Integer value, and returns a
-   * LinkedHashMap of OfflinePlayers and Integers.
+   * Sorts the map by integer values in descending order.
    *
-   * @param map The HashMap you want to sort.
+   * @param map The map to sort.
    * @return A LinkedHashMap with the keys sorted by value in descending order.
    */
   public static Map<OfflinePlayer, Integer> sortByValue(Map<OfflinePlayer, Integer> map) {
-    if (map.isEmpty()) {
-      return map;
-    }
-
-    LinkedHashMap<OfflinePlayer, Integer> reverseSortedMap = new LinkedHashMap<>();
-
-    map.entrySet().stream()
+    return map.entrySet().stream()
         .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-        .forEachOrdered(x -> reverseSortedMap.put(x.getKey(), x.getValue()));
-
-    return reverseSortedMap;
+        .collect(
+            Collectors.toMap(
+                Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
   }
 
   @EventHandler
@@ -255,15 +234,9 @@ public class LeaderboardManager implements Listener {
           }
 
           switch (lbMainType) {
-            case GLOBAL:
-              updateLb(lbMainType, lbSecondaryType, null);
-              break;
-            case LADDER:
-              updateLb(lbMainType, lbSecondaryType, ladder);
-              break;
-
-            default:
-              break;
+            case GLOBAL -> updateLb(lbMainType, lbSecondaryType, null);
+            case LADDER -> updateLb(lbMainType, lbSecondaryType, ladder);
+            default -> {}
           }
         }
       }

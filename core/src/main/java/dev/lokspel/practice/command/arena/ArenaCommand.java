@@ -34,39 +34,17 @@ public class ArenaCommand implements CommandExecutor, TabCompleter {
 
     if (args.length > 0) {
       switch (args[0]) {
-        case "info":
-          InfoArg.run(player, label, args);
-          break;
-        case "create":
-          CreateArg.run(player, label, args);
-          break;
-        case "setup":
-          SetupArg.run(player, label, args);
-          break;
-        case "delete":
-          DeleteArg.run(player, label, args);
-          break;
-        case "set":
-          SetArg.run(player, label, args);
-          break;
-        case "teleport":
-          TeleportArg.run(player, label, args);
-          break;
-        case "freeze":
-          FreezeArg.run(player, label, args);
-          break;
-        case "enable":
-          EnableArg.run(player, label, args);
-          break;
-        case "disable":
-          DisableArg.run(player, label, args);
-          break;
-        case "stop":
-          StopArg.run(player, label, args);
-          break;
-        default:
-          HelpArg.run(player, label);
-          break;
+        case "info" -> InfoArg.run(player, label, args);
+        case "create" -> CreateArg.run(player, label, args);
+        case "setup" -> SetupArg.run(player, label, args);
+        case "delete" -> DeleteArg.run(player, label, args);
+        case "set" -> SetArg.run(player, label, args);
+        case "teleport" -> TeleportArg.run(player, label, args);
+        case "freeze" -> FreezeArg.run(player, label, args);
+        case "enable" -> EnableArg.run(player, label, args);
+        case "disable" -> DisableArg.run(player, label, args);
+        case "stop" -> StopArg.run(player, label, args);
+        default -> HelpArg.run(player, label);
       }
     } else {
       HelpArg.run(player, label);

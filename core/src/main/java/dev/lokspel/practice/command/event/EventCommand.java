@@ -34,40 +34,17 @@ public class EventCommand implements CommandExecutor, TabCompleter {
 
     if (args.length >= 1) {
       switch (args[0]) {
-        case "host":
-          HostArg.run(player, label, args);
-          break;
-        case "join":
-          JoinArg.run(player, label, args);
-          break;
-        case "stop":
-          StopArg.run(player, label, args);
-          break;
-        case "lms":
-          LmsArg.run(player, label, args);
-          break;
-        case "oitc":
-          OitcArg.run(player, label, args);
-          break;
-        case "tnttag":
-          TntTagArg.run(player, label, args);
-          break;
-        case "brackets":
-          BracketsArg.run(player, label, args);
-          break;
-        case "sumo":
-          SumoArg.run(player, label, args);
-          break;
-        case "splegg":
-          SpleggArg.run(player, label, args);
-          break;
-        case "jn":
-        case "juggernaut":
-          JuggernautArg.run(player, label, args);
-          break;
-        default:
-          HelpArg.run(player, label);
-          break;
+        case "host" -> HostArg.run(player, label, args);
+        case "join" -> JoinArg.run(player, label, args);
+        case "stop" -> StopArg.run(player, label, args);
+        case "lms" -> LmsArg.run(player, label, args);
+        case "oitc" -> OitcArg.run(player, label, args);
+        case "tnttag" -> TntTagArg.run(player, label, args);
+        case "brackets" -> BracketsArg.run(player, label, args);
+        case "sumo" -> SumoArg.run(player, label, args);
+        case "splegg" -> SpleggArg.run(player, label, args);
+        case "jn", "juggernaut" -> JuggernautArg.run(player, label, args);
+        default -> HelpArg.run(player, label);
       }
     } else {
       HelpArg.run(player, label);

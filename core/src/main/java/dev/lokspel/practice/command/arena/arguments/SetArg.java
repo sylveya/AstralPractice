@@ -18,25 +18,12 @@ public final class SetArg {
   public static void run(Player player, String label, String[] args) {
     if (args.length > 1) {
       switch (args[1]) {
-        case "icon":
-          IconArg.run(player, label, args);
-          break;
-        case "portalprot":
-          PortalProtArg.run(player, label, args);
-          break;
-        case "sidebuildlimit":
-          SideBuildLimitArg.run(player, label, args);
-          break;
-        case "partyffacenter":
-          PartyFfaCenterArg.run(player, label, args);
-          break;
-        case "spectator":
-        case "spectatorpos":
-          SpectatorArg.run(player, label, args);
-          break;
-
-        default:
-          break;
+        case "icon" -> IconArg.run(player, label, args);
+        case "portalprot" -> PortalProtArg.run(player, label, args);
+        case "sidebuildlimit" -> SideBuildLimitArg.run(player, label, args);
+        case "partyffacenter" -> PartyFfaCenterArg.run(player, label, args);
+        case "spectator", "spectatorpos" -> SpectatorArg.run(player, label, args);
+        default -> {}
       }
     } else {
       HelpArg.runSetCommand(player, label);

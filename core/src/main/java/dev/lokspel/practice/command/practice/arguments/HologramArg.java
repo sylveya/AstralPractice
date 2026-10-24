@@ -143,7 +143,7 @@ public final class HologramArg {
     }
 
     String name = args[2];
-    if (HologramManager.getInstance().getHologram(name) != null) {
+    if (HologramManager.getInstance().findHologram(name).isPresent()) {
       Common.sendMmMessage(
           player, PracticeConfig.language().getCommand().getHologram().getHoloExists());
       return;

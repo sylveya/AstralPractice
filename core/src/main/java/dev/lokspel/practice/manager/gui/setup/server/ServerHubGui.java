@@ -95,18 +95,13 @@ public class ServerHubGui extends Gui {
 
   @Override
   public void update() {
-    Bukkit.getScheduler()
-        .runTaskAsynchronously(
-            AstralPractice.getInstance(),
-            () -> {
-              Inventory inventory = gui.get(1);
+    Inventory inventory = gui.get(1);
 
-              inventory.setItem(10, getInformationItem());
-              inventory.setItem(15, getMatchesItem());
-              inventory.setItem(16, getEventsItem());
+    inventory.setItem(10, getInformationItem());
+    inventory.setItem(15, getMatchesItem());
+    inventory.setItem(16, getEventsItem());
 
-              updatePlayers();
-            });
+    updatePlayers();
   }
 
   @Override
