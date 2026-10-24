@@ -108,9 +108,8 @@ public final class PartyInviteArg {
       return;
     }
 
-    if (party.getInvites().containsKey(player)
-        && (party.getInvites().get(player) + PartyManager.INVITE_COOLDOWN
-            > System.currentTimeMillis())) {
+    if (party.getInvites().getOrDefault(target, 0L) + PartyManager.INVITE_COOLDOWN
+        > System.currentTimeMillis()) {
       Common.sendMmMessage(
           player,
           PracticeConfig.language()
@@ -145,28 +144,20 @@ public final class PartyInviteArg {
   }
 
   public static List<String> tabComplete(Player player, String[] args) {
-    List<String> arguments = new ArrayList<>();
-
     Party party = PartyManager.getInstance().getParty(player);
+    if (party != null
+        && (party.getLeader().equals(player) || party.isAllInvite())
+        && args.length == 2) {
+      List<String> arguments =
+          Bukkit.getOnlinePlayers().stream()
+              .filter(online -> !online.equals(player))
+              .filter(online -> !ProfileManager.getInstance().getProfile(online).isParty())
+              .map(Player::getName)
+              .toList();
 
-    if (party != null && (party.getLeader().equals(player) || party.isAllInvite())) {
-      if (args.length == 2) {
-        for (Player online : Bukkit.getOnlinePlayers()) {
-          if (online.equals(player)) {
-            continue;
-          }
-          Profile onlineProfile = ProfileManager.getInstance().getProfile(online);
-          if (onlineProfile.isParty()) {
-            continue;
-          }
-
-          arguments.add(online.getName());
-        }
-
-        return StringUtil.copyPartialMatches(args[1], arguments, new ArrayList<>());
-      }
+      return StringUtil.copyPartialMatches(args[1], arguments, new ArrayList<>());
     }
 
-    return arguments;
+    return List.of();
   }
 }

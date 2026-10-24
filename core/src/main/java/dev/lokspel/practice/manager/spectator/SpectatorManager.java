@@ -12,12 +12,12 @@ import dev.lokspel.practice.util.StringUtil;
 import dev.lokspel.practice.util.cooldown.CooldownObject;
 import dev.lokspel.practice.util.cooldown.PlayerCooldown;
 import dev.lokspel.practice.util.interfaces.Spectatable;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Stream;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -106,24 +106,22 @@ public class SpectatorManager {
   }
 
   public static void spectateRandomMatch(Player player) {
-    List<Spectatable> spectatables = new ArrayList<>(MatchManager.getInstance().getLiveMatches());
-    spectatables.addAll(FfaManager.getInstance().getOpenFfas());
-
-    if (spectatables.isEmpty()) {
-      Common.sendMmMessage(player, PracticeConfig.language().getSpectate().getNoMatch());
-      return;
-    }
-
-    List<Spectatable> available = new ArrayList<>(spectatables.size());
-    for (Spectatable spectatable : spectatables) {
-      if (!spectatable.getSpectators().contains(player)) {
-        available.add(spectatable);
-      }
-    }
+    List<Spectatable> available =
+        Stream.<Spectatable>concat(
+                MatchManager.getInstance().getLiveMatches().stream(),
+                FfaManager.getInstance().getOpenFfas().stream())
+            .filter(spectatable -> !spectatable.getSpectators().contains(player))
+            .toList();
 
     if (available.isEmpty()) {
+      boolean anyMatch =
+          !MatchManager.getInstance().getLiveMatches().isEmpty()
+              || !FfaManager.getInstance().getOpenFfas().isEmpty();
       Common.sendMmMessage(
-          player, PracticeConfig.language().getSpectate().getMatch().getOnlyOneToSpectate());
+          player,
+          anyMatch
+              ? PracticeConfig.language().getSpectate().getMatch().getOnlyOneToSpectate()
+              : PracticeConfig.language().getSpectate().getNoMatch());
       return;
     }
 

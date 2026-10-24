@@ -10,15 +10,6 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Represents a single line in a hologram display. Each HologramLine manages exactly ONE TextDisplay
  * entity with strict lifecycle management.
- *
- * <p>Key responsibilities:
- *
- * <ul>
- *   <li>Spawning/despawning text display entities
- *   <li>Updating display text without flicker
- *   <li>Auto-recovery when displays are removed externally
- *   <li>Thread-safe state tracking
- * </ul>
  */
 @Getter
 public class HologramLine {
@@ -46,7 +37,6 @@ public class HologramLine {
    */
   @Nullable
   public TextDisplay spawn(@NotNull Location loc, @NotNull String text) {
-    // Return existing if already alive
     if (spawned && TextDisplayFactory.isAlive(entity)) {
       return entity;
     }
@@ -87,31 +77,14 @@ public class HologramLine {
   public void updateText(@NotNull String newText) {
     this.text = newText;
 
-    // If entity is alive, just update the text
     if (TextDisplayFactory.isAlive(entity)) {
       TextDisplayFactory.updateText(entity, newText);
       return;
     }
 
-    // Auto-respawn if entity was killed externally
     if (spawned && location != null && location.getWorld() != null) {
       this.entity = TextDisplayFactory.create(location, newText);
     }
-  }
-
-  /**
-   * Teleports the text display to a new location.
-   *
-   * @param newLoc The new location
-   * @return true if teleported successfully
-   */
-  public boolean teleport(@NotNull Location newLoc) {
-    if (!isValid()) {
-      return false;
-    }
-
-    this.location = newLoc.clone();
-    return entity.teleport(newLoc);
   }
 
   /**
@@ -121,48 +94,5 @@ public class HologramLine {
    */
   public boolean isValid() {
     return spawned && TextDisplayFactory.isAlive(entity);
-  }
-
-  /**
-   * Gets the Y coordinate of this line.
-   *
-   * @return The Y coordinate, or 0 if not spawned
-   */
-  public double getY() {
-    if (location != null) {
-      return location.getY();
-    }
-    return TextDisplayFactory.isAlive(entity) ? entity.getLocation().getY() : 0;
-  }
-
-  /**
-   * Updates both location and text in one operation.
-   *
-   * @param newLoc The new location
-   * @param newText The new display text
-   * @return true if successful
-   */
-  public boolean update(@NotNull Location newLoc, @NotNull String newText) {
-    if (!isValid()) {
-      return false;
-    }
-
-    this.location = newLoc.clone();
-    this.text = newText;
-
-    entity.teleport(newLoc);
-    TextDisplayFactory.updateText(entity, newText);
-
-    return true;
-  }
-
-  /**
-   * Force-cleans this line by removing the entity regardless of state. Use as a recovery method
-   * when normal despawn might not work.
-   */
-  public void forceClean() {
-    TextDisplayFactory.safeRemove(entity);
-    entity = null;
-    spawned = false;
   }
 }

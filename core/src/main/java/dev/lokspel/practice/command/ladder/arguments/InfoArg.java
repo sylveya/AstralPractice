@@ -7,6 +7,7 @@ import dev.lokspel.practice.util.Common;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.entity.Player;
+import org.bukkit.util.StringUtil;
 
 public final class InfoArg {
 
@@ -46,87 +47,33 @@ public final class InfoArg {
       return;
     }
 
-    for (String line :
-        PracticeConfig.language()
-            .getCommand()
-            .getLadder()
-            .getArguments()
-            .getInfo()
-            .getLadderInfo()) {
+    var infoConfig = PracticeConfig.language().getCommand().getLadder().getArguments().getInfo();
+    var statusNames = infoConfig.getStatusNames();
+
+    String iconStatus = ladder.getIcon() != null ? statusNames.getSet() : statusNames.getNotSet();
+    String invStatus = ladder.getKitData().isSet() ? statusNames.getSet() : statusNames.getNotSet();
+    String status = ladder.isEnabled() ? statusNames.getEnabled() : statusNames.getDisabled();
+    String effectsCount = String.valueOf(ladder.getKitData().getEffects().size());
+
+    for (String line : infoConfig.getLadderInfo()) {
       Common.sendMmMessage(
           player,
           line.replace("%ladder%", ladder.getName())
               .replace("%type%", ladder.getType().getName())
-              .replace(
-                  "%icon%",
-                  ladder.getIcon() != null
-                      ? PracticeConfig.language()
-                          .getCommand()
-                          .getLadder()
-                          .getArguments()
-                          .getInfo()
-                          .getStatusNames()
-                          .getSet()
-                      : PracticeConfig.language()
-                          .getCommand()
-                          .getLadder()
-                          .getArguments()
-                          .getInfo()
-                          .getStatusNames()
-                          .getNotSet())
+              .replace("%icon%", iconStatus)
               .replace("%displayName%", ladder.getDisplayName())
-              .replace(
-                  "%inventory%",
-                  ladder.getKitData().isSet()
-                      ? PracticeConfig.language()
-                          .getCommand()
-                          .getLadder()
-                          .getArguments()
-                          .getInfo()
-                          .getStatusNames()
-                          .getSet()
-                      : PracticeConfig.language()
-                          .getCommand()
-                          .getLadder()
-                          .getArguments()
-                          .getInfo()
-                          .getStatusNames()
-                          .getNotSet())
-              .replace("%effects%", String.valueOf(ladder.getKitData().getEffects().size()))
-              .replace(
-                  "%status%",
-                  ladder.isEnabled()
-                      ? PracticeConfig.language()
-                          .getCommand()
-                          .getLadder()
-                          .getArguments()
-                          .getInfo()
-                          .getStatusNames()
-                          .getEnabled()
-                      : PracticeConfig.language()
-                          .getCommand()
-                          .getLadder()
-                          .getArguments()
-                          .getInfo()
-                          .getStatusNames()
-                          .getDisabled()));
+              .replace("%inventory%", invStatus)
+              .replace("%effects%", effectsCount)
+              .replace("%status%", status));
     }
   }
 
   public static List<String> tabComplete(Player player, String[] args) {
-    List<String> arguments = new ArrayList<>();
-    if (!player.hasPermission("ap.setup")) {
-      return arguments;
+    if (!player.hasPermission("ap.setup") || args.length != 2) {
+      return List.of();
     }
 
-    if (args.length == 2) {
-      for (Ladder ladder : LadderManager.getInstance().getLadders()) {
-        arguments.add(ladder.getName());
-      }
-
-      return org.bukkit.util.StringUtil.copyPartialMatches(args[1], arguments, new ArrayList<>());
-    }
-
-    return arguments;
+    return StringUtil.copyPartialMatches(
+        args[1], LadderManager.getInstance().getLadderNames(), new ArrayList<>());
   }
 }

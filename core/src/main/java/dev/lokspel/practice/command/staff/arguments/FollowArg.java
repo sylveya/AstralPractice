@@ -1,5 +1,6 @@
 package dev.lokspel.practice.command.staff.arguments;
 
+import dev.lokspel.practice.config.PracticeConfig;
 import dev.lokspel.practice.util.Common;
 import org.bukkit.entity.Player;
 
@@ -8,12 +9,13 @@ public final class FollowArg {
   private FollowArg() {}
 
   public static void run(Player player, String label, String[] args) {
+    var followConfig = PracticeConfig.language().getCommand().getStaff().getArguments().getFollow();
     if (!player.hasPermission("ap.staffmode.follow")) {
-      Common.sendMmMessage(player, "<red>You don't have permission.");
+      Common.sendMmMessage(player, followConfig.getNoPermission());
       return;
     }
 
-    Common.sendMmMessage(player, "<red>Currently not a feature of the plugin.");
+    Common.sendMmMessage(player, followConfig.getUnavailable());
 
     /*
      * if (args.length == 2)

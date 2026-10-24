@@ -5,7 +5,6 @@ import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.util.startup.SoftDependUtil;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import me.clip.placeholderapi.PlaceholderAPI;
@@ -63,7 +62,6 @@ public final class Common {
       deathEffect.play(location, viewers);
     } catch (Exception ignored) {
       // This best-effort operation may fail without interrupting its caller.
-
     }
   }
 
@@ -72,13 +70,11 @@ public final class Common {
       Collection<? extends Player> spectators,
       String message,
       boolean includeSpectators) {
-    for (Player player : players) {
-      sendMmMessage(player, message);
+    if (players != null) {
+      players.forEach(player -> sendMmMessage(player, message));
     }
-    if (includeSpectators) {
-      for (Player spectator : spectators) {
-        sendMmMessage(spectator, message);
-      }
+    if (includeSpectators && spectators != null) {
+      spectators.forEach(spectator -> sendMmMessage(spectator, message));
     }
   }
 
@@ -90,14 +86,7 @@ public final class Common {
   }
 
   public static List<Component> toComponent(List<String> list) {
-    if (list == null) {
-      return new ArrayList<>();
-    }
-    List<Component> components = new ArrayList<>(list.size());
-    for (String line : list) {
-      components.add(toComponent(line));
-    }
-    return components;
+    return list != null ? list.stream().map(Common::toComponent).toList() : List.of();
   }
 
   public static String toLegacy(Component component) {
@@ -115,14 +104,7 @@ public final class Common {
   }
 
   public static List<String> toLegacy(List<String> list) {
-    if (list == null) {
-      return new ArrayList<>();
-    }
-    List<String> result = new ArrayList<>(list.size());
-    for (String line : list) {
-      result.add(toLegacy(line));
-    }
-    return result;
+    return list != null ? list.stream().map(Common::toLegacy).toList() : List.of();
   }
 
   public static Component deserializeMiniMessage(String line) {

@@ -319,7 +319,11 @@ public class CustomKitQueueManager implements Listener {
             .replace("%kit%", hostedKit.getDisplayName()));
 
     Duel duel = new Duel(hostedKit, arena, List.of(host, joiner), false, hostedKit.getRounds());
-    duel.startMatch();
+    if (!duel.startMatch()) {
+      InventoryManager.getInstance().setLobbyInventory(host, false);
+      InventoryManager.getInstance().setLobbyInventory(joiner, false);
+      return false;
+    }
     return true;
   }
 
@@ -338,6 +342,13 @@ public class CustomKitQueueManager implements Listener {
     Profile hostProfile = ProfileManager.getInstance().getProfile(host);
     if (hostProfile == null || hostProfile.getStatus() != ProfileStatus.QUEUE) {
       hostedQueues.remove(hostedQueue.hostUuid());
+      return false;
+    }
+
+    Profile joinerProfile = ProfileManager.getInstance().getProfile(joiner);
+    if (joinerProfile != null
+        && (hostProfile.getIgnoredPlayers().contains(joinerProfile)
+            || joinerProfile.getIgnoredPlayers().contains(hostProfile))) {
       return false;
     }
 

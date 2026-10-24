@@ -37,16 +37,12 @@ public final class HologramArg {
 
     Profile profile = ProfileManager.getInstance().getProfile(player);
     switch (profile.getStatus()) {
-      case MATCH:
-      case FFA:
-      case EVENT:
-      case SPECTATE:
+      case MATCH, FFA, EVENT, SPECTATE -> {
         Common.sendMmMessage(
             player, PracticeConfig.language().getCommand().getHologram().getCantUse());
         return;
-
-      default:
-        break;
+      }
+      default -> {}
     }
 
     if (ServerManager.getLobby() == null) {
@@ -116,24 +112,19 @@ public final class HologramArg {
       return;
     }
 
-    HologramType hologramType;
-    switch (args[3].toLowerCase()) {
-      case "global":
-        hologramType = HologramType.GLOBAL;
-        break;
-      case "ffa_global", "ffa":
-        hologramType = HologramType.FFA_GLOBAL;
-        break;
-      case "ladder_static":
-        hologramType = HologramType.LADDER_STATIC;
-        break;
-      case "ladder_dynamic":
-        hologramType = HologramType.LADDER_DYNAMIC;
-        break;
-      default:
-        Common.sendMmMessage(
-            player, PracticeConfig.language().getCommand().getHologram().getInvalidType());
-        return;
+    HologramType hologramType =
+        switch (args[3].toLowerCase()) {
+          case "global" -> HologramType.GLOBAL;
+          case "ffa_global", "ffa" -> HologramType.FFA_GLOBAL;
+          case "ladder_static" -> HologramType.LADDER_STATIC;
+          case "ladder_dynamic" -> HologramType.LADDER_DYNAMIC;
+          default -> null;
+        };
+
+    if (hologramType == null) {
+      Common.sendMmMessage(
+          player, PracticeConfig.language().getCommand().getHologram().getInvalidType());
+      return;
     }
 
     if (HologramManager.getInstance().getHolograms().size() >= 18) {
@@ -143,7 +134,7 @@ public final class HologramArg {
     }
 
     String name = args[2];
-    if (HologramManager.getInstance().getHologram(name) != null) {
+    if (HologramManager.getInstance().findHologram(name).isPresent()) {
       Common.sendMmMessage(
           player, PracticeConfig.language().getCommand().getHologram().getHoloExists());
       return;

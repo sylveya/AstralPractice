@@ -1,5 +1,6 @@
 package dev.lokspel.practice.command.singlecommands;
 
+import dev.lokspel.practice.config.PracticeConfig;
 import dev.lokspel.practice.manager.gui.guis.cosmetics.CosmeticsHubGui;
 import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
@@ -25,19 +26,22 @@ public class CosmeticsCommand implements CommandExecutor {
     }
 
     if (!player.hasPermission("ap.cosmetics.main")) {
-      Common.sendMmMessage(player, "<red>You don't have permission to use cosmetics!");
+      Common.sendMmMessage(
+          player, PracticeConfig.language().getCommand().getCosmetics().getNoPermission());
       return false;
     }
 
     Profile profile = ProfileManager.getInstance().getProfile(player);
     if (profile == null) {
-      Common.sendMmMessage(player, "<red>Failed to load your profile!");
+      Common.sendMmMessage(
+          player, PracticeConfig.language().getCommand().getCosmetics().getFailedLoadProfile());
       return false;
     }
 
-    if (!profile.getStatus().equals(ProfileStatus.LOBBY)
-        && !profile.getStatus().equals(ProfileStatus.STAFF_MODE)) {
-      Common.sendMmMessage(player, "<red>You can only open cosmetics while in the lobby!");
+    if (profile.getStatus() != ProfileStatus.LOBBY
+        && profile.getStatus() != ProfileStatus.STAFF_MODE) {
+      Common.sendMmMessage(
+          player, PracticeConfig.language().getCommand().getCosmetics().getOnlyInLobby());
       return false;
     }
 

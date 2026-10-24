@@ -19,13 +19,12 @@ import lombok.Getter;
 public class MatchHistoryRepository {
 
   private static final String SELECT_HISTORY =
-      "SELECT * FROM match_history WHERE uuid = ? OR opponentUuid = ? "
-          + "ORDER BY matchId DESC LIMIT ?";
+      "SELECT * FROM match_history WHERE uuid = ? ORDER BY matchId DESC LIMIT ?";
 
   private static final String DELETE_STALE =
-      "DELETE FROM match_history WHERE matchId <= ("
+      "DELETE FROM match_history WHERE uuid = ? AND matchId <= ("
           + "SELECT matchId FROM ("
-          + "SELECT matchId FROM match_history WHERE uuid = ? OR opponentUuid = ? "
+          + "SELECT matchId FROM match_history WHERE uuid = ? "
           + "ORDER BY matchId DESC LIMIT 1 OFFSET ?"
           + ") AS stale"
           + ")";
@@ -35,8 +34,7 @@ public class MatchHistoryRepository {
           + "arenaName, score, opponentScore, finalHealth, opponentFinalHealth, "
           + "winnerUuid, matchDuration, playedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-  private static final String DELETE_HISTORY =
-      "DELETE FROM match_history WHERE uuid = ? OR opponentUuid = ?";
+  private static final String DELETE_HISTORY = "DELETE FROM match_history WHERE uuid = ?";
 
   private final ExecutorService executor;
   private final DataSource dataSource;
@@ -51,13 +49,24 @@ public class MatchHistoryRepository {
     return CompletableFuture.runAsync(
         () -> {
           try (Connection connection = dataSource.getConnection()) {
-            insert(connection, playerPov);
-            insert(connection, opponentPov);
+            boolean autoCommit = connection.getAutoCommit();
+            connection.setAutoCommit(false);
+            try {
+              insert(connection, playerPov);
+              insert(connection, opponentPov);
 
-            // Each row is stored from one player's point of view, so the two rows'
-            // own uuids are the two participants.
-            prune(connection, UUID.fromString(playerPov.getUuid()), retainPerPlayer);
-            prune(connection, UUID.fromString(opponentPov.getUuid()), retainPerPlayer);
+              // Each row is stored from one player's point of view, so the two rows'
+              // own uuids are the two participants.
+              prune(connection, UUID.fromString(playerPov.getUuid()), retainPerPlayer);
+              prune(connection, UUID.fromString(opponentPov.getUuid()), retainPerPlayer);
+
+              connection.commit();
+            } catch (SQLException e) {
+              connection.rollback();
+              throw e;
+            } finally {
+              connection.setAutoCommit(autoCommit);
+            }
           } catch (SQLException e) {
             Common.sendConsoleMmMessage(
                 "<red>[Database] save match history error: " + e.getMessage());
@@ -73,8 +82,7 @@ public class MatchHistoryRepository {
               PreparedStatement statement = connection.prepareStatement(SELECT_HISTORY)) {
 
             statement.setString(1, playerUuid.toString());
-            statement.setString(2, playerUuid.toString());
-            statement.setInt(3, Math.max(1, limit));
+            statement.setInt(2, Math.max(1, limit));
 
             List<MatchHistoryEntry> entries = new ArrayList<>();
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -99,7 +107,6 @@ public class MatchHistoryRepository {
               PreparedStatement statement = connection.prepareStatement(DELETE_HISTORY)) {
 
             statement.setString(1, uuid.toString());
-            statement.setString(2, uuid.toString());
             statement.executeUpdate();
           } catch (SQLException e) {
             Common.sendConsoleMmMessage(

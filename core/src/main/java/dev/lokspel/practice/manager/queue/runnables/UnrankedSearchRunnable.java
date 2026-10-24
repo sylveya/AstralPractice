@@ -27,15 +27,16 @@ public class UnrankedSearchRunnable extends SearchRunnable {
           .getSettings()
           .getExtendDivisionSearch();
 
-  private final List<Division> acceptableDivisions = new ArrayList<>();
+  private final boolean ladderMode;
   private final Division currentDivision;
   private Division nextDivision = null;
   private Division previousDivision = null;
+  private int expansionStep = 0;
 
   public UnrankedSearchRunnable(final Queue queue) {
     super(queue, SEARCH_IN_OWN_DIVISION * 20L, SEARCH_IN_NEXT_DIVISION * 20L, false);
 
-    boolean ladderMode =
+    this.ladderMode =
         PracticeConfig.settings()
             .getQueue()
             .getUnranked()
@@ -51,9 +52,6 @@ public class UnrankedSearchRunnable extends SearchRunnable {
       initial = queue.getProfile().getStats().getDivision();
     }
     this.currentDivision = initial;
-    if (currentDivision != null) {
-      this.acceptableDivisions.add(currentDivision);
-    }
     this.sendMsg();
 
     this.searching =
@@ -61,16 +59,7 @@ public class UnrankedSearchRunnable extends SearchRunnable {
           @Override
           public void run() {
             for (Queue q : queueManager.getQueues()) {
-              if (q == queue || q.getPlayer() == queue.getPlayer()) {
-                continue;
-              }
-
-              if (queue.getProfile().getIgnoredPlayers().contains(q.getProfile())
-                  || q.getProfile().getIgnoredPlayers().contains(queue.getProfile())) {
-                continue;
-              }
-
-              if (q.isRanked()) {
+              if (!queue.canMatchWith(q)) {
                 continue;
               }
 
@@ -84,7 +73,8 @@ public class UnrankedSearchRunnable extends SearchRunnable {
                         ? DivisionManager.getInstance().getLadderDivision(q.getProfile(), ladder)
                         : q.getProfile().getStats().getDivision();
 
-                if (acceptableDivisions.contains(targetDivision)) {
+                if (targetDivision != null
+                    && getAcceptableDivisions(ladder).contains(targetDivision)) {
                   this.cancel();
                   queue.startMatch(q, ladder);
                   return;
@@ -95,11 +85,66 @@ public class UnrankedSearchRunnable extends SearchRunnable {
         }.runTaskTimer(AstralPractice.getInstance(), 0, 20L);
   }
 
+  /**
+   * Resolves the base division for the player on a specific ladder.
+   *
+   * @param ladder the ladder to resolve the division for
+   * @return the player's division for the ladder, or their global division
+   */
+  public Division getBaseDivision(NormalLadder ladder) {
+    if (ladderMode && ladder != null) {
+      Division div = DivisionManager.getInstance().getLadderDivision(queue.getProfile(), ladder);
+      if (div != null) {
+        return div;
+      }
+    }
+    return queue.getProfile().getStats().getDivision();
+  }
+
+  /**
+   * Computes the list of acceptable divisions for the given ladder based on the current expansion.
+   *
+   * @param ladder the ladder to evaluate
+   * @return acceptable divisions for the given ladder
+   */
+  public List<Division> getAcceptableDivisions(NormalLadder ladder) {
+    Division base = getBaseDivision(ladder);
+    if (base == null) {
+      return List.of();
+    }
+
+    List<Division> acceptable = new ArrayList<>();
+    acceptable.add(base);
+
+    Division currentUp = base;
+    Division currentDown = base;
+
+    for (int i = 0; i < expansionStep; i++) {
+      if (currentUp != null) {
+        currentUp = DivisionManager.getInstance().getNextDivision(currentUp);
+        if (currentUp != null && !acceptable.contains(currentUp)) {
+          acceptable.add(currentUp);
+        }
+      }
+
+      if (currentDown != null) {
+        currentDown = DivisionManager.getInstance().getPreviousDivision(currentDown);
+        if (currentDown != null && !acceptable.contains(currentDown)) {
+          acceptable.add(currentDown);
+        }
+      }
+    }
+
+    return acceptable;
+  }
+
   @Override
   public void run() {
     if (currentDivision == null) {
       return;
     }
+
+    expansionStep++;
 
     Division nextDivision2;
     if (nextDivision == null) {
@@ -110,9 +155,6 @@ public class UnrankedSearchRunnable extends SearchRunnable {
 
     if (nextDivision2 != null) {
       nextDivision = nextDivision2;
-      if (!acceptableDivisions.contains(nextDivision)) {
-        acceptableDivisions.add(nextDivision);
-      }
     }
 
     Division previousDivision2;
@@ -124,9 +166,6 @@ public class UnrankedSearchRunnable extends SearchRunnable {
 
     if (previousDivision2 != null) {
       previousDivision = previousDivision2;
-      if (!acceptableDivisions.contains(previousDivision)) {
-        acceptableDivisions.add(previousDivision);
-      }
     }
 
     this.sendMsg();
@@ -137,7 +176,7 @@ public class UnrankedSearchRunnable extends SearchRunnable {
       return;
     }
 
-    if (acceptableDivisions.size() == 1) {
+    if (expansionStep == 0) {
       this.updateQueueActionBar(
           PracticeConfig.language()
               .getQueues()

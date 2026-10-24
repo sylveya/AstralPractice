@@ -51,26 +51,26 @@ public class BattleRush extends PortalFight
 
   @Override
   public boolean handleEvents(Event e, Match match) {
-    if (e instanceof BlockBreakEvent) {
-      onBlockBreak((BlockBreakEvent) e, match);
-      TempBuild.onBlockBreak((BlockBreakEvent) e, match);
+    if (e instanceof BlockBreakEvent breakEvent) {
+      onBlockBreak(breakEvent, match);
+      TempBuild.onBlockBreak(breakEvent, match);
       return true;
-    } else if (e instanceof BlockPlaceEvent) {
-      onBlockPlace((BlockPlaceEvent) e, match);
-      TempBuild.onBlockPlace((BlockPlaceEvent) e, match, tempBuildReturnDelaySeconds);
+    } else if (e instanceof BlockPlaceEvent placeEvent) {
+      onBlockPlace(placeEvent, match);
+      TempBuild.onBlockPlace(placeEvent, match, tempBuildReturnDelaySeconds);
       return true;
-    } else if (e instanceof PlayerBucketEmptyEvent) {
-      onBucketEmpty((PlayerBucketEmptyEvent) e, match);
-      TempBuild.onBucketEmpty((PlayerBucketEmptyEvent) e, match, tempBuildReturnDelaySeconds);
+    } else if (e instanceof PlayerBucketEmptyEvent bucketEvent) {
+      onBucketEmpty(bucketEvent, match);
+      TempBuild.onBucketEmpty(bucketEvent, match, tempBuildReturnDelaySeconds);
       return true;
-    } else if (e instanceof BlockFromToEvent) {
-      onLiquidFlow((BlockFromToEvent) e);
+    } else if (e instanceof BlockFromToEvent flowEvent) {
+      onLiquidFlow(flowEvent);
       return true;
-    } else if (e instanceof PlayerMoveEvent) {
-      onPlayerMove((PlayerMoveEvent) e, match);
+    } else if (e instanceof PlayerMoveEvent moveEvent) {
+      onPlayerMove(moveEvent, match);
       return true;
-    } else if (e instanceof EntityDamageEvent) {
-      onPlayerDamage((EntityDamageEvent) e, match);
+    } else if (e instanceof EntityDamageEvent damageEvent) {
+      onPlayerDamage(damageEvent, match);
       return true;
     }
     return false;
@@ -78,11 +78,8 @@ public class BattleRush extends PortalFight
 
   private static void onPlayerDamage(
       final @NotNull EntityDamageEvent e, final @NotNull Match match) {
-    if (!(e.getEntity() instanceof Player player)) {
-      return;
-    }
-
-    if (match.getCurrentRound().getRoundStatus().equals(RoundStatus.LIVE)) {
+    if (e.getEntity() instanceof Player player
+        && match.getCurrentRound().getRoundStatus().equals(RoundStatus.LIVE)) {
       e.setDamage(0);
       PlayerUtil.healToMaxHealth(player);
     }

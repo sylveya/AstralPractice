@@ -3,10 +3,13 @@ package dev.lokspel.practice.manager.matchhistory;
 import dev.lokspel.practice.data.DataFiles;
 import dev.lokspel.practice.util.Common;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 
 /**
  * YAML-backed per-player match history stored at {@code
@@ -18,8 +21,6 @@ import java.util.UUID;
 public class MatchHistoryFile {
 
   private static final int MAX_HISTORY = 5;
-  private static final String NO_OPPONENT = "00000000-0000-0000-0000-000000000000";
-  private static final String UNKNOWN = "Unknown";
 
   private final MatchHistory matchHistory;
   private final String path;
@@ -56,7 +57,9 @@ public class MatchHistoryFile {
       }
     }
 
-    matchHistory.getMatches().sort((a, b) -> Integer.compare(b.getMatchId(), a.getMatchId()));
+    matchHistory
+        .getMatches()
+        .sort(Comparator.comparingInt(MatchHistoryEntry::getMatchId).reversed());
   }
 
   private MatchHistoryData read() {
@@ -87,41 +90,69 @@ public class MatchHistoryFile {
   }
 
   private MatchHistoryEntry toEntry(String matchId, MatchHistoryData.Match match) {
+    if (match == null) {
+      return null;
+    }
+
     try {
+      UUID playerUuid =
+          match.getUuid() != null ? UUID.fromString(match.getUuid()) : matchHistory.getUuid();
+
+      if (match.getOpponentUuid() == null || match.getOpponentUuid().isBlank()) {
+        Common.sendConsoleMmMessage(
+            "<yellow>Warning: Skipping corrupted match entry <white>"
+                + matchId
+                + "<yellow> in <white>"
+                + path
+                + "<yellow> (missing opponent UUID)");
+        return null;
+      }
+      UUID opponentUuid = UUID.fromString(match.getOpponentUuid());
+
+      String username = match.getUsername();
+      if (username == null || username.isBlank()) {
+        OfflinePlayer op = Bukkit.getOfflinePlayer(playerUuid);
+        username = op.getName() != null ? op.getName() : playerUuid.toString();
+      }
+
+      String opponentName = match.getOpponentName();
+      if (opponentName == null || opponentName.isBlank()) {
+        OfflinePlayer op = Bukkit.getOfflinePlayer(opponentUuid);
+        opponentName = op.getName() != null ? op.getName() : opponentUuid.toString();
+      }
+
+      String winner = match.getWinnerUuid();
+      UUID winnerUuid = (winner != null && !winner.isBlank()) ? UUID.fromString(winner) : null;
+
       return new MatchHistoryEntry(
           Integer.parseInt(matchId),
-          UUID.fromString(or(match.getUuid(), matchHistory.getUuid().toString())),
-          UUID.fromString(or(match.getOpponentUuid(), NO_OPPONENT)),
-          or(match.getUsername(), UNKNOWN),
-          or(match.getOpponentName(), UNKNOWN),
-          or(match.getKitName(), UNKNOWN),
-          or(match.getArenaName(), UNKNOWN),
-          or(match.getScore(), 0),
-          or(match.getOpponentScore(), 0),
-          or(match.getFinalHealth(), 0.0),
-          or(match.getOpponentFinalHealth(), 0.0),
-          getWinnerUuid(match),
-          or(match.getMatchDuration(), 0),
-          or(match.getPlayedAt(), System.currentTimeMillis()));
+          playerUuid,
+          opponentUuid,
+          username,
+          opponentName,
+          orDefault(match.getKitName(), ""),
+          orDefault(match.getArenaName(), ""),
+          orDefault(match.getScore(), 0),
+          orDefault(match.getOpponentScore(), 0),
+          orDefault(match.getFinalHealth(), 0.0),
+          orDefault(match.getOpponentFinalHealth(), 0.0),
+          winnerUuid,
+          orDefault(match.getMatchDuration(), 0),
+          orDefault(match.getPlayedAt(), System.currentTimeMillis()));
     } catch (Exception e) {
       Common.sendConsoleMmMessage(
-          "<yellow>[MatchHistory] Skipping corrupt entry "
+          "<yellow>Warning: Skipping corrupted match entry <white>"
               + matchId
-              + " for "
-              + matchHistory.getUuid()
-              + ": "
+              + "<yellow> in <white>"
+              + path
+              + "<yellow>: "
               + e.getMessage());
       return null;
     }
   }
 
-  private static <T> T or(T value, T fallback) {
+  private static <T> T orDefault(T value, T fallback) {
     return value != null ? value : fallback;
-  }
-
-  private static UUID getWinnerUuid(MatchHistoryData.Match match) {
-    String winnerUuid = match.getWinnerUuid();
-    return (winnerUuid != null && !winnerUuid.isEmpty()) ? UUID.fromString(winnerUuid) : null;
   }
 
   private int getNextId() {
@@ -138,7 +169,7 @@ public class MatchHistoryFile {
       return;
     }
 
-    ids.sort((a, b) -> Integer.compare(b, a)); // newest first
+    ids.sort(Comparator.reverseOrder());
     for (int id : ids.subList(MAX_HISTORY, ids.size())) {
       data.getMatches().remove(String.valueOf(id));
     }

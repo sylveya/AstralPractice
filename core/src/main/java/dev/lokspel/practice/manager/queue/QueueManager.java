@@ -41,40 +41,27 @@ public class QueueManager implements Listener {
   }
 
   public Queue getQueue(final Player queuePlayer) {
-    for (Queue queue : queues) {
-      if (queue.getPlayer() == queuePlayer) {
-        return queue;
-      }
-    }
-    return null;
+    return queues.stream()
+        .filter(queue -> queue.getPlayer() == queuePlayer)
+        .findFirst()
+        .orElse(null);
   }
 
   public int getQueueSize(final Ladder ladder, final boolean ranked) {
     if (!(ladder instanceof NormalLadder normalLadder)) {
       return 0;
     }
-
-    int size = 0;
-    for (Queue queue : queues) {
-      if (queue.isRanked() == ranked && queue.isQueued(normalLadder)) {
-        size++;
-      }
-    }
-    return size;
+    return (int)
+        queues.stream()
+            .filter(queue -> queue.isRanked() == ranked && queue.isQueued(normalLadder))
+            .count();
   }
 
   public int getQueueSize(final Ladder ladder) {
     if (!(ladder instanceof NormalLadder normalLadder)) {
       return 0;
     }
-
-    int size = 0;
-    for (Queue queue : queues) {
-      if (queue.isQueued(normalLadder)) {
-        size++;
-      }
-    }
-    return size;
+    return (int) queues.stream().filter(queue -> queue.isQueued(normalLadder)).count();
   }
 
   public void createUnrankedQueue(Player player, NormalLadder ladder) {
@@ -314,7 +301,6 @@ public class QueueManager implements Listener {
       return;
     }
 
-    existingQueue.addLadder(ladder);
     Common.sendMmMessage(
         player,
         PracticeConfig.language()
@@ -324,6 +310,8 @@ public class QueueManager implements Listener {
                 "%weightClass%",
                 ranked ? WeightClass.RANKED.getMmName() : WeightClass.UNRANKED.getMmName())
             .replace("%ladder%", ladder.getDisplayName()));
+
+    existingQueue.addLadder(ladder);
   }
 
   @EventHandler

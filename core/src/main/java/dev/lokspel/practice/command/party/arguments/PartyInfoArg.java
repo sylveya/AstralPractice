@@ -80,33 +80,24 @@ public final class PartyInfoArg {
       }
     }
 
-    for (String line :
-        PracticeConfig.language().getCommand().getParty().getArguments().getInfo().getPartyInfo()) {
+    var infoConfig = PracticeConfig.language().getCommand().getParty().getArguments().getInfo();
+    String partyState =
+        party.isPublicParty()
+            ? infoConfig.getPartyStates().getPublicValue()
+            : infoConfig.getPartyStates().getPrivateValue();
+    String leaderName = party.getLeader().getName();
+    String memberSize = String.valueOf(party.getMembers().size());
+    String maxMembers = String.valueOf(party.getMaxPlayerLimit());
+    String membersStr = String.join(", ", party.getMemberNames());
+
+    for (String line : infoConfig.getPartyInfo()) {
       Common.sendMmMessage(
           player,
-          line.replace("%leader%", party.getLeader().getName())
-              .replace(
-                  "%partyState%",
-                  (party.isPublicParty()
-                      ? PracticeConfig.language()
-                          .getCommand()
-                          .getParty()
-                          .getArguments()
-                          .getInfo()
-                          .getPartyStates()
-                          .getPublicValue()
-                      : PracticeConfig.language()
-                          .getCommand()
-                          .getParty()
-                          .getArguments()
-                          .getInfo()
-                          .getPartyStates()
-                          .getPrivateValue()))
-              .replace("%maxPlayerLimit%", String.valueOf(party.getMaxPlayerLimit()))
-              .replace("%memberSize%", String.valueOf(party.getMembers().size()))
-              .replace(
-                  "%members%",
-                  party.getMemberNames().toString().replace("[", "").replace("]", "")));
+          line.replace("%leader%", leaderName)
+              .replace("%partyState%", partyState)
+              .replace("%memberSize%", memberSize)
+              .replace("%maxMembers%", maxMembers)
+              .replace("%members%", membersStr));
     }
   }
 }

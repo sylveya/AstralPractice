@@ -32,33 +32,15 @@ public class LadderCommand implements CommandExecutor, TabCompleter {
 
     if (args.length > 0) {
       switch (args[0]) {
-        case "info":
-          InfoArg.run(player, label, args);
-          break;
-        case "create":
-          CreateArg.run(player, label, args);
-          break;
-        case "load":
-          LoadArg.run(player, label, args);
-          break;
-        case "clone":
-          CloneArg.run(player, label, args);
-          break;
-        case "delete":
-          DeleteArg.run(player, label, args);
-          break;
-        case "set":
-          SetArg.run(player, label, args);
-          break;
-        case "freeze":
-          FreezeArg.run(player, label, args);
-          break;
-        case "stop":
-          StopArg.run(player, label, args);
-          break;
-        default:
-          HelpArg.run(player, label);
-          break;
+        case "info" -> InfoArg.run(player, label, args);
+        case "create" -> CreateArg.run(player, label, args);
+        case "load" -> LoadArg.run(player, label, args);
+        case "clone" -> CloneArg.run(player, label, args);
+        case "delete" -> DeleteArg.run(player, label, args);
+        case "set" -> SetArg.run(player, label, args);
+        case "freeze" -> FreezeArg.run(player, label, args);
+        case "stop" -> StopArg.run(player, label, args);
+        default -> HelpArg.run(player, label);
       }
     } else {
       HelpArg.run(player, label);
@@ -95,32 +77,17 @@ public class LadderCommand implements CommandExecutor, TabCompleter {
 
       StringUtil.copyPartialMatches(args[0], arguments, completion);
     } else {
-      switch (args[0]) {
-        case "delete":
-          completion = DeleteArg.tabComplete(player, args);
-          break;
-        case "freeze":
-          completion = FreezeArg.tabComplete(player, args);
-          break;
-        case "stop":
-          completion = StopArg.tabComplete(player, args);
-          break;
-        case "info":
-          completion = InfoArg.tabComplete(player, args);
-          break;
-        case "load":
-          completion = LoadArg.tabComplete(player, args);
-          break;
-        case "clone":
-          completion = CloneArg.tabComplete(player, args);
-          break;
-        case "set":
-          completion = SetArg.tabComplete(player, args);
-          break;
-
-        default:
-          break;
-      }
+      completion =
+          switch (args[0]) {
+            case "delete" -> DeleteArg.tabComplete(player, args);
+            case "freeze" -> FreezeArg.tabComplete(player, args);
+            case "stop" -> StopArg.tabComplete(player, args);
+            case "info" -> InfoArg.tabComplete(player, args);
+            case "load" -> LoadArg.tabComplete(player, args);
+            case "clone" -> CloneArg.tabComplete(player, args);
+            case "set" -> SetArg.tabComplete(player, args);
+            default -> completion;
+          };
     }
 
     Collections.sort(completion);

@@ -29,15 +29,12 @@ public class DivisionsCommand implements CommandExecutor {
 
     if (!player.hasPermission("ap.admin")) {
       switch (profile.getStatus()) {
-        case MATCH:
-        case FFA:
-        case EVENT:
+        case MATCH, FFA, EVENT -> {
           Common.sendMmMessage(
               player, PracticeConfig.language().getCommand().getDivisions().getCantUse());
           return false;
-
-        default:
-          break;
+        }
+        default -> {}
       }
     }
 

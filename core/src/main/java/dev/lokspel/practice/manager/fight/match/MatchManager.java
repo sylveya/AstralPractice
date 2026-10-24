@@ -8,12 +8,13 @@ import dev.lokspel.practice.manager.fight.match.listener.MatchLifecycleListener;
 import dev.lokspel.practice.manager.fight.match.listener.StartListener;
 import dev.lokspel.practice.manager.fight.match.type.duel.Duel;
 import dev.lokspel.practice.manager.fight.match.util.RematchRequest;
+import dev.lokspel.practice.manager.gui.GuiManager;
+import dev.lokspel.practice.manager.gui.GuiType;
 import dev.lokspel.practice.manager.ladder.abstraction.Ladder;
 import dev.lokspel.practice.manager.ladder.settings.CentralizedSettingListener;
 import dev.lokspel.practice.manager.nametag.NametagManager;
 import dev.lokspel.practice.manager.spectator.SpectatorManager;
 import dev.lokspel.practice.util.interfaces.Spectatable;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -66,6 +67,26 @@ public class MatchManager {
     // PacketListenerPriority.NORMAL);
   }
 
+  /**
+   * Registers an active match and updates matchmaking queues.
+   *
+   * @param match the match to register
+   */
+  public void registerMatch(Match match) {
+    for (Player player : match.getPlayers()) {
+      this.playerMatches.put(player.getUniqueId(), match);
+    }
+
+    this.matches.put(match.getId(), match);
+    this.liveMatches.add(match);
+
+    if (match instanceof Duel duel && duel.isRanked()) {
+      GuiManager.getInstance().searchGui(GuiType.Queue_Ranked).update();
+    } else {
+      GuiManager.getInstance().searchGui(GuiType.Queue_Unranked).update();
+    }
+  }
+
   public Match getLiveMatchByPlayer(Player player) {
     if (player == null) {
       return null;
@@ -86,31 +107,15 @@ public class MatchManager {
     }
     Spectatable spectatable =
         SpectatorManager.getInstance().getSpectators().get(spectator.getUniqueId());
-    if (spectatable instanceof Match) {
-      return (Match) spectatable;
-    } else {
-      return null;
-    }
+    return spectatable instanceof Match match ? match : null;
   }
 
   public List<Match> getLiveMatchesByArena(BasicArena arena) {
-    List<Match> list = new ArrayList<>();
-    for (Match match : liveMatches) {
-      if (match.getArena().equals(arena)) {
-        list.add(match);
-      }
-    }
-    return list;
+    return liveMatches.stream().filter(match -> match.getArena().equals(arena)).toList();
   }
 
   public List<Match> getLiveMatchesByLadder(Ladder ladder) {
-    List<Match> list = new ArrayList<>();
-    for (Match match : liveMatches) {
-      if (match.getLadder().equals(ladder)) {
-        list.add(match);
-      }
-    }
-    return list;
+    return liveMatches.stream().filter(match -> match.getLadder().equals(ladder)).toList();
   }
 
   public int getDuelMatchSize(Ladder ladder, boolean ranked) {
@@ -130,42 +135,28 @@ public class MatchManager {
   }
 
   public int getPlayerInMatchSize() {
-    int size = 0;
-    for (Match match : liveMatches) {
-      size += match.getPlayers().size();
-    }
-    return size;
+    return liveMatches.stream().mapToInt(match -> match.getPlayers().size()).sum();
   }
 
   public int getPlayerInMatchSize(final Ladder ladder) {
-    int size = 0;
-    for (Match match : liveMatches) {
-      if (match.getLadder().equals(ladder)) {
-        size += match.getPlayers().size();
-      }
-    }
-    return size;
+    return liveMatches.stream()
+        .filter(match -> match.getLadder().equals(ladder))
+        .mapToInt(match -> match.getPlayers().size())
+        .sum();
   }
 
   /**
    * "Get all players in the arena that are not in the match or spectating the match."
    *
-   * <p>The first thing we do is create a new list of players. We'll be adding players to this list
-   * and returning it at the end of the function
-   *
    * @param match The match that the players are being hidden from.
    * @return A list of players that are not in the match and are not spectating the match.
    */
   public List<Player> getHidePlayers(Match match) {
-    List<Player> players = new ArrayList<>();
-
-    for (Player player : match.getArena().getCuboid().getPlayers()) {
-      if (!match.getPlayers().contains(player) && !match.getSpectators().contains(player)) {
-        players.add(player);
-      }
-    }
-
-    return players;
+    return match.getArena().getCuboid().getPlayers().stream()
+        .filter(
+            player ->
+                !match.getPlayers().contains(player) && !match.getSpectators().contains(player))
+        .toList();
   }
 
   /** End all live matches. */

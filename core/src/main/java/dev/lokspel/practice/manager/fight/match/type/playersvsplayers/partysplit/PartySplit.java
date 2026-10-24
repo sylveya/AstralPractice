@@ -69,11 +69,13 @@ public class PartySplit extends PlayersVsPlayers {
   }
 
   @Override
-  public void startMatch() {
-    super.startMatch();
+  public boolean startMatch() {
+    if (!super.startMatch()) {
+      return false;
+    }
 
     if (this.partySpectators.isEmpty()) {
-      return;
+      return true;
     }
 
     // The leader put these players into the match as spectators, so they must
@@ -83,6 +85,7 @@ public class PartySplit extends PlayersVsPlayers {
     for (Player spectator : this.partySpectators) {
       this.addSpectator(spectator, null, true, false);
     }
+    return true;
   }
 
   private void addToTeam(Player player, TeamEnum team) {

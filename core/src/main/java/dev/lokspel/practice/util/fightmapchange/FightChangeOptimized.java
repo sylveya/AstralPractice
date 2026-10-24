@@ -102,19 +102,6 @@ public class FightChangeOptimized {
   }
 
   /**
-   * Legacy constructor for backwards compatibility (e.g., tests or special cases).
-   *
-   * @param cuboid The arena cuboid
-   * @deprecated Use FightChangeOptimized(Spectatable) instead
-   */
-  @Deprecated
-  public FightChangeOptimized(Cuboid cuboid) {
-    this.spectatable = null;
-    this.cuboid = cuboid;
-    this.world = cuboid.getWorld();
-  }
-
-  /**
    * Adds a block change for rollback. NOTE: Uses putIfAbsent to preserve the ORIGINAL state before
    * any changes. This ensures proper rollback even if the same block is modified multiple times.
    */

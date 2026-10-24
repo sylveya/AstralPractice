@@ -29,25 +29,12 @@ public class FfaCommand implements CommandExecutor, TabCompleter {
 
     if (args.length > 0) {
       switch (args[0]) {
-        case "join":
-          JoinArg.run(player, label, args);
-          break;
-        case "leave":
-          LeaveArg.run(player);
-          break;
-        case "kit":
-          KitArg.run(player);
-          break;
-        case "spec":
-        case "spectate":
-          SpectateArg.run(player, label, args);
-          break;
-        case "list":
-          ListArg.run(player);
-          break;
-        default:
-          HelpArg.run(player, label);
-          break;
+        case "join" -> JoinArg.run(player, label, args);
+        case "leave" -> LeaveArg.run(player);
+        case "kit" -> KitArg.run(player);
+        case "spec", "spectate" -> SpectateArg.run(player, label, args);
+        case "list" -> ListArg.run(player);
+        default -> HelpArg.run(player, label);
       }
     } else {
       JoinArg.run(player, label, args);

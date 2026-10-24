@@ -5,7 +5,6 @@ import dev.lokspel.practice.manager.arena.ArenaManager;
 import dev.lokspel.practice.manager.arena.arenas.interfaces.DisplayArena;
 import dev.lokspel.practice.manager.arena.util.ArenaUtil;
 import dev.lokspel.practice.util.Common;
-import dev.lokspel.practice.util.StringUtil;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.entity.Player;
@@ -48,77 +47,45 @@ public final class InfoArg {
       return;
     }
 
+    var infoConfig = PracticeConfig.language().getCommand().getArena().getArguments().getInfo();
+    var statusNames = infoConfig.getStatusNames();
     List<String> ladderNames = ArenaUtil.getLadderNames(arena);
-    for (String line :
-        PracticeConfig.language().getCommand().getArena().getArguments().getInfo().getArenaInfo()) {
+
+    String iconStatus = arena.getIcon() != null ? statusNames.getSet() : statusNames.getNotSet();
+    String laddersStr =
+        ladderNames.isEmpty() ? statusNames.getNotSet() : String.join(", ", ladderNames);
+    String status = arena.isEnabled() ? statusNames.getEnabled() : statusNames.getDisabled();
+    String corner1 = ArenaUtil.convertLocation(arena.getCorner1());
+    String corner2 = ArenaUtil.convertLocation(arena.getCorner2());
+    String pos1 = ArenaUtil.convertLocation(arena.getPosition1());
+    String pos2 = ArenaUtil.convertLocation(arena.getPosition2());
+    String partyFfaCenter = ArenaUtil.convertLocation(arena.getPartyFfaCenter());
+    String specPos = ArenaUtil.convertLocation(arena.getSpectatorPosition());
+
+    for (String line : infoConfig.getArenaInfo()) {
       Common.sendMmMessage(
           player,
           line.replace("%arena%", arena.getName())
               .replace("%type%", arena.getType().getName())
-              .replace(
-                  "%icon%",
-                  arena.getIcon() != null
-                      ? PracticeConfig.language()
-                          .getCommand()
-                          .getArena()
-                          .getArguments()
-                          .getInfo()
-                          .getStatusNames()
-                          .getSet()
-                      : PracticeConfig.language()
-                          .getCommand()
-                          .getArena()
-                          .getArguments()
-                          .getInfo()
-                          .getStatusNames()
-                          .getNotSet())
+              .replace("%icon%", iconStatus)
               .replace("%displayName%", arena.getDisplayName())
-              .replace(
-                  "%ladders%",
-                  (ladderNames.isEmpty()
-                      ? StringUtil.cc("<red>NULL")
-                      : ladderNames.toString().replace("]", "").replace("[", "")))
-              .replace("%corner1%", ArenaUtil.convertLocation(arena.getCorner1()))
-              .replace("%corner2%", ArenaUtil.convertLocation(arena.getCorner2()))
-              .replace("%position1%", ArenaUtil.convertLocation(arena.getPosition1()))
-              .replace("%position2%", ArenaUtil.convertLocation(arena.getPosition2()))
-              .replace("%partyFfaCenter%", ArenaUtil.convertLocation(arena.getPartyFfaCenter()))
-              .replace(
-                  "%spectatorPosition%", ArenaUtil.convertLocation(arena.getSpectatorPosition()))
-              .replace(
-                  "%status%",
-                  arena.isEnabled()
-                      ? PracticeConfig.language()
-                          .getCommand()
-                          .getArena()
-                          .getArguments()
-                          .getInfo()
-                          .getStatusNames()
-                          .getEnabled()
-                      : PracticeConfig.language()
-                          .getCommand()
-                          .getArena()
-                          .getArguments()
-                          .getInfo()
-                          .getStatusNames()
-                          .getDisabled()));
+              .replace("%ladders%", laddersStr)
+              .replace("%corner1%", corner1)
+              .replace("%corner2%", corner2)
+              .replace("%position1%", pos1)
+              .replace("%position2%", pos2)
+              .replace("%partyFfaCenter%", partyFfaCenter)
+              .replace("%spectatorPosition%", specPos)
+              .replace("%status%", status));
     }
   }
 
   public static List<String> tabComplete(Player player, String[] args) {
-    List<String> arguments = new ArrayList<>();
-    if (!player.hasPermission("ap.setup")) {
-      return arguments;
+    if (!player.hasPermission("ap.setup") || args.length != 2) {
+      return List.of();
     }
 
-    if (args.length == 2) {
-      for (DisplayArena arena : ArenaManager.getInstance().getArenaList()) {
-        arguments.add(arena.getName());
-      }
-
-      return org.bukkit.util.StringUtil.copyPartialMatches(args[1], arguments, new ArrayList<>());
-    }
-
-    return arguments;
+    return org.bukkit.util.StringUtil.copyPartialMatches(
+        args[1], ArenaManager.getInstance().getArenaNames(), new ArrayList<>());
   }
 }

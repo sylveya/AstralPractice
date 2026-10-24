@@ -81,6 +81,7 @@ public class Queue extends Runnable implements dev.lokspel.api.interfaces.Queue 
 
     this.ladder = normalLadder;
     this.queuedLadders.add(normalLadder);
+    searchInstantMatch();
   }
 
   public void removeLadder(NormalLadder normalLadder) {
@@ -166,29 +167,8 @@ public class Queue extends Runnable implements dev.lokspel.api.interfaces.Queue 
 
     if (division == null
         || !PracticeConfig.settings().getQueue().getUnranked().getDivisionSearch().getEnabled()) {
-      List<NormalLadder> ladders = new ArrayList<>(this.queuedLadders);
-      Collections.shuffle(ladders);
-
-      for (Queue queue : queueManager.getQueues()) {
-        if (queue == queueManager.getQueue(player)) {
-          continue;
-        }
-        if (queue.getPlayer() == player) {
-          continue;
-        }
-        if (queue.isRanked()) {
-          continue;
-        }
-
-        for (NormalLadder normalLadder : ladders) {
-          if (!queue.isQueued(normalLadder)) {
-            continue;
-          }
-
-          this.cancel();
-          this.startMatch(queue, normalLadder);
-          return;
-        }
+      if (searchInstantMatch()) {
+        return;
       }
     } else {
       this.searchRunnable = new UnrankedSearchRunnable(this);
@@ -196,6 +176,66 @@ public class Queue extends Runnable implements dev.lokspel.api.interfaces.Queue 
     }
 
     GuiManager.getInstance().searchGui(GuiType.Queue_Unranked).update();
+  }
+
+  /**
+   * Checks whether this queue can match with another candidate queue.
+   *
+   * @param other the candidate queue
+   * @return true if the candidate queue is eligible for matchmaking
+   */
+  public boolean canMatchWith(Queue other) {
+    if (other == null || other == this) {
+      return false;
+    }
+
+    if (other.getPlayer() == null || other.getPlayer().equals(this.player)) {
+      return false;
+    }
+
+    if (other.isRanked() != this.isRanked()) {
+      return false;
+    }
+
+    Profile selfProfile = this.profile;
+    Profile otherProfile = other.getProfile();
+    if (selfProfile == null || otherProfile == null) {
+      return false;
+    }
+
+    return !selfProfile.getIgnoredPlayers().contains(otherProfile)
+        && !otherProfile.getIgnoredPlayers().contains(selfProfile);
+  }
+
+  /**
+   * Searches for a compatible unranked opponent across active queues and starts a match if found.
+   *
+   * @return true if a match was found and started
+   */
+  public boolean searchInstantMatch() {
+    if (this.ranked || this.searchRunnable != null) {
+      return false;
+    }
+
+    List<NormalLadder> ladders = new ArrayList<>(this.queuedLadders);
+    Collections.shuffle(ladders);
+
+    for (Queue other : queueManager.getQueues()) {
+      if (!canMatchWith(other)) {
+        continue;
+      }
+
+      for (NormalLadder normalLadder : ladders) {
+        if (!other.isQueued(normalLadder)) {
+          continue;
+        }
+
+        this.cancel();
+        this.startMatch(other, normalLadder);
+        return true;
+      }
+    }
+    return false;
   }
 
   public void startMatch(Queue queue, NormalLadder matchedLadder) {
@@ -270,17 +310,32 @@ public class Queue extends Runnable implements dev.lokspel.api.interfaces.Queue 
               AstralPractice.getInstance(),
               () -> {
                 if (player.isOnline() && queue.getPlayer().isOnline()) {
-                  duel.startMatch();
+                  if (!duel.startMatch()) {
+                    returnToLobbyIfOnline(player);
+                    returnToLobbyIfOnline(queue.getPlayer());
+                  }
+                } else {
+                  returnToLobbyIfOnline(player);
+                  returnToLobbyIfOnline(queue.getPlayer());
                 }
               },
               PracticeConfig.settings().getMatchSettings().getMatchFound().getIconAnimationDelay());
     } else {
-      duel.startMatch();
+      if (!duel.startMatch()) {
+        returnToLobbyIfOnline(player);
+        returnToLobbyIfOnline(queue.getPlayer());
+      }
     }
   }
 
   public void startMatch(Queue queue) {
     this.startMatch(queue, ladder);
+  }
+
+  private static void returnToLobbyIfOnline(Player matchPlayer) {
+    if (matchPlayer != null && matchPlayer.isOnline()) {
+      InventoryManager.getInstance().setLobbyInventory(matchPlayer, false);
+    }
   }
 
   public void endQueue(boolean foundMatch, final String message) {

@@ -73,21 +73,17 @@ public class PartyManager implements Listener {
   }
 
   public Party getParty(Player player) {
-    for (Party party : parties) {
-      if (party.getMembers().contains(player)) {
-        return party;
-      }
-    }
-    return null;
+    return parties.stream()
+        .filter(party -> party.getMembers().contains(player))
+        .findFirst()
+        .orElse(null);
   }
 
   public Party getParty(Match match) {
-    for (Party party : parties) {
-      if (party.getMatch() != null && party.getMatch().equals(match)) {
-        return party;
-      }
-    }
-    return null;
+    return parties.stream()
+        .filter(party -> match != null && match.equals(party.getMatch()))
+        .findFirst()
+        .orElse(null);
   }
 
   /**
@@ -109,26 +105,16 @@ public class PartyManager implements Listener {
   }
 
   public boolean hasJoinablePublicParty() {
-    for (Party party : parties) {
-      if (party.isPublicParty() && party.getMembers().size() < party.getMaxPlayerLimit()) {
-        return true;
-      }
-    }
-    return false;
+    return parties.stream()
+        .anyMatch(
+            party ->
+                party.isPublicParty() && party.getMembers().size() < party.getMaxPlayerLimit());
   }
 
   public int resolvePartyMemberLimit(Player player) {
     Profile profile = ProfileManager.getInstance().getProfile(player);
-    if (profile == null) {
-      return Math.max(2, DEFAULT_MAX_PARTY_MEMBERS);
-    }
-
-    Group group = profile.getGroup();
-    if (group == null) {
-      return Math.max(2, DEFAULT_MAX_PARTY_MEMBERS);
-    }
-
-    return Math.max(2, group.getPartyMemberLimit());
+    Group group = profile != null ? profile.getGroup() : null;
+    return Math.max(2, group != null ? group.getPartyMemberLimit() : DEFAULT_MAX_PARTY_MEMBERS);
   }
 
   public void createParty(Player player) {

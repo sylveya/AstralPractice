@@ -225,21 +225,16 @@ public class EventManager {
     }
 
     if (this.isEventLive(eventType)) {
+      String msg =
+          PracticeConfig.language()
+              .getEvent()
+              .getCantStartEvent()
+              .replace("%event%", eventType.getName());
       if (starter != null) {
-        Common.sendMmMessage(
-            starter,
-            PracticeConfig.language()
-                .getEvent()
-                .getCantStartEvent()
-                .replace("%event%", eventType.getName()));
+        Common.sendMmMessage(starter, msg);
       } else {
-        Common.sendConsoleMmMessage(
-            PracticeConfig.language()
-                .getEvent()
-                .getCantStartEvent()
-                .replace("%event%", eventType.getName()));
+        Common.sendConsoleMmMessage(msg);
       }
-
       return;
     }
 
@@ -272,40 +267,25 @@ public class EventManager {
   }
 
   public boolean isEventLive(EventType eventType) {
-    for (Event event : events) {
-      if (event.getType().equals(eventType)) {
-        return true;
-      }
-    }
-    return false;
+    return events.stream().anyMatch(event -> event.getType().equals(eventType));
   }
 
   public List<EventData> getEnabledEvents() {
-    List<EventData> enabledEvents = new ArrayList<>();
-    for (EventData eventData : eventData.values()) {
-      if (eventData.isEnabled()) {
-        enabledEvents.add(eventData);
-      }
-    }
-    return enabledEvents;
+    return eventData.values().stream().filter(EventData::isEnabled).toList();
   }
 
   public Event getEventByPlayer(Player player) {
-    for (Event event : events) {
-      if (event.getPlayers().contains(player)) {
-        return event;
-      }
-    }
-    return null;
+    return events.stream()
+        .filter(event -> event.getPlayers().contains(player))
+        .findFirst()
+        .orElse(null);
   }
 
   public Event getEventBySpectator(Player player) {
-    for (Event event : events) {
-      if (event.getSpectators().contains(player)) {
-        return event;
-      }
-    }
-    return null;
+    return events.stream()
+        .filter(event -> event.getSpectators().contains(player))
+        .findFirst()
+        .orElse(null);
   }
 
   public int getPostKillDelayTicks() {

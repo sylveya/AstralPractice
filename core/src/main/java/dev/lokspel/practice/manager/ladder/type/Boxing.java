@@ -16,6 +16,7 @@ import dev.lokspel.practice.manager.ladder.abstraction.normal.NormalLadder;
 import dev.lokspel.practice.manager.ladder.enums.LadderType;
 import dev.lokspel.practice.util.playerutil.PlayerUtil;
 import java.util.List;
+import java.util.Objects;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.entity.Player;
@@ -37,10 +38,8 @@ public class Boxing extends NormalLadder implements CustomConfig, LadderHandle, 
 
   @Override
   public boolean shouldEndRound(Match match, Round round, Player player) {
-    // Check if the player has reached the required hits
-    int requiredStrokes = boxingWinHit;
     Statistic statistic = match.getCurrentStat(player);
-    return statistic != null && statistic.getHit() >= requiredStrokes;
+    return statistic != null && statistic.getHit() >= boxingWinHit;
   }
 
   @Override
@@ -55,11 +54,11 @@ public class Boxing extends NormalLadder implements CustomConfig, LadderHandle, 
 
   @Override
   public boolean handleEvents(Event e, Match match) {
-    if (e instanceof EntityDamageEvent) {
-      onPlayerDamage((EntityDamageEvent) e, match);
+    if (e instanceof EntityDamageEvent damageEvent) {
+      onPlayerDamage(damageEvent, match);
 
-      if (e instanceof EntityDamageByEntityEvent) {
-        onPlayerDamagePlayer((EntityDamageByEntityEvent) e, match, this);
+      if (damageEvent instanceof EntityDamageByEntityEvent damageByEntity) {
+        onPlayerDamagePlayer(damageByEntity, match, this);
       }
 
       return true;
@@ -98,64 +97,48 @@ public class Boxing extends NormalLadder implements CustomConfig, LadderHandle, 
     }
 
     int requiredStrokes = ladder.getBoxingWinHit();
-
     MatchType matchType = match.getType();
-    TeamEnum attackerTeam;
-
     Round round = match.getCurrentRound();
 
     switch (matchType) {
-      case DUEL:
-      case PARTY_FFA:
-        if (attackerStat.getHit() >= requiredStrokes && round instanceof PlayerWinner) {
-          PlayerWinner playerWinner = (PlayerWinner) match.getCurrentRound();
+      case DUEL, PARTY_FFA -> {
+        if (attackerStat.getHit() >= requiredStrokes
+            && round instanceof PlayerWinner playerWinner
+            && !attackerStat.isSet()) {
+          playerWinner.setRoundWinner(attacker);
+          round.endRound();
+        }
+      }
+      case PARTY_SPLIT, PARTY_VS_PARTY -> {
+        if (match instanceof PlayersVsPlayers playersVsPlayers) {
+          TeamEnum attackerTeam = playersVsPlayers.getTeam(attacker);
 
-          if (!attackerStat.isSet()) {
-            playerWinner.setRoundWinner(attacker);
+          if (getTeamBoxingStrokes(match, playersVsPlayers.getTeamPlayers(attackerTeam))
+                  >= requiredStrokes
+              && !attackerStat.isSet()) {
+            playersVsPlayers.getCurrentRound().setRoundWinner(attackerTeam);
             round.endRound();
           }
         }
-        break;
-      case PARTY_SPLIT:
-      case PARTY_VS_PARTY:
-        if (match instanceof PlayersVsPlayers playersVsPlayers) {
-          attackerTeam = playersVsPlayers.getTeam(attacker);
-
-          if (getTeamBoxingStrokes(match, playersVsPlayers.getTeamPlayers(attackerTeam))
-              >= requiredStrokes) {
-            if (!attackerStat.isSet()) {
-              playersVsPlayers.getCurrentRound().setRoundWinner(attackerTeam);
-              round.endRound();
-            }
-          }
-        }
-        break;
-
-      default:
-        break;
+      }
+      default -> {}
     }
   }
 
   private static void onPlayerDamage(
       final @NotNull EntityDamageEvent e, final @NotNull Match match) {
-    if (!(e.getEntity() instanceof Player player)) {
-      return;
-    }
-
-    if (match.getCurrentRound().getRoundStatus().equals(RoundStatus.LIVE)) {
+    if (e.getEntity() instanceof Player player
+        && match.getCurrentRound().getRoundStatus().equals(RoundStatus.LIVE)) {
       e.setDamage(0);
       PlayerUtil.healToMaxHealth(player);
     }
   }
 
   public static int getTeamBoxingStrokes(Match match, List<Player> team) {
-    int strokes = 0;
-    for (Player player : team) {
-      Statistic statistic = match.getCurrentStat(player);
-      if (statistic != null) {
-        strokes += statistic.getHit();
-      }
-    }
-    return strokes;
+    return team.stream()
+        .map(match::getCurrentStat)
+        .filter(Objects::nonNull)
+        .mapToInt(Statistic::getHit)
+        .sum();
   }
 }

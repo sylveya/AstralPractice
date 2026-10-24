@@ -36,34 +36,23 @@ public class SetupCommand implements CommandExecutor, TabCompleter {
       GuiManager.getInstance().searchGui(GuiType.Setup_Hub).open(player);
     } else if (args.length == 1) {
       switch (args[0]) {
-        case "arena":
-          GuiManager.getInstance().searchGui(GuiType.Arena_Summary).open(player);
-          break;
-        case "ladder":
-          GuiManager.getInstance().searchGui(GuiType.Ladder_Summary).open(player);
-          break;
-        case "hologram":
-          GuiManager.getInstance().searchGui(GuiType.Hologram_Summary).open(player);
-          break;
-        case "event":
-          GuiManager.getInstance().searchGui(GuiType.Event_Summary).open(player);
-          break;
-        case "server":
-          new ServerHubGui().open(player);
-          break;
-        case "on":
+        case "arena" -> GuiManager.getInstance().searchGui(GuiType.Arena_Summary).open(player);
+        case "ladder" -> GuiManager.getInstance().searchGui(GuiType.Ladder_Summary).open(player);
+        case "hologram" ->
+            GuiManager.getInstance().searchGui(GuiType.Hologram_Summary).open(player);
+        case "event" -> GuiManager.getInstance().searchGui(GuiType.Event_Summary).open(player);
+        case "server" -> new ServerHubGui().open(player);
+        case "on" -> {
           InventoryManager.getInstance().getSetupModePlayers().add(player);
           InventoryManager.getInstance().setInventory(player, null);
           player.setGameMode(org.bukkit.GameMode.CREATIVE);
           player.setFlying(true);
-          break;
-        case "off":
+        }
+        case "off" -> {
           InventoryManager.getInstance().getSetupModePlayers().remove(player);
           InventoryManager.getInstance().setInventory(player, Inventory.InventoryType.LOBBY);
-          break;
-
-        default:
-          break;
+        }
+        default -> {}
       }
     }
 

@@ -49,16 +49,6 @@ public class HologramManager {
     return holograms.stream().filter(h -> h.getName().equalsIgnoreCase(name)).findFirst();
   }
 
-  /**
-   * Finds a hologram by name, or returns {@code null} if none exists.
-   *
-   * @deprecated Use {@link #findHologram(String)} instead
-   */
-  @Deprecated
-  public Hologram getHologram(String name) {
-    return findHologram(name).orElse(null);
-  }
-
   /** Creates and registers a new hologram. */
   public void createHologram(Hologram hologram) {
     holograms.add(hologram);

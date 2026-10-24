@@ -13,7 +13,6 @@ import dev.lokspel.practice.manager.profile.enums.ProfileStatus;
 import dev.lokspel.practice.manager.spectator.SpectatorManager;
 import dev.lokspel.practice.util.Common;
 import dev.lokspel.practice.util.interfaces.Spectatable;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 import org.bukkit.entity.Player;
@@ -84,19 +83,14 @@ public class FfaManager {
   }
 
   public List<Ffa> getOpenFfas() {
-    List<Ffa> ffas = new ArrayList<>();
-    for (FfaArena ffaArena : ArenaManager.getInstance().getFfaArenas()) {
-      if (ffaArena.getFfa().isOpen()) {
-        ffas.add(ffaArena.getFfa());
-      }
-    }
-    return ffas;
+    return ArenaManager.getInstance().getFfaArenas().stream()
+        .map(FfaArena::getFfa)
+        .filter(ffa -> ffa != null && ffa.isOpen())
+        .toList();
   }
 
   public void endFfas() {
-    for (FfaArena ffaArena : ArenaManager.getInstance().getFfaArenas()) {
-      ffaArena.getFfa().close("");
-    }
+    ArenaManager.getInstance().getFfaArenas().forEach(ffaArena -> ffaArena.getFfa().close(""));
   }
 
   public Ffa getFfaByPlayer(Player player) {
@@ -122,10 +116,6 @@ public class FfaManager {
     }
     Spectatable spectatable =
         SpectatorManager.getInstance().getSpectators().get(player.getUniqueId());
-    if (spectatable instanceof Ffa) {
-      return (Ffa) spectatable;
-    } else {
-      return null;
-    }
+    return spectatable instanceof Ffa ffa ? ffa : null;
   }
 }

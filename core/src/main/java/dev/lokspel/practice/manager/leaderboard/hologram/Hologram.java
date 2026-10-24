@@ -21,7 +21,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import lombok.Getter;
 import lombok.Setter;
@@ -316,33 +315,28 @@ public abstract class Hologram {
   }
 
   private List<String> getConfigLines(Leaderboard leaderboard) {
-    List<String> lines =
-        switch (leaderboard.getMainType()) {
-          case GLOBAL -> new ArrayList<>(leaderboard.getSecondaryType().getGlobalLines());
-          case FFA_GLOBAL -> {
-            List<String> ffaLines =
-                new ArrayList<>(leaderboard.getSecondaryType().getGlobalLines());
-            ffaLines.replaceAll(
-                line ->
-                    line.replace("<gold>", "<gold>FFA Global ")
-                        .replace("Win Streak", "Kill Streak"));
-            yield ffaLines;
-          }
-          case LADDER -> {
-            List<String> ladderLines =
-                new ArrayList<>(leaderboard.getSecondaryType().getLadderLines());
-            if (leaderboard.getLadder() != null) {
-              String ladderName = leaderboard.getLadder().getName();
-              String displayName = leaderboard.getLadder().getDisplayName();
-              ladderLines.replaceAll(
-                  line ->
-                      line.replace("%ladder_name%", ladderName)
-                          .replace("%ladder_displayName%", displayName));
-            }
-            yield ladderLines;
-          }
-        };
-    return lines;
+    return switch (leaderboard.getMainType()) {
+      case GLOBAL -> new ArrayList<>(leaderboard.getSecondaryType().getGlobalLines());
+      case FFA_GLOBAL -> {
+        List<String> ffaLines = new ArrayList<>(leaderboard.getSecondaryType().getGlobalLines());
+        ffaLines.replaceAll(
+            line ->
+                line.replace("<gold>", "<gold>FFA Global ").replace("Win Streak", "Kill Streak"));
+        yield ffaLines;
+      }
+      case LADDER -> {
+        List<String> ladderLines = new ArrayList<>(leaderboard.getSecondaryType().getLadderLines());
+        if (leaderboard.getLadder() != null) {
+          String ladderName = leaderboard.getLadder().getName();
+          String displayName = leaderboard.getLadder().getDisplayName();
+          ladderLines.replaceAll(
+              line ->
+                  line.replace("%ladder_name%", ladderName)
+                      .replace("%ladder_displayName%", displayName));
+        }
+        yield ladderLines;
+      }
+    };
   }
 
   private List<Double> buildSpacings(int lineCount, Leaderboard leaderboard) {
@@ -351,7 +345,7 @@ public abstract class Hologram {
 
     return IntStream.range(0, lineCount)
         .mapToObj(i -> i == lineCount - 1 ? titleSpacing : standardSpacing)
-        .collect(Collectors.toList());
+        .toList();
   }
 
   private List<String> buildPlacementStrings(Leaderboard leaderboard) {
@@ -360,7 +354,7 @@ public abstract class Hologram {
         playerStats.keySet().stream()
             .filter(p -> p.getName() != null && ProfileManager.getInstance().getProfile(p) != null)
             .limit(showStat)
-            .collect(Collectors.toList());
+            .toList();
 
     List<String> placements = new ArrayList<>();
 
@@ -447,8 +441,7 @@ public abstract class Hologram {
           }
         };
 
-    List<Double> spacings =
-        setupLines.stream().map(l -> DEFAULT_SPACING).collect(Collectors.toList());
+    List<Double> spacings = setupLines.stream().map(l -> DEFAULT_SPACING).toList();
     updateSmartly(setupLines, spacings);
   }
 

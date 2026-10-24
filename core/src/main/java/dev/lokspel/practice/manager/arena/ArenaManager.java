@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Predicate;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -48,70 +49,56 @@ public class ArenaManager implements Listener {
   private ArenaManager() {}
 
   public DisplayArena getArena(String arenaName) {
-    for (DisplayArena arena : this.arenaList) {
-      if (arena.getName().equalsIgnoreCase(arenaName)) {
-        return arena;
-      }
-    }
-    return null;
+    return arenaList.stream()
+        .filter(arena -> arena.getName().equalsIgnoreCase(arenaName))
+        .findFirst()
+        .orElse(null);
   }
 
   public Arena getNormalArena(String arenaName) {
-    for (Arena arena : this.getNormalArenas()) {
-      if (arena.getName().equalsIgnoreCase(arenaName)) {
-        return arena;
-      }
-    }
-    return null;
+    return getNormalArenas().stream()
+        .filter(arena -> arena.getName().equalsIgnoreCase(arenaName))
+        .findFirst()
+        .orElse(null);
   }
 
   public List<Arena> getNormalArenas() {
-    List<Arena> arenas = new ArrayList<>();
-    for (DisplayArena arena : this.arenaList) {
-      if (arena instanceof Arena) {
-        arenas.add((Arena) arena);
-      }
-    }
-    return arenas;
+    return arenaList.stream().filter(Arena.class::isInstance).map(Arena.class::cast).toList();
   }
 
   public FfaArena getFfaArena(String arenaName) {
-    for (FfaArena arena : this.getFfaArenas()) {
-      if (arena.getName().equalsIgnoreCase(arenaName)) {
-        return arena;
-      }
-    }
-    return null;
+    return getFfaArenas().stream()
+        .filter(arena -> arena.getName().equalsIgnoreCase(arenaName))
+        .findFirst()
+        .orElse(null);
   }
 
   public List<FfaArena> getFfaArenas() {
-    List<FfaArena> arenas = new ArrayList<>();
-    for (DisplayArena arena : this.arenaList) {
-      if (arena instanceof FfaArena) {
-        arenas.add((FfaArena) arena);
-      }
-    }
-    return arenas;
+    return arenaList.stream().filter(FfaArena.class::isInstance).map(FfaArena.class::cast).toList();
   }
 
   public List<Arena> getEnabledArenas() {
-    List<Arena> enabledArenas = new ArrayList<>();
-    for (Arena arena : this.getNormalArenas()) {
-      if (arena.isEnabled()) {
-        enabledArenas.add(arena);
-      }
-    }
-    return enabledArenas;
+    return getNormalArenas().stream().filter(Arena::isEnabled).toList();
   }
 
   public List<FfaArena> getEnabledFfaArenas() {
-    List<FfaArena> enabledArenas = new ArrayList<>();
-    for (FfaArena arena : this.getFfaArenas()) {
-      if (arena.isEnabled()) {
-        enabledArenas.add(arena);
-      }
-    }
-    return enabledArenas;
+    return getFfaArenas().stream().filter(FfaArena::isEnabled).toList();
+  }
+
+  public List<String> getArenaNames() {
+    return arenaList.stream().map(DisplayArena::getName).toList();
+  }
+
+  public List<String> getArenaNames(Predicate<DisplayArena> filter) {
+    return arenaList.stream().filter(filter).map(DisplayArena::getName).toList();
+  }
+
+  public List<String> getNormalArenaNames() {
+    return getNormalArenas().stream().map(DisplayArena::getName).toList();
+  }
+
+  public List<String> getNormalArenaNames(Predicate<Arena> filter) {
+    return getNormalArenas().stream().filter(filter).map(DisplayArena::getName).toList();
   }
 
   public void loadArenas(final StartUpCallback boolCallback) {
@@ -173,9 +160,7 @@ public class ArenaManager implements Listener {
   }
 
   public void saveArenas() {
-    for (DisplayArena arena : arenaList) {
-      arena.setData();
-    }
+    arenaList.forEach(DisplayArena::setData);
   }
 
   public void removeLadder(NormalLadder ladder) {
@@ -193,8 +178,8 @@ public class ArenaManager implements Listener {
             .update();
       }
 
-      if (arena instanceof FfaArena) {
-        Ffa ffa = ((FfaArena) arena).getFfa();
+      if (arena instanceof FfaArena ffaArena) {
+        Ffa ffa = ffaArena.getFfa();
 
         for (Map.Entry<Player, NormalLadder> ffaPlayer :
             new ArrayList<>(ffa.getPlayers().entrySet())) {

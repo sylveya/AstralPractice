@@ -174,7 +174,7 @@ public final class AstralPractice extends JavaPlugin {
   private final BukkitContext faststatsMetrics =
       new BukkitContext.Factory(this, "a515f033e0639d1407b9bd6a926c2efb")
           .errorTrackerService(ERROR_TRACKER)
-          .metrics(factory -> factory.create())
+          .metrics(dev.faststats.Metrics.Factory::create)
           .create();
 
   @Override
