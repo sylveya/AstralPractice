@@ -21,9 +21,7 @@ public class ItemConsume implements Listener {
     ItemStack item = e.getItem();
 
     switch (profile.getStatus()) {
-      case MATCH:
-      case FFA:
-      case EVENT:
+      case MATCH, FFA, EVENT -> {
         if (item.getType() == Material.POTION
             && PracticeConfig.settings().getMatchSettings().isRemoveEmptyBottle()) {
           Bukkit.getScheduler()
@@ -32,10 +30,8 @@ public class ItemConsume implements Listener {
                   () -> player.getInventory().remove(Material.GLASS_BOTTLE),
                   1L);
         }
-        break;
-
-      default:
-        break;
+      }
+      default -> {}
     }
   }
 }

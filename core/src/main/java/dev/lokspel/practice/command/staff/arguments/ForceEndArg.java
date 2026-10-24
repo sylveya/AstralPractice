@@ -15,6 +15,7 @@ import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.util.StringUtil;
+import org.jetbrains.annotations.Nullable;
 
 public final class ForceEndArg {
   private ForceEndArg() {}
@@ -66,102 +67,7 @@ public final class ForceEndArg {
       return;
     }
 
-    Profile targetProfile = ProfileManager.getInstance().getProfile(target);
-    if (targetProfile.getStatus().equals(ProfileStatus.MATCH)) {
-      Match match = MatchManager.getInstance().getLiveMatchByPlayer(target);
-      RoundEndRunnable roundEndRunnable = match.getCurrentRound().getRoundEndRunnable();
-
-      if (roundEndRunnable != null && roundEndRunnable.isRunning() && roundEndRunnable.isEnded()) {
-        Common.sendMmMessage(
-            player,
-            PracticeConfig.language()
-                .getCommand()
-                .getStaff()
-                .getArguments()
-                .getForceEnd()
-                .getMatch()
-                .getEnded());
-        return;
-      }
-
-      for (Player matchPlayer : match.getPlayers()) {
-        if (player != matchPlayer && matchPlayer.hasPermission("ap.bypass.forceend")) {
-          Common.sendMmMessage(
-              player,
-              PracticeConfig.language()
-                  .getCommand()
-                  .getStaff()
-                  .getArguments()
-                  .getForceEnd()
-                  .getMatch()
-                  .getCantEnd());
-          return;
-        }
-      }
-
-      match.endMatch();
-      match.sendMessage(
-          PracticeConfig.language()
-              .getCommand()
-              .getStaff()
-              .getArguments()
-              .getForceEnd()
-              .getMatch()
-              .getMatchEndMsg()
-              .replace("%player%", player.getName()),
-          false);
-      Common.sendMmMessage(
-          player,
-          PracticeConfig.language()
-              .getCommand()
-              .getStaff()
-              .getArguments()
-              .getForceEnd()
-              .getMatch()
-              .getPlayerEndMsg()
-              .replace("%target%", target.getName()));
-    } else if (targetProfile.getStatus().equals(ProfileStatus.EVENT)) {
-      Event event = EventManager.getInstance().getEventByPlayer(target);
-
-      if (event.getEndRunnable() != null && event.getEndRunnable().isRunning()) {
-        Common.sendMmMessage(
-            player,
-            PracticeConfig.language()
-                .getCommand()
-                .getStaff()
-                .getArguments()
-                .getForceEnd()
-                .getEvent()
-                .getEnded());
-        return;
-      }
-
-      for (Player matchPlayer : event.getPlayers()) {
-        if (player != matchPlayer && matchPlayer.hasPermission("ap.bypass.forceend")) {
-          Common.sendMmMessage(
-              player,
-              PracticeConfig.language()
-                  .getCommand()
-                  .getStaff()
-                  .getArguments()
-                  .getForceEnd()
-                  .getEvent()
-                  .getCantEnd());
-          return;
-        }
-      }
-
-      event.forceEnd(player);
-    } else {
-      Common.sendMmMessage(
-          player,
-          PracticeConfig.language()
-              .getCommand()
-              .getStaff()
-              .getArguments()
-              .getForceEnd()
-              .getPlayerInactive());
-    }
+    forceEndTarget(player, target);
   }
 
   public static void run(String label, String[] args) {
@@ -190,93 +96,81 @@ public final class ForceEndArg {
       return;
     }
 
+    forceEndTarget(null, target);
+  }
+
+  private static void forceEndTarget(@Nullable Player player, Player target) {
+    var forceEndCfg =
+        PracticeConfig.language().getCommand().getStaff().getArguments().getForceEnd();
     Profile targetProfile = ProfileManager.getInstance().getProfile(target);
-    if (targetProfile.getStatus().equals(ProfileStatus.MATCH)) {
+
+    if (targetProfile.getStatus() == ProfileStatus.MATCH) {
       Match match = MatchManager.getInstance().getLiveMatchByPlayer(target);
       RoundEndRunnable roundEndRunnable = match.getCurrentRound().getRoundEndRunnable();
 
       if (roundEndRunnable != null && roundEndRunnable.isRunning() && roundEndRunnable.isEnded()) {
-        Common.sendConsoleMmMessage(
-            PracticeConfig.language()
-                .getCommand()
-                .getStaff()
-                .getArguments()
-                .getForceEnd()
-                .getMatch()
-                .getEnded());
+        sendMessage(player, forceEndCfg.getMatch().getEnded());
         return;
       }
 
-      match.sendMessage(
-          PracticeConfig.language()
-              .getCommand()
-              .getStaff()
-              .getArguments()
-              .getForceEnd()
-              .getMatch()
-              .getMatchEndMsg()
-              .replace("%player%", PracticeConfig.language().getConsoleName()),
-          false);
-      Common.sendConsoleMmMessage(
-          PracticeConfig.language()
-              .getCommand()
-              .getStaff()
-              .getArguments()
-              .getForceEnd()
-              .getMatch()
-              .getPlayerEndMsg()
-              .replace("%target%", target.getName()));
+      if (player != null) {
+        for (Player matchPlayer : match.getPlayers()) {
+          if (player != matchPlayer && matchPlayer.hasPermission("ap.bypass.forceend")) {
+            Common.sendMmMessage(player, forceEndCfg.getMatch().getCantEnd());
+            return;
+          }
+        }
+      }
 
+      String senderName =
+          player != null ? player.getName() : PracticeConfig.language().getConsoleName();
+      match.sendMessage(
+          forceEndCfg.getMatch().getMatchEndMsg().replace("%player%", senderName), false);
+      sendMessage(
+          player, forceEndCfg.getMatch().getPlayerEndMsg().replace("%target%", target.getName()));
       match.endMatch();
-    } else if (targetProfile.getStatus().equals(ProfileStatus.EVENT)) {
+
+    } else if (targetProfile.getStatus() == ProfileStatus.EVENT) {
       Event event = EventManager.getInstance().getEventByPlayer(target);
 
       if (event.getEndRunnable() != null && event.getEndRunnable().isRunning()) {
-        Common.sendConsoleMmMessage(
-            PracticeConfig.language()
-                .getCommand()
-                .getStaff()
-                .getArguments()
-                .getForceEnd()
-                .getEvent()
-                .getEnded());
+        sendMessage(player, forceEndCfg.getEvent().getEnded());
         return;
       }
 
-      Common.sendConsoleMmMessage(
-          PracticeConfig.language()
-              .getCommand()
-              .getStaff()
-              .getArguments()
-              .getForceEnd()
-              .getEvent()
-              .getPlayerEndMsg());
-      event.sendMessage(
-          PracticeConfig.language()
-              .getCommand()
-              .getStaff()
-              .getArguments()
-              .getForceEnd()
-              .getEvent()
-              .getMatchEndMsg()
-              .replace("%player%", PracticeConfig.language().getConsoleName()),
-          true);
-
-      event.forceEnd(null);
+      if (player != null) {
+        for (Player matchPlayer : event.getPlayers()) {
+          if (player != matchPlayer && matchPlayer.hasPermission("ap.bypass.forceend")) {
+            Common.sendMmMessage(player, forceEndCfg.getEvent().getCantEnd());
+            return;
+          }
+        }
+        event.forceEnd(player);
+      } else {
+        Common.sendConsoleMmMessage(forceEndCfg.getEvent().getPlayerEndMsg());
+        event.sendMessage(
+            forceEndCfg
+                .getEvent()
+                .getMatchEndMsg()
+                .replace("%player%", PracticeConfig.language().getConsoleName()),
+            true);
+        event.forceEnd(null);
+      }
     } else {
-      Common.sendConsoleMmMessage(
-          PracticeConfig.language()
-              .getCommand()
-              .getStaff()
-              .getArguments()
-              .getForceEnd()
-              .getPlayerInactive());
+      sendMessage(player, forceEndCfg.getPlayerInactive());
+    }
+  }
+
+  private static void sendMessage(@Nullable Player player, String message) {
+    if (player != null) {
+      Common.sendMmMessage(player, message);
+    } else {
+      Common.sendConsoleMmMessage(message);
     }
   }
 
   public static List<String> tabComplete(Player player, String[] args) {
     List<String> arguments = new ArrayList<>();
-
     if (!player.hasPermission("ap.staffmode.forceend")) {
       return arguments;
     }
@@ -285,7 +179,6 @@ public final class ForceEndArg {
       for (Player online : Bukkit.getOnlinePlayers()) {
         arguments.add(online.getName());
       }
-
       return StringUtil.copyPartialMatches(args[1], arguments, new ArrayList<>());
     }
 

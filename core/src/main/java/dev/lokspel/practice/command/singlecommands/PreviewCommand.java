@@ -30,16 +30,12 @@ public class PreviewCommand implements CommandExecutor, TabCompleter {
     Profile profile = ProfileManager.getInstance().getProfile(player);
 
     switch (profile.getStatus()) {
-      case MATCH:
-      case FFA:
-      case EVENT:
-      case SPECTATE:
+      case MATCH, FFA, EVENT, SPECTATE -> {
         Common.sendMmMessage(
             player, PracticeConfig.language().getCommand().getPreview().getCantUse());
         return false;
-
-      default:
-        break;
+      }
+      default -> {}
     }
 
     if (args.length != 1) {

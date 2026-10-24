@@ -36,13 +36,8 @@ public class PlayerInteract implements Listener {
     }
 
     switch (profile.getStatus()) {
-      case MATCH:
-      case FFA:
-      case EVENT:
-        e.setCancelled(true);
-        break;
-      default:
-        break;
+      case MATCH, FFA, EVENT -> e.setCancelled(true);
+      default -> {}
     }
   }
 
@@ -66,9 +61,7 @@ public class PlayerInteract implements Listener {
     }
 
     switch (profile.getStatus()) {
-      case MATCH:
-      case FFA:
-      case EVENT:
+      case MATCH, FFA, EVENT -> {
         if (player.getFoodLevel() < 20) {
           e.setCancelled(true);
           return;
@@ -87,10 +80,8 @@ public class PlayerInteract implements Listener {
         consumeUsedSoup(player, e.getHand());
         player.setHealth(newHealth);
         player.updateInventory();
-        break;
-
-      default:
-        break;
+      }
+      default -> {}
     }
   }
 
@@ -123,13 +114,8 @@ public class PlayerInteract implements Listener {
     }
 
     switch (profile.getStatus()) {
-      case MATCH:
-      case FFA:
-      case EVENT:
-        e.setCancelled(true);
-        break;
-      default:
-        break;
+      case MATCH, FFA, EVENT -> e.setCancelled(true);
+      default -> {}
     }
   }
 
@@ -141,13 +127,8 @@ public class PlayerInteract implements Listener {
     }
 
     switch (profile.getStatus()) {
-      case MATCH:
-      case FFA:
-      case EVENT:
-        e.setCancelled(true);
-        break;
-      default:
-        break;
+      case MATCH, FFA, EVENT -> e.setCancelled(true);
+      default -> {}
     }
   }
 }

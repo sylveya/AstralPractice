@@ -30,15 +30,12 @@ public class StatisticsCommand implements CommandExecutor, TabCompleter {
 
     if (!player.hasPermission("ap.admin")) {
       switch (profile.getStatus()) {
-        case MATCH:
-        case FFA:
-        case EVENT:
+        case MATCH, FFA, EVENT -> {
           Common.sendMmMessage(
               player, PracticeConfig.language().getCommand().getStatistics().getCantUse());
           return false;
-
-        default:
-          break;
+        }
+        default -> {}
       }
     }
 

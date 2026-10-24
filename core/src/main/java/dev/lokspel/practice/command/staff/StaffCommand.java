@@ -23,29 +23,15 @@ public class StaffCommand implements CommandExecutor, TabCompleter {
   @Override
   public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
     if (sender instanceof Player player) {
-
       if (args.length > 0) {
         switch (args[0]) {
-          case "chat":
-            ChatArg.run(player, args);
-            break;
-          case "enable":
-            EnableArg.run(player, label, args);
-            break;
-          case "follow":
-            FollowArg.run(player, label, args);
-            break;
-          case "forceend":
-            ForceEndArg.run(player, label, args);
-            break;
-          case "stop":
-            StopArg.run(player, label, args);
-            break;
-          case "vanish":
-            VanishArg.run(player, label, args);
-            break;
-          default:
-            HelpArg.run(player, label);
+          case "chat" -> ChatArg.run(player, args);
+          case "enable" -> EnableArg.run(player, label, args);
+          case "follow" -> FollowArg.run(player, label, args);
+          case "forceend" -> ForceEndArg.run(player, label, args);
+          case "stop" -> StopArg.run(player, label, args);
+          case "vanish" -> VanishArg.run(player, label, args);
+          default -> HelpArg.run(player, label);
         }
       } else {
         HelpArg.run(player, label);
@@ -53,17 +39,10 @@ public class StaffCommand implements CommandExecutor, TabCompleter {
     } else if (sender instanceof ConsoleCommandSender) {
       if (args.length > 0) {
         switch (args[0]) {
-          case "stop":
-            StopArg.run(label, args);
-          // fall through
-          case "forceend":
-            ForceEndArg.run(label, args);
-          // fall through
-          case "chat":
-            ChatArg.run(args);
-          // fall through
-          default:
-            HelpArg.run(label);
+          case "stop" -> StopArg.run(label, args);
+          case "forceend" -> ForceEndArg.run(label, args);
+          case "chat" -> ChatArg.run(args);
+          default -> HelpArg.run(label);
         }
       } else {
         HelpArg.run(label);
@@ -82,8 +61,6 @@ public class StaffCommand implements CommandExecutor, TabCompleter {
     }
 
     if (args.length == 1) {
-      // "chat" is not suggested: the old check read the config key "chat.staff-chat.enabled"
-      // (lower case), which never existed, so it was always false.
       if (player.hasPermission("ap.staff")) {
         arguments.add("enable");
         arguments.add("vanish");
@@ -97,17 +74,12 @@ public class StaffCommand implements CommandExecutor, TabCompleter {
 
       StringUtil.copyPartialMatches(args[0], arguments, completion);
     } else {
-      switch (args[0]) {
-        case "forceend":
-          ForceEndArg.tabComplete(player, args);
-          break;
-        case "stop":
-          StopArg.tabComplete(player, args);
-          break;
-
-        default:
-          break;
-      }
+      completion =
+          switch (args[0]) {
+            case "forceend" -> ForceEndArg.tabComplete(player, args);
+            case "stop" -> StopArg.tabComplete(player, args);
+            default -> completion;
+          };
     }
 
     Collections.sort(completion);
