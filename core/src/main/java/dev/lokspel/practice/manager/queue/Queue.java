@@ -81,10 +81,7 @@ public class Queue extends Runnable implements dev.lokspel.api.interfaces.Queue 
 
     this.ladder = normalLadder;
     this.queuedLadders.add(normalLadder);
-
-    if (this.searchRunnable == null && !this.ranked) {
-      searchInstantMatch();
-    }
+    searchInstantMatch();
   }
 
   public void removeLadder(NormalLadder normalLadder) {
@@ -216,7 +213,7 @@ public class Queue extends Runnable implements dev.lokspel.api.interfaces.Queue 
    * @return true if a match was found and started
    */
   public boolean searchInstantMatch() {
-    if (this.ranked) {
+    if (this.ranked || this.searchRunnable != null) {
       return false;
     }
 
@@ -419,10 +416,6 @@ public class Queue extends Runnable implements dev.lokspel.api.interfaces.Queue 
     }
 
     seconds++;
-
-    if (this.searchRunnable == null && !this.ranked) {
-      searchInstantMatch();
-    }
   }
 
   public String getFormattedDuration() {
