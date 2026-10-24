@@ -81,6 +81,10 @@ public class Queue extends Runnable implements dev.lokspel.api.interfaces.Queue 
 
     this.ladder = normalLadder;
     this.queuedLadders.add(normalLadder);
+
+    if (this.searchRunnable == null && !this.ranked) {
+      searchInstantMatch();
+    }
   }
 
   public void removeLadder(NormalLadder normalLadder) {
@@ -166,29 +170,8 @@ public class Queue extends Runnable implements dev.lokspel.api.interfaces.Queue 
 
     if (division == null
         || !PracticeConfig.settings().getQueue().getUnranked().getDivisionSearch().getEnabled()) {
-      List<NormalLadder> ladders = new ArrayList<>(this.queuedLadders);
-      Collections.shuffle(ladders);
-
-      for (Queue queue : queueManager.getQueues()) {
-        if (queue == queueManager.getQueue(player)) {
-          continue;
-        }
-        if (queue.getPlayer() == player) {
-          continue;
-        }
-        if (queue.isRanked()) {
-          continue;
-        }
-
-        for (NormalLadder normalLadder : ladders) {
-          if (!queue.isQueued(normalLadder)) {
-            continue;
-          }
-
-          this.cancel();
-          this.startMatch(queue, normalLadder);
-          return;
-        }
+      if (searchInstantMatch()) {
+        return;
       }
     } else {
       this.searchRunnable = new UnrankedSearchRunnable(this);
@@ -196,6 +179,42 @@ public class Queue extends Runnable implements dev.lokspel.api.interfaces.Queue 
     }
 
     GuiManager.getInstance().searchGui(GuiType.Queue_Unranked).update();
+  }
+
+  /**
+   * Searches for a compatible unranked opponent across active queues and starts a match if found.
+   *
+   * @return true if a match was found and started
+   */
+  public boolean searchInstantMatch() {
+    if (this.ranked) {
+      return false;
+    }
+
+    List<NormalLadder> ladders = new ArrayList<>(this.queuedLadders);
+    Collections.shuffle(ladders);
+
+    for (Queue other : queueManager.getQueues()) {
+      if (other == this || other.getPlayer() == this.player || other.isRanked()) {
+        continue;
+      }
+
+      if (this.profile.getIgnoredPlayers().contains(other.getProfile())
+          || other.getProfile().getIgnoredPlayers().contains(this.profile)) {
+        continue;
+      }
+
+      for (NormalLadder normalLadder : ladders) {
+        if (!other.isQueued(normalLadder)) {
+          continue;
+        }
+
+        this.cancel();
+        this.startMatch(other, normalLadder);
+        return true;
+      }
+    }
+    return false;
   }
 
   public void startMatch(Queue queue, NormalLadder matchedLadder) {
@@ -376,6 +395,10 @@ public class Queue extends Runnable implements dev.lokspel.api.interfaces.Queue 
     }
 
     seconds++;
+
+    if (this.searchRunnable == null && !this.ranked) {
+      searchInstantMatch();
+    }
   }
 
   public String getFormattedDuration() {

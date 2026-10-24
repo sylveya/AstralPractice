@@ -301,7 +301,6 @@ public class QueueManager implements Listener {
       return;
     }
 
-    existingQueue.addLadder(ladder);
     Common.sendMmMessage(
         player,
         PracticeConfig.language()
@@ -311,6 +310,8 @@ public class QueueManager implements Listener {
                 "%weightClass%",
                 ranked ? WeightClass.RANKED.getMmName() : WeightClass.UNRANKED.getMmName())
             .replace("%ladder%", ladder.getDisplayName()));
+
+    existingQueue.addLadder(ladder);
   }
 
   @EventHandler
