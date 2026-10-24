@@ -20,6 +20,7 @@ public enum GuiType {
   Arena_Ladders_Type,
   Arena_Ladders_Single,
   Arena_Create,
+  Arena_Settings,
   FFA_Arena_Settings,
 
   Hologram_Summary,

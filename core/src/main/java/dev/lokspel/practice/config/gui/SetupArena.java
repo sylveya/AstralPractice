@@ -21,6 +21,9 @@ public class SetupArena {
   @JsonProperty("ARENA-LADDERS-SINGLE")
   private ArenaLaddersSingle arenaLaddersSingle = new ArenaLaddersSingle();
 
+  @JsonProperty("ARENA-SETTINGS")
+  private ArenaSettings arenaSettings = new ArenaSettings();
+
   @Getter
   public static class ArenaManager {
     @JsonProperty("TITLE")
@@ -118,6 +121,17 @@ public class SetupArena {
 
       @JsonProperty("DELETE")
       private ItemConfig delete = ItemConfig.of("RED_DYE").name("<red>Delete Arena");
+
+      @JsonProperty("SETTINGS")
+      private ItemConfig settings =
+          ItemConfig.of("REDSTONE")
+              .name("<dark_purple>Settings")
+              .lore(
+                  "",
+                  "<yellow><bold>Click here <gray>to open the arena settings gui.",
+                  "",
+                  "<red><bold>Note: <gray>Configure custom kits availability",
+                  "<gray>and arena build limits.");
 
       @JsonProperty("ARENA-NAME")
       private ItemConfig arenaName =
@@ -439,6 +453,80 @@ public class SetupArena {
                     "<gray>This ladder is <red>not compatible",
                     "<gray>with the arena because of the",
                     "<gray>build status.");
+      }
+    }
+  }
+
+  @Getter
+  public static class ArenaSettings {
+    @JsonProperty("TITLE")
+    private String title = "<dark_red>%arenaName% <dark_gray>- Settings";
+
+    @JsonProperty("ICONS")
+    private Icons icons = new Icons();
+
+    @Getter
+    public static class Icons {
+      @JsonProperty("GO-BACK")
+      private ItemConfig goBack = ItemConfig.of("ARROW").name("<red>Go Back");
+
+      @JsonProperty("FILLER")
+      private ItemConfig filler = ItemConfig.of("BLACK_STAINED_GLASS_PANE");
+
+      @JsonProperty("CUSTOM-KITS")
+      private CustomKits customKits = new CustomKits();
+
+      @JsonProperty("SIDE-BUILD-LIMIT")
+      private ItemConfig sideBuildLimit =
+          ItemConfig.of("BRICKS")
+              .name("<yellow>Side Build Limit: <aqua>%sideBuildLimit% <gray>blocks")
+              .lore(
+                  "",
+                  "<gray>Maximum blocks players can build",
+                  "<gray>outside the arena boundary.",
+                  "",
+                  "<yellow><bold>Left-Click: <green>+1 block",
+                  "<yellow><bold>Right-Click: <red>-1 block",
+                  "",
+                  "<red><bold>Note: <gray>Allowed range is 0-10 blocks.");
+
+      @JsonProperty("PORTAL-PROTECTION")
+      private ItemConfig portalProtection =
+          ItemConfig.of("END_PORTAL_FRAME")
+              .name("<yellow>Portal Protection: <aqua>%portalProtection% <gray>blocks")
+              .lore(
+                  "",
+                  "<gray>Protected radius around portals",
+                  "<gray>preventing block placement and destruction.",
+                  "",
+                  "<yellow><bold>Left-Click: <green>+1 block",
+                  "<yellow><bold>Right-Click: <red>-1 block",
+                  "",
+                  "<red><bold>Note: <gray>Allowed range is 0-20 blocks (0 = disabled).");
+
+      @Getter
+      public static class CustomKits {
+        @JsonProperty("ENABLED")
+        private ItemConfig enabled =
+            ItemConfig.of("CHEST")
+                .name("<gray>Custom Kits: <green>Allowed")
+                .lore(
+                    "",
+                    "<gray>Players <green>can <gray>use their custom kits",
+                    "<gray>in this arena.",
+                    "",
+                    "<yellow><bold>Click here <gray>to <red>disallow<gray>.");
+
+        @JsonProperty("DISABLED")
+        private ItemConfig disabled =
+            ItemConfig.of("BARRIER")
+                .name("<gray>Custom Kits: <red>Disallowed")
+                .lore(
+                    "",
+                    "<gray>Players <red>cannot <gray>use custom kits",
+                    "<gray>in this arena.",
+                    "",
+                    "<yellow><bold>Click here <gray>to <green>allow<gray>.");
       }
     }
   }

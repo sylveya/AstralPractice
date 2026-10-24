@@ -9,6 +9,7 @@ import dev.lokspel.practice.manager.gui.Gui;
 import dev.lokspel.practice.manager.gui.GuiManager;
 import dev.lokspel.practice.manager.gui.GuiType;
 import dev.lokspel.practice.manager.gui.setup.arena.arenasettings.normal.ArenaMainGui;
+import dev.lokspel.practice.manager.gui.setup.arena.arenasettings.normal.ArenaSettingsGui;
 import dev.lokspel.practice.manager.gui.setup.arena.arenasettings.normal.CopyGui;
 import dev.lokspel.practice.manager.gui.setup.arena.arenasettings.normal.LadderSingleGui;
 import dev.lokspel.practice.manager.gui.setup.arena.arenasettings.normal.LadderTypeGui;
@@ -60,6 +61,7 @@ public class ArenaGuiSetupManager implements Listener {
       guis.put(GuiType.Arena_Main, new ArenaMainGui((Arena) arena));
       guis.put(GuiType.Arena_Ladders_Single, new LadderSingleGui((Arena) arena));
       guis.put(GuiType.Arena_Ladders_Type, new LadderTypeGui((Arena) arena));
+      guis.put(GuiType.Arena_Settings, new ArenaSettingsGui((Arena) arena));
       if (arena.isBuild()) {
         guis.put(GuiType.Arena_Copy, new CopyGui((Arena) arena));
       }

@@ -50,6 +50,18 @@ public class ArenaMainGui extends Gui {
         .get();
   }
 
+  private static ItemStack settingsItem() {
+    return BackendUtil.getGuiItem(
+            PracticeConfig.guis()
+                .getGuis()
+                .getSetup()
+                .getArena()
+                .getArenaMain()
+                .getIcons()
+                .getSettings())
+        .get();
+  }
+
   private static ItemStack deleteItem() {
     return BackendUtil.getGuiItem(
             PracticeConfig.guis()
@@ -91,6 +103,7 @@ public class ArenaMainGui extends Gui {
       inventory.setItem(i, GuiManager.fillerItem());
     }
 
+    inventory.setItem(13, settingsItem());
     inventory.setItem(15, ladderItem());
     inventory.setItem(35, deleteItem());
 
@@ -149,6 +162,13 @@ public class ArenaMainGui extends Gui {
         break;
       case 11:
         ArenaUtil.changeStatus(player, arena);
+        break;
+      case 13:
+        ArenaGuiSetupManager.getInstance()
+            .getArenaSetupGuis()
+            .get(arena)
+            .get(GuiType.Arena_Settings)
+            .open(player);
         break;
       case 14:
         if (arena.isBuild()) {
