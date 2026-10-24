@@ -182,6 +182,35 @@ public class Queue extends Runnable implements dev.lokspel.api.interfaces.Queue 
   }
 
   /**
+   * Checks whether this queue can match with another candidate queue.
+   *
+   * @param other the candidate queue
+   * @return true if the candidate queue is eligible for matchmaking
+   */
+  public boolean canMatchWith(Queue other) {
+    if (other == null || other == this) {
+      return false;
+    }
+
+    if (other.getPlayer() == null || other.getPlayer().equals(this.player)) {
+      return false;
+    }
+
+    if (other.isRanked() != this.isRanked()) {
+      return false;
+    }
+
+    Profile selfProfile = this.profile;
+    Profile otherProfile = other.getProfile();
+    if (selfProfile == null || otherProfile == null) {
+      return false;
+    }
+
+    return !selfProfile.getIgnoredPlayers().contains(otherProfile)
+        && !otherProfile.getIgnoredPlayers().contains(selfProfile);
+  }
+
+  /**
    * Searches for a compatible unranked opponent across active queues and starts a match if found.
    *
    * @return true if a match was found and started
@@ -195,12 +224,7 @@ public class Queue extends Runnable implements dev.lokspel.api.interfaces.Queue 
     Collections.shuffle(ladders);
 
     for (Queue other : queueManager.getQueues()) {
-      if (other == this || other.getPlayer() == this.player || other.isRanked()) {
-        continue;
-      }
-
-      if (this.profile.getIgnoredPlayers().contains(other.getProfile())
-          || other.getProfile().getIgnoredPlayers().contains(this.profile)) {
+      if (!canMatchWith(other)) {
         continue;
       }
 

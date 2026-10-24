@@ -345,6 +345,13 @@ public class CustomKitQueueManager implements Listener {
       return false;
     }
 
+    Profile joinerProfile = ProfileManager.getInstance().getProfile(joiner);
+    if (joinerProfile != null
+        && (hostProfile.getIgnoredPlayers().contains(joinerProfile)
+            || joinerProfile.getIgnoredPlayers().contains(hostProfile))) {
+      return false;
+    }
+
     if (hostedQueue.customLadder() == null || !hostedQueue.customLadder().isEnabled()) {
       hostedQueues.remove(hostedQueue.hostUuid());
       InventoryManager.getInstance().setLobbyInventory(host, false);

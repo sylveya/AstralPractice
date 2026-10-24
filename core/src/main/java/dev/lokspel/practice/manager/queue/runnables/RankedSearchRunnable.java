@@ -22,15 +22,7 @@ public class RankedSearchRunnable extends SearchRunnable {
           @Override
           public void run() {
             for (Queue q : queueManager.getQueues()) {
-              if (q == queueManager.getQueue(queue.getPlayer())) {
-                continue;
-              }
-
-              if (q.getPlayer() == queue.getPlayer()) {
-                continue;
-              }
-
-              if (!q.isRanked()) {
+              if (!queue.canMatchWith(q)) {
                 continue;
               }
 

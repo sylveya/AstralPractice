@@ -61,16 +61,7 @@ public class UnrankedSearchRunnable extends SearchRunnable {
           @Override
           public void run() {
             for (Queue q : queueManager.getQueues()) {
-              if (q == queue || q.getPlayer() == queue.getPlayer()) {
-                continue;
-              }
-
-              if (queue.getProfile().getIgnoredPlayers().contains(q.getProfile())
-                  || q.getProfile().getIgnoredPlayers().contains(queue.getProfile())) {
-                continue;
-              }
-
-              if (q.isRanked()) {
+              if (!queue.canMatchWith(q)) {
                 continue;
               }
 
