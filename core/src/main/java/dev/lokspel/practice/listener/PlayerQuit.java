@@ -57,8 +57,7 @@ public class PlayerQuit implements Listener {
             .runTaskLater(
                 AstralPractice.getInstance(),
                 () -> {
-                  Player online = Bukkit.getPlayer(uuid);
-                  if (online == null || !online.isOnline()) {
+                  if (Bukkit.getPlayer(uuid) == null) {
                     profile.setStatus(ProfileStatus.OFFLINE);
                   }
                 },
