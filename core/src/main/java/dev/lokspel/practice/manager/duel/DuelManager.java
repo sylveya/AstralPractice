@@ -28,47 +28,33 @@ public class DuelManager {
   private final Map<Player, List<DuelRequest>> requests = new HashMap<>();
 
   public boolean isRequested(Player sender, Player target) {
-    if (requests.containsKey(target)) {
-      for (DuelRequest request : requests.get(target)) {
-        if (request.getSender().equals(sender)) {
-          return true;
-        }
-      }
-    }
-    return false;
+    List<DuelRequest> targetRequests = requests.get(target);
+    return targetRequests != null
+        && targetRequests.stream().anyMatch(request -> request.getSender().equals(sender));
   }
 
   public void sendRequest(DuelRequest request) {
-    List<DuelRequest> requests;
     final Player sender = request.getSender();
     Player target = request.getTarget();
 
-    if (getRequests().containsKey(target)) {
-      requests = new ArrayList<>(getRequests().get(target));
-    } else {
-      requests = new ArrayList<>();
-    }
-
-    requests.removeIf(oldRequest -> oldRequest.getSender().equals(request.getSender()));
-
-    requests.add(request);
-    getRequests().put(target, requests);
+    List<DuelRequest> targetRequests = requests.computeIfAbsent(target, k -> new ArrayList<>());
+    targetRequests.removeIf(oldRequest -> oldRequest.getSender().equals(sender));
+    targetRequests.add(request);
 
     sender.closeInventory();
-
     request.sendRequest();
 
     new BukkitRunnable() {
       @Override
       public void run() {
-        List<DuelRequest> targetRequests = getRequests().get(target);
-        if (targetRequests == null) {
+        List<DuelRequest> currentRequests = requests.get(target);
+        if (currentRequests == null) {
           return;
         }
 
-        boolean removed = targetRequests.remove(request);
-        if (targetRequests.isEmpty()) {
-          getRequests().remove(target);
+        boolean removed = currentRequests.remove(request);
+        if (currentRequests.isEmpty()) {
+          requests.remove(target);
         }
 
         if (removed) {
