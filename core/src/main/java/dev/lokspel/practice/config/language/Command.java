@@ -41,6 +41,9 @@ public class Command {
   @JsonProperty("MATCH-STAT")
   private MatchStat matchStat = new MatchStat();
 
+  @JsonProperty("COSMETICS")
+  private Cosmetics cosmetics = new Cosmetics();
+
   @JsonProperty("MATCH-HISTORY")
   private MatchHistory matchHistory = new MatchHistory();
 
@@ -694,6 +697,18 @@ public class Command {
 
     @JsonProperty("INVALID-ROUND")
     private String invalidRound = "<red>Round cannot be found in statistics.";
+  }
+
+  @Getter
+  public static class Cosmetics {
+    @JsonProperty("NO-PERMISSION")
+    private String noPermission = "<red>You don't have permission to use cosmetics!";
+
+    @JsonProperty("FAILED-LOAD-PROFILE")
+    private String failedLoadProfile = "<red>Failed to load your profile!";
+
+    @JsonProperty("ONLY-IN-LOBBY")
+    private String onlyInLobby = "<red>You can only open cosmetics while in the lobby!";
   }
 
   @Getter
@@ -1718,6 +1733,9 @@ public class Command {
       @JsonProperty("STOP")
       private Stop stop = new Stop();
 
+      @JsonProperty("FOLLOW")
+      private Follow follow = new Follow();
+
       @JsonProperty("HELP")
       private List<String> help =
           List.of(
@@ -1743,6 +1761,15 @@ public class Command {
 
         @JsonProperty("CHAT-DISABLED")
         private String chatDisabled = "<yellow>Staff chat <red>disabled<yellow>.";
+      }
+
+      @Getter
+      public static class Follow {
+        @JsonProperty("NO-PERMISSION")
+        private String noPermission = "<red>You don't have permission.";
+
+        @JsonProperty("UNAVAILABLE")
+        private String unavailable = "<red>Currently not a feature of the plugin.";
       }
 
       @Getter

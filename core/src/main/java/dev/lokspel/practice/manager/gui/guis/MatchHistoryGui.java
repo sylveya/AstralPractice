@@ -11,7 +11,6 @@ import dev.lokspel.practice.util.InventoryUtil;
 import dev.lokspel.practice.util.TimeUtil;
 import dev.lokspel.practice.util.items.ItemCreateUtil;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -42,9 +41,7 @@ public class MatchHistoryGui extends Gui {
   public void update() {
     Guis.MatchHistory config = PracticeConfig.guis().getGuis().getMatchHistory();
     String title =
-        Objects.requireNonNullElse(
-                config.getTitle(), "<dark_gray>Match History <gray>- <gold>%player%")
-            .replace("%player%", targetName);
+        config.getTitle() != null ? config.getTitle().replace("%player%", targetName) : targetName;
 
     int size = config.getSize();
     if (size < 9 || size > 54 || size % 9 != 0) {
@@ -80,25 +77,28 @@ public class MatchHistoryGui extends Gui {
   }
 
   private ItemStack buildMatchItem(MatchHistoryEntry entry, Guis.MatchHistory config) {
-    boolean isTarget = entry.getPlayerUuid().equals(targetUuid);
-    String opponentName = isTarget ? entry.getOpponentName() : entry.getPlayerName();
-    UUID opponentUuid = isTarget ? entry.getOpponentUuid() : entry.getPlayerUuid();
+    final boolean isTarget = entry.getPlayerUuid().equals(targetUuid);
+    final String opponentName = isTarget ? entry.getOpponentName() : entry.getPlayerName();
+    final UUID opponentUuid = isTarget ? entry.getOpponentUuid() : entry.getPlayerUuid();
 
-    double myHealth = isTarget ? entry.getPlayerFinalHealth() : entry.getOpponentFinalHealth();
-    double oppHealth = isTarget ? entry.getOpponentFinalHealth() : entry.getPlayerFinalHealth();
-    int myScore = isTarget ? entry.getPlayerScore() : entry.getOpponentScore();
-    int oppScore = isTarget ? entry.getOpponentScore() : entry.getPlayerScore();
+    final double myHealth =
+        isTarget ? entry.getPlayerFinalHealth() : entry.getOpponentFinalHealth();
+    final double oppHealth =
+        isTarget ? entry.getOpponentFinalHealth() : entry.getPlayerFinalHealth();
+    final int myScore = isTarget ? entry.getPlayerScore() : entry.getOpponentScore();
+    final int oppScore = isTarget ? entry.getOpponentScore() : entry.getPlayerScore();
 
-    boolean won = entry.isWinner(targetUuid);
-    boolean draw = entry.getWinnerUuid() == null;
+    final boolean won = entry.isWinner(targetUuid);
+    final boolean draw = entry.getWinnerUuid() == null;
 
     Guis.MatchHistory.Messages messages = config.getMessages();
-    String result =
-        won
-            ? Objects.requireNonNullElse(messages.getWin(), "<green>Win")
-            : draw
-                ? Objects.requireNonNullElse(messages.getDraw(), "<yellow>Equality")
-                : Objects.requireNonNullElse(messages.getLoss(), "<red>Loss");
+    String result = "";
+    if (messages != null) {
+      String msg = won ? messages.getWin() : (draw ? messages.getDraw() : messages.getLoss());
+      if (msg != null) {
+        result = msg;
+      }
+    }
 
     Guis.MatchHistory.MatchItem matchItemConfig = config.getMatchItem();
     GuiItem guiItem;

@@ -5,7 +5,6 @@ import dev.lokspel.practice.manager.arena.ArenaManager;
 import dev.lokspel.practice.manager.arena.arenas.interfaces.DisplayArena;
 import dev.lokspel.practice.manager.arena.util.ArenaUtil;
 import dev.lokspel.practice.util.Common;
-import dev.lokspel.practice.util.StringUtil;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.entity.Player;
@@ -54,7 +53,7 @@ public final class InfoArg {
 
     String iconStatus = arena.getIcon() != null ? statusNames.getSet() : statusNames.getNotSet();
     String laddersStr =
-        ladderNames.isEmpty() ? StringUtil.cc("<red>NULL") : String.join(", ", ladderNames);
+        ladderNames.isEmpty() ? statusNames.getNotSet() : String.join(", ", ladderNames);
     String status = arena.isEnabled() ? statusNames.getEnabled() : statusNames.getDisabled();
     String corner1 = ArenaUtil.convertLocation(arena.getCorner1());
     String corner2 = ArenaUtil.convertLocation(arena.getCorner2());

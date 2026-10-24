@@ -57,6 +57,10 @@ import org.intellij.lang.annotations.RegExp;
 
 public class PracticeAdapter implements SidebarAdapter {
 
+  private static final String NOT_AVAILABLE = "<red>N/A";
+  private static final Component NOT_AVAILABLE_COMPONENT =
+      Common.deserializeMiniMessage(NOT_AVAILABLE);
+
   private static String fallbackToZero(String value) {
     return value != null ? value : "0";
   }
@@ -242,21 +246,16 @@ public class PracticeAdapter implements SidebarAdapter {
       if (multiQueue) {
         multiQueueLabel =
             PracticeConfig.settings().getQueue().getMulti().getSidebar().getMultipleLabel();
-        if (multiQueueLabel.isEmpty()) {
+        if (multiQueueLabel == null || multiQueueLabel.isEmpty()) {
           multiQueueLabel = PracticeConfig.language().getQueues().getMulti().getSidebarMultiple();
-        }
-        if (multiQueueLabel.isEmpty()) {
-          multiQueueLabel = "Multiple Ladders";
         }
 
         String currentFormat =
             PracticeConfig.settings().getQueue().getMulti().getSidebar().getCurrentLadderFormat();
-        if (currentFormat.isEmpty()) {
-          currentFormat = "<white>Current: <gold>%ladder%";
+        if (currentFormat != null && !currentFormat.isEmpty()) {
+          multiQueueCurrent = currentFormat.replace("%ladder%", queue.getCyclingSidebarLadder());
         }
-
-        multiQueueCurrent = currentFormat.replace("%ladder%", queue.getCyclingSidebarLadder());
-        ladderDisplayName = multiQueueLabel;
+        ladderDisplayName = multiQueueLabel != null ? multiQueueLabel : "";
       }
 
       List<String> duelQueueLines =
@@ -451,13 +450,11 @@ public class PracticeAdapter implements SidebarAdapter {
         for (int i = 1; i <= 3; i++) {
           Player topPlayer = MatchUtil.getBoxingTopPlayer(partyFfa, i);
           Component playerName =
-              topPlayer != null
-                  ? AdapterUtil.getSidebarName(topPlayer)
-                  : Common.deserializeMiniMessage("<red>N/A");
+              topPlayer != null ? AdapterUtil.getSidebarName(topPlayer) : NOT_AVAILABLE_COMPONENT;
           Component playerHits =
               topPlayer != null && match.getCurrentStat(topPlayer) != null
                   ? Component.text(match.getCurrentStat(topPlayer).getHit())
-                  : Common.deserializeMiniMessage("<red>N/A");
+                  : NOT_AVAILABLE_COMPONENT;
 
           component =
               component
@@ -599,7 +596,7 @@ public class PracticeAdapter implements SidebarAdapter {
         Component topPlayerName =
             highestPointPlayer != null
                 ? AdapterUtil.getSidebarName(highestPointPlayer)
-                : Common.deserializeMiniMessage("<red>N/A");
+                : NOT_AVAILABLE_COMPONENT;
         String topPlayerScore =
             highestPointPlayer != null
                 ? String.valueOf(oitc.getPlayerPoints().get(highestPointPlayer))
@@ -769,11 +766,11 @@ public class PracticeAdapter implements SidebarAdapter {
                 String name =
                     top != null
                         ? AstralPractice.getMiniMessage().serialize(AdapterUtil.getSidebarName(top))
-                        : "<red>N/A";
+                        : NOT_AVAILABLE;
                 String hits =
                     top != null && match.getCurrentStat(top) != null
                         ? String.valueOf(match.getCurrentStat(top).getHit())
-                        : "<red>N/A";
+                        : NOT_AVAILABLE;
                 line =
                     line.replace("%player" + i + "boxing%", name)
                         .replace("%player" + i + "boxingHits%", hits);
@@ -850,7 +847,7 @@ public class PracticeAdapter implements SidebarAdapter {
             highestPointPlayer != null
                 ? AstralPractice.getMiniMessage()
                     .serialize(AdapterUtil.getSidebarName(highestPointPlayer))
-                : "<red>N/A";
+                : NOT_AVAILABLE;
         String topPlayerScore =
             highestPointPlayer != null
                 ? String.valueOf(oitc.getPlayerPoints().get(highestPointPlayer))
