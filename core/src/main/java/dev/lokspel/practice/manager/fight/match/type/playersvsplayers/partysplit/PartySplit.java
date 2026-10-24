@@ -2,7 +2,6 @@ package dev.lokspel.practice.manager.fight.match.type.playersvsplayers.partyspli
 
 import dev.lokspel.practice.config.PracticeConfig;
 import dev.lokspel.practice.manager.arena.arenas.Arena;
-import dev.lokspel.practice.manager.fight.match.enums.MatchStatus;
 import dev.lokspel.practice.manager.fight.match.enums.MatchType;
 import dev.lokspel.practice.manager.fight.match.enums.TeamEnum;
 import dev.lokspel.practice.manager.fight.match.type.playersvsplayers.PlayersVsPlayers;
@@ -70,11 +69,13 @@ public class PartySplit extends PlayersVsPlayers {
   }
 
   @Override
-  public void startMatch() {
-    super.startMatch();
+  public boolean startMatch() {
+    if (!super.startMatch()) {
+      return false;
+    }
 
-    if (this.status != MatchStatus.START || this.partySpectators.isEmpty()) {
-      return;
+    if (this.partySpectators.isEmpty()) {
+      return true;
     }
 
     // The leader put these players into the match as spectators, so they must
@@ -84,6 +85,7 @@ public class PartySplit extends PlayersVsPlayers {
     for (Player spectator : this.partySpectators) {
       this.addSpectator(spectator, null, true, false);
     }
+    return true;
   }
 
   private void addToTeam(Player player, TeamEnum team) {

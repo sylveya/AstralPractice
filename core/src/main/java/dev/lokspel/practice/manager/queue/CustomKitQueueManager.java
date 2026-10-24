@@ -319,7 +319,11 @@ public class CustomKitQueueManager implements Listener {
             .replace("%kit%", hostedKit.getDisplayName()));
 
     Duel duel = new Duel(hostedKit, arena, List.of(host, joiner), false, hostedKit.getRounds());
-    duel.startMatch();
+    if (!duel.startMatch()) {
+      InventoryManager.getInstance().setLobbyInventory(host, false);
+      InventoryManager.getInstance().setLobbyInventory(joiner, false);
+      return false;
+    }
     return true;
   }
 

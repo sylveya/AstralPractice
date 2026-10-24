@@ -146,7 +146,7 @@ public abstract class Match extends BukkitRunnable
     }
   }
 
-  public void startMatch() {
+  public boolean startMatch() {
     MatchStartEvent matchStartEvent = new MatchStartEvent(this);
     Bukkit.getPluginManager().callEvent(matchStartEvent);
     if (matchStartEvent.isCancelled()) {
@@ -155,7 +155,7 @@ public abstract class Match extends BukkitRunnable
           party.setMatch(null);
         }
       }
-      return;
+      return false;
     }
 
     MatchManager.getInstance().registerMatch(this);
@@ -191,6 +191,7 @@ public abstract class Match extends BukkitRunnable
     this.status = MatchStatus.START;
     this.startNextRound();
     this.runTaskTimerAsynchronously(AstralPractice.getInstance(), 0, 20L);
+    return true;
   }
 
   public void sendMessage(String message, boolean spectator) {

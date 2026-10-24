@@ -270,17 +270,32 @@ public class Queue extends Runnable implements dev.lokspel.api.interfaces.Queue 
               AstralPractice.getInstance(),
               () -> {
                 if (player.isOnline() && queue.getPlayer().isOnline()) {
-                  duel.startMatch();
+                  if (!duel.startMatch()) {
+                    returnToLobbyIfOnline(player);
+                    returnToLobbyIfOnline(queue.getPlayer());
+                  }
+                } else {
+                  returnToLobbyIfOnline(player);
+                  returnToLobbyIfOnline(queue.getPlayer());
                 }
               },
               PracticeConfig.settings().getMatchSettings().getMatchFound().getIconAnimationDelay());
     } else {
-      duel.startMatch();
+      if (!duel.startMatch()) {
+        returnToLobbyIfOnline(player);
+        returnToLobbyIfOnline(queue.getPlayer());
+      }
     }
   }
 
   public void startMatch(Queue queue) {
     this.startMatch(queue, ladder);
+  }
+
+  private static void returnToLobbyIfOnline(Player matchPlayer) {
+    if (matchPlayer != null && matchPlayer.isOnline()) {
+      InventoryManager.getInstance().setLobbyInventory(matchPlayer, false);
+    }
   }
 
   public void endQueue(boolean foundMatch, final String message) {
