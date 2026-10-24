@@ -1,7 +1,6 @@
 package dev.lokspel.practice.manager.fight.match.listener;
 
 import dev.lokspel.api.event.match.MatchEndEvent;
-import dev.lokspel.api.event.match.MatchStartEvent;
 import dev.lokspel.practice.AstralPractice;
 import dev.lokspel.practice.config.PracticeConfig;
 import dev.lokspel.practice.manager.fight.match.Match;
@@ -23,30 +22,10 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
 /**
- * Handles match lifecycle events (start/end) and match management. Does NOT handle setting-specific
+ * Handles match lifecycle termination events and match cleanup. Does NOT handle setting-specific
  * events - those are handled by CentralizedSettingListener.
  */
 public class MatchLifecycleListener implements Listener {
-
-  @EventHandler
-  public void onMatchStart(MatchStartEvent e) {
-    Match match = (Match) e.getMatch();
-
-    // Register match in manager
-    for (Player player : match.getPlayers()) {
-      MatchManager.getInstance().getPlayerMatches().put(player.getUniqueId(), match);
-    }
-
-    MatchManager.getInstance().getMatches().put(match.getId(), match);
-    MatchManager.getInstance().getLiveMatches().add(match);
-
-    // Update GUIs
-    if (match instanceof Duel && ((Duel) match).isRanked()) {
-      GuiManager.getInstance().searchGui(GuiType.Queue_Ranked).update();
-    } else {
-      GuiManager.getInstance().searchGui(GuiType.Queue_Unranked).update();
-    }
-  }
 
   @EventHandler
   public void onMatchEnd(MatchEndEvent e) {

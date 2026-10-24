@@ -33,6 +33,8 @@ import dev.lokspel.practice.manager.ladder.abstraction.interfaces.DeathResult;
 import dev.lokspel.practice.manager.ladder.abstraction.interfaces.RespawnableLadder;
 import dev.lokspel.practice.manager.ladder.abstraction.interfaces.ScoringLadder;
 import dev.lokspel.practice.manager.ladder.abstraction.normal.NormalLadder;
+import dev.lokspel.practice.manager.party.Party;
+import dev.lokspel.practice.manager.party.PartyManager;
 import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.manager.profile.enums.ProfileStatus;
@@ -148,8 +150,15 @@ public abstract class Match extends BukkitRunnable
     MatchStartEvent matchStartEvent = new MatchStartEvent(this);
     Bukkit.getPluginManager().callEvent(matchStartEvent);
     if (matchStartEvent.isCancelled()) {
+      for (Party party : PartyManager.getInstance().getParties()) {
+        if (this.equals(party.getMatch())) {
+          party.setMatch(null);
+        }
+      }
       return;
     }
+
+    MatchManager.getInstance().registerMatch(this);
 
     if (this.ladder.isBuild()) {
       this.arena.setAvailable(false);

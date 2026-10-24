@@ -51,7 +51,7 @@ public class CentralizedSettingListener implements Listener {
   }
 
   /** Called when a match starts - triggers onMatchStart for all active setting handlers. */
-  @EventHandler(priority = EventPriority.NORMAL)
+  @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
   public void onMatchStart(MatchStartEvent e) {
     Match match = (Match) e.getMatch();
 

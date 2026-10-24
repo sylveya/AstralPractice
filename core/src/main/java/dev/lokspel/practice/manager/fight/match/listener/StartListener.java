@@ -14,7 +14,7 @@ import org.bukkit.event.Listener;
 
 public class StartListener implements Listener {
 
-  @EventHandler
+  @EventHandler(ignoreCancelled = true)
   public void onMatchStart(MatchStartEvent e) {
     Match match = (Match) e.getMatch();
 

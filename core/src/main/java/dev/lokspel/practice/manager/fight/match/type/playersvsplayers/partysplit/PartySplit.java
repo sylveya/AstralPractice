@@ -2,6 +2,7 @@ package dev.lokspel.practice.manager.fight.match.type.playersvsplayers.partyspli
 
 import dev.lokspel.practice.config.PracticeConfig;
 import dev.lokspel.practice.manager.arena.arenas.Arena;
+import dev.lokspel.practice.manager.fight.match.enums.MatchStatus;
 import dev.lokspel.practice.manager.fight.match.enums.MatchType;
 import dev.lokspel.practice.manager.fight.match.enums.TeamEnum;
 import dev.lokspel.practice.manager.fight.match.type.playersvsplayers.PlayersVsPlayers;
@@ -72,7 +73,7 @@ public class PartySplit extends PlayersVsPlayers {
   public void startMatch() {
     super.startMatch();
 
-    if (this.partySpectators.isEmpty()) {
+    if (this.status != MatchStatus.START || this.partySpectators.isEmpty()) {
       return;
     }
 

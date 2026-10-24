@@ -8,6 +8,8 @@ import dev.lokspel.practice.manager.fight.match.listener.MatchLifecycleListener;
 import dev.lokspel.practice.manager.fight.match.listener.StartListener;
 import dev.lokspel.practice.manager.fight.match.type.duel.Duel;
 import dev.lokspel.practice.manager.fight.match.util.RematchRequest;
+import dev.lokspel.practice.manager.gui.GuiManager;
+import dev.lokspel.practice.manager.gui.GuiType;
 import dev.lokspel.practice.manager.ladder.abstraction.Ladder;
 import dev.lokspel.practice.manager.ladder.settings.CentralizedSettingListener;
 import dev.lokspel.practice.manager.nametag.NametagManager;
@@ -63,6 +65,26 @@ public class MatchManager {
     this.belowNameManager = NametagManager.getInstance();
     // PacketEvents.getAPI().getEventManager().registerListener(this.belowNameManager,
     // PacketListenerPriority.NORMAL);
+  }
+
+  /**
+   * Registers an active match and updates matchmaking queues.
+   *
+   * @param match the match to register
+   */
+  public void registerMatch(Match match) {
+    for (Player player : match.getPlayers()) {
+      this.playerMatches.put(player.getUniqueId(), match);
+    }
+
+    this.matches.put(match.getId(), match);
+    this.liveMatches.add(match);
+
+    if (match instanceof Duel duel && duel.isRanked()) {
+      GuiManager.getInstance().searchGui(GuiType.Queue_Ranked).update();
+    } else {
+      GuiManager.getInstance().searchGui(GuiType.Queue_Unranked).update();
+    }
   }
 
   public Match getLiveMatchByPlayer(Player player) {
