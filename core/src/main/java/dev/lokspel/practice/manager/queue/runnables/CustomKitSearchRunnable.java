@@ -78,22 +78,19 @@ public class CustomKitSearchRunnable extends Runnable {
             ? PracticeConfig.language().getQueues().getCustom().getHostingActionbar()
             : PracticeConfig.language().getQueues().getCustom().getSearchingActionbar();
 
-    if (searchingActionbar.isEmpty()) {
-      searchingActionbar =
-          mode == SearchMode.HOST
-              ? "<yellow>Hosting custom kit <gold>%kit% <gray>%elapsed%"
-              : "<yellow>Searching hosted custom kits... <gray>%elapsed%";
+    if (searchingActionbar != null && !searchingActionbar.isBlank()) {
+      profile
+          .getActionBar()
+          .setMessage(
+              ACTION_BAR_ID,
+              searchingActionbar
+                  .replace("%elapsed%", TimeUtil.formatDuration(seconds * 1000L))
+                  .replace("%kit%", hostedKitName == null ? "-" : hostedKitName),
+              -1,
+              ActionBarPriority.NORMAL);
+    } else {
+      profile.getActionBar().removeMessage(ACTION_BAR_ID);
     }
-
-    profile
-        .getActionBar()
-        .setMessage(
-            ACTION_BAR_ID,
-            searchingActionbar
-                .replace("%elapsed%", TimeUtil.formatDuration(seconds * 1000L))
-                .replace("%kit%", hostedKitName == null ? "-" : hostedKitName),
-            -1,
-            ActionBarPriority.NORMAL);
 
     seconds++;
   }
