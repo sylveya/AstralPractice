@@ -910,6 +910,12 @@ public class LadderTypeListener implements Listener {
 
     if (SpectatorManager.getInstance().getSpectators().containsKey(player.getUniqueId())) {
       e.setCancelled(true);
+      return;
+    }
+
+    Match match = MatchManager.getInstance().getLiveMatchByPlayer(player);
+    if (match != null && ListenerUtil.cancelEvent(match, player)) {
+      e.setCancelled(true);
     }
   }
 

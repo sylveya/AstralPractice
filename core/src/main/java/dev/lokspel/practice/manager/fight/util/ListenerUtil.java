@@ -5,7 +5,9 @@ import static dev.lokspel.practice.util.startup.PermanentConfig.PLACED_IN_FIGHT;
 import dev.lokspel.practice.manager.arena.arenas.FfaArena;
 import dev.lokspel.practice.manager.arena.arenas.interfaces.BasicArena;
 import dev.lokspel.practice.manager.fight.match.Match;
+import dev.lokspel.practice.manager.fight.match.Round;
 import dev.lokspel.practice.manager.fight.match.enums.RoundStatus;
+import dev.lokspel.practice.manager.fight.util.stats.Statistic;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -30,11 +32,21 @@ public final class ListenerUtil {
   }
 
   public static boolean cancelEvent(Match match, Player player) {
-    if (match.getCurrentStat(player).isSet()) {
+    if (match == null || player == null) {
       return true;
     }
 
-    return !match.getCurrentRound().getRoundStatus().equals(RoundStatus.LIVE);
+    Statistic stat = match.getCurrentStat(player);
+    if (stat != null && stat.isSet()) {
+      return true;
+    }
+
+    Round round = match.getCurrentRound();
+    if (round != null && round.getTempKill(player) != null) {
+      return true;
+    }
+
+    return round == null || !round.getRoundStatus().equals(RoundStatus.LIVE);
   }
 
   public static int getCalculatedBuildLimit(BasicArena arena) {
