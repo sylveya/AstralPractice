@@ -43,7 +43,7 @@ public class Gui {
               .name("<aqua><bold>Guide")
               .lore(
                   "<white>Left click to change item",
-                  "<white>Shit left click to remove item",
+                  "<white>Shift left click to remove item",
                   "<white>Right click to enchant or change count",
                   "<white>Shift right click to copy or paste item");
 
