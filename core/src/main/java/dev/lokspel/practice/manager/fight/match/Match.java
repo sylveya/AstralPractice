@@ -147,15 +147,16 @@ public abstract class Match extends BukkitRunnable
   }
 
   public boolean startMatch() {
+    for (Player player : this.players) {
+      if (player == null || !player.isOnline()) {
+        return abortStart();
+      }
+    }
+
     MatchStartEvent matchStartEvent = new MatchStartEvent(this);
     Bukkit.getPluginManager().callEvent(matchStartEvent);
     if (matchStartEvent.isCancelled()) {
-      for (Party party : PartyManager.getInstance().getParties()) {
-        if (this.equals(party.getMatch())) {
-          party.setMatch(null);
-        }
-      }
-      return false;
+      return abortStart();
     }
 
     MatchManager.getInstance().registerMatch(this);
@@ -192,6 +193,20 @@ public abstract class Match extends BukkitRunnable
     this.startNextRound();
     this.runTaskTimerAsynchronously(AstralPractice.getInstance(), 0, 20L);
     return true;
+  }
+
+  private boolean abortStart() {
+    for (Party party : PartyManager.getInstance().getParties()) {
+      if (this.equals(party.getMatch())) {
+        party.setMatch(null);
+      }
+    }
+    for (Player player : this.players) {
+      if (player != null && player.isOnline()) {
+        InventoryManager.getInstance().setLobbyInventory(player, false);
+      }
+    }
+    return false;
   }
 
   public void sendMessage(String message, boolean spectator) {
