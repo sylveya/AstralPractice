@@ -3,7 +3,7 @@
 ---
 
 <div align="center">
-  <a href="https://discord.gg/tRq4JJnRc2" target="_blank"><img alt="Discord" src="https://img.shields.io/badge/Discord-100000?style=for-the-badge&logo=Discord&logoColor=white&labelColor=7289da&color=7289da"/></a>&nbsp;
+  <a href="https://discord.gg/vpDDPVnqPG" target="_blank"><img alt="Discord" src="https://img.shields.io/badge/Discord-100000?style=for-the-badge&logo=Discord&logoColor=white&labelColor=7289da&color=7289da"/></a>&nbsp;
   <a href="https://hangar.papermc.io/Sylveya/AstralPractice" target="_blank"><img alt="Hangar" src="https://img.shields.io/badge/Hangar-100000?style=for-the-badge&logo=hangar&logoColor=white&labelColor=7289da&color=7289da"/></a>
 </div>
 
@@ -57,7 +57,7 @@ Use the `/setup` command to create and manage arenas and kits through intuitive 
 
 ## 💬 Support
 
-Join our [Discord server](https://discord.gg/tRq4JJnRc2) for help, bug reports, and feature requests.
+Join our [Discord server](https://discord.gg/vpDDPVnqPG) for help, bug reports, and feature requests.
 
 ---
 
