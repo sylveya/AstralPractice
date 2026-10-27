@@ -29,6 +29,9 @@ public class QueueManager implements Listener {
 
   public static QueueManager getInstance() {
     if (instance == null) {
+      if (AstralPractice.getInstance() == null || !AstralPractice.getInstance().isEnabled()) {
+        return null;
+      }
       instance = new QueueManager();
     }
     return instance;

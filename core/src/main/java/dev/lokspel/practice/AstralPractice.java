@@ -83,6 +83,8 @@ import dev.lokspel.practice.manager.leaderboard.hologram.HologramManager;
 import dev.lokspel.practice.manager.leaderboard.hologram.HologramProtectionListener;
 import dev.lokspel.practice.manager.matchhistory.MatchHistoryManager;
 import dev.lokspel.practice.manager.nametag.NametagManager;
+import dev.lokspel.practice.manager.queue.CustomKitQueueManager;
+import dev.lokspel.practice.manager.queue.QueueManager;
 import dev.lokspel.practice.manager.playerkit.PlayerKitManager;
 import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.manager.profile.cosmetics.CosmeticPresets;
@@ -293,6 +295,8 @@ public final class AstralPractice extends JavaPlugin {
               startUpProgress.replace(StartUpTypes.EVENT_LOADING, true);
             });
 
+    QueueManager.getInstance();
+    CustomKitQueueManager.getInstance();
     FfaManager.getInstance();
     EntityHiderListener.getInstance();
   }
