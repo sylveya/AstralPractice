@@ -29,6 +29,10 @@ public final class StringUtil {
     return list;
   }
 
+  public static String formatLimit(int left) {
+    return left < 0 ? PracticeConfig.language().getLimitUnlimited() : String.valueOf(left);
+  }
+
   private static final Map<Character, String> LEGACY_TO_MM =
       Map.ofEntries(
           Map.entry('0', "black"),

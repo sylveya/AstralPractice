@@ -6,11 +6,11 @@ import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.manager.profile.group.Group;
 import dev.lokspel.practice.manager.server.ServerManager;
 import dev.lokspel.practice.util.Common;
+import dev.lokspel.practice.util.StringUtil;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.util.StringUtil;
 
 public final class RankedArg {
 
@@ -67,7 +67,7 @@ public final class RankedArg {
                 .getRanked()
                 .getResetDailyLimit()
                 .replace("%target%", target.getPlayer().getName())
-                .replace("%dailyRankedLimit%", String.valueOf(group.getRankedLimit())));
+                .replace("%dailyRankedLimit%", StringUtil.formatLimit(group.getRankedLimit())));
       } else {
         Common.sendMmMessage(
             player,
@@ -129,7 +129,9 @@ public final class RankedArg {
         return;
       }
 
-      target.setRankedLeft(target.getRankedLeft() + extraRanked);
+      if (target.getRankedLeft() >= 0) {
+        target.setRankedLeft(target.getRankedLeft() + extraRanked);
+      }
 
       Common.sendMmMessage(
           player,
@@ -141,7 +143,7 @@ public final class RankedArg {
               .getAddExtraRanked()
               .replace("%extraRanked%", String.valueOf(extraRanked))
               .replace("%target%", target.getPlayer().getName())
-              .replace("%newRanked%", String.valueOf(target.getRankedLeft())));
+              .replace("%newRanked%", StringUtil.formatLimit(target.getRankedLeft())));
     } else if (args.length >= 3 && args[1].equalsIgnoreCase("ban")) {
       if (!player.hasPermission("ap.practice.ranked.ban")) {
         Common.sendMmMessage(
@@ -343,7 +345,7 @@ public final class RankedArg {
                 .getRanked()
                 .getResetDailyLimit()
                 .replace("%target%", target.getPlayer().getName())
-                .replace("%dailyRankedLimit%", String.valueOf(group.getRankedLimit())));
+                .replace("%dailyRankedLimit%", StringUtil.formatLimit(group.getRankedLimit())));
       } else {
         Common.sendConsoleMmMessage(
             PracticeConfig.language()
@@ -382,7 +384,9 @@ public final class RankedArg {
         return;
       }
 
-      target.setRankedLeft(target.getRankedLeft() + extraRanked);
+      if (target.getRankedLeft() >= 0) {
+        target.setRankedLeft(target.getRankedLeft() + extraRanked);
+      }
 
       Common.sendConsoleMmMessage(
           PracticeConfig.language()
@@ -393,7 +397,7 @@ public final class RankedArg {
               .getAddExtraRanked()
               .replace("%extraRanked%", String.valueOf(extraRanked))
               .replace("%target%", target.getPlayer().getName())
-              .replace("%newRanked%", String.valueOf(target.getRankedLeft())));
+              .replace("%newRanked%", StringUtil.formatLimit(target.getRankedLeft())));
     } else {
       for (String line :
           PracticeConfig.language()
@@ -424,7 +428,7 @@ public final class RankedArg {
         arguments.add("unban");
       }
 
-      return StringUtil.copyPartialMatches(args[1], arguments, new ArrayList<>());
+      return org.bukkit.util.StringUtil.copyPartialMatches(args[1], arguments, new ArrayList<>());
     } else if (args.length == 3) {
       if (player.hasPermission("ap.practice.ranked.default")
           || player.hasPermission("ap.practice.ranked.add")
@@ -435,7 +439,7 @@ public final class RankedArg {
         }
       }
 
-      return StringUtil.copyPartialMatches(args[2], arguments, new ArrayList<>());
+      return org.bukkit.util.StringUtil.copyPartialMatches(args[2], arguments, new ArrayList<>());
     }
 
     return arguments;

@@ -81,7 +81,7 @@ public class EventHostGui extends Gui {
           return;
         }
 
-        if (profile.getEventStartLeft() <= 0) {
+        if (profile.getEventStartLeft() == 0) {
           Common.sendMmMessage(
               player, PracticeConfig.language().getEvent().getCantHostEventToday());
           return;

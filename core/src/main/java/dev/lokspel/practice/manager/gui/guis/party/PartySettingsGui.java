@@ -325,12 +325,13 @@ public class PartySettingsGui extends Gui {
             if (party.isPublicParty()) {
               Profile leaderProfile = ProfileManager.getInstance().getProfile(player);
               if (!player.hasPermission("ap.bypass.party.broadcast.limit")
-                  && leaderProfile.getPartyBroadcastLeft() <= 0) {
+                  && leaderProfile.getPartyBroadcastLeft() == 0) {
                 Common.sendMmMessage(
                     player, PracticeConfig.language().getParty().getNoBroadcastLeft());
                 return;
               }
-              if (!player.hasPermission("ap.bypass.party.broadcast.limit")) {
+              if (!player.hasPermission("ap.bypass.party.broadcast.limit")
+                  && leaderProfile.getPartyBroadcastLeft() > 0) {
                 leaderProfile.setPartyBroadcastLeft(leaderProfile.getPartyBroadcastLeft() - 1);
               }
 

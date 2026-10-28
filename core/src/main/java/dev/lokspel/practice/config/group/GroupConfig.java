@@ -39,15 +39,19 @@ public class GroupConfig {
     @JsonProperty("WEIGHT")
     private Integer weight;
 
+    @Comment("Set to -1 for unlimited, 0 to disable.")
     @JsonProperty("UNRANKED-PER-DAY")
     private Integer unrankedPerDay;
 
+    @Comment("Set to -1 for unlimited, 0 to disable.")
     @JsonProperty("RANKED-PER-DAY")
     private Integer rankedPerDay;
 
+    @Comment("Set to -1 for unlimited, 0 to disable.")
     @JsonProperty("EVENT-START-PER-DAY")
     private Integer eventStartPerDay;
 
+    @Comment("Set to -1 for unlimited, 0 to disable.")
     @JsonProperty("PARTY-BROADCAST-PER-DAY")
     private Integer partyBroadcastPerDay;
 

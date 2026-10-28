@@ -261,9 +261,13 @@ public class Duel extends Match implements Team {
       // Remove 1 from the player's left matches
       Profile profile = ProfileManager.getInstance().getProfile(player);
       if (ranked) {
-        profile.setRankedLeft(profile.getRankedLeft() - 1);
+        if (profile.getRankedLeft() > 0) {
+          profile.setRankedLeft(profile.getRankedLeft() - 1);
+        }
       } else {
-        profile.setUnrankedLeft(profile.getUnrankedLeft() - 1);
+        if (profile.getUnrankedLeft() > 0) {
+          profile.setUnrankedLeft(profile.getUnrankedLeft() - 1);
+        }
       }
 
       // Set the player inventory to lobby inventory

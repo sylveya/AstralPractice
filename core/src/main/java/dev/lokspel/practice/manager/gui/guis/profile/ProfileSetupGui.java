@@ -19,6 +19,7 @@ import dev.lokspel.practice.manager.profile.enums.ProfileStatus;
 import dev.lokspel.practice.manager.spectator.SpectatorManager;
 import dev.lokspel.practice.util.Common;
 import dev.lokspel.practice.util.InventoryUtil;
+import dev.lokspel.practice.util.StringUtil;
 import dev.lokspel.practice.util.TimeUtil;
 import dev.lokspel.practice.util.interfaces.Spectatable;
 import dev.lokspel.practice.util.items.ItemCreateUtil;
@@ -307,8 +308,8 @@ public class ProfileSetupGui extends Gui {
                     .getIcons()
                     .getBasicInfo()
                     .getOnlineStatus()))
-        .replace("%unranked_left%", String.valueOf(profile.getUnrankedLeft()))
-        .replace("%ranked_left%", String.valueOf(profile.getRankedLeft()))
+        .replace("%unranked_left%", StringUtil.formatLimit(profile.getUnrankedLeft()))
+        .replace("%ranked_left%", StringUtil.formatLimit(profile.getRankedLeft()))
         .replace(
             "%division_fullName%",
             profile.getStats().getDivision() != null

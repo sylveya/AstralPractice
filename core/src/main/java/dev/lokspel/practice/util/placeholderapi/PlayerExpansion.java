@@ -25,6 +25,7 @@ import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.manager.profile.group.Group;
 import dev.lokspel.practice.manager.profile.statistics.FfaStats;
 import dev.lokspel.practice.manager.queue.QueueManager;
+import dev.lokspel.practice.util.StringUtil;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.clip.placeholderapi.expansion.Relational;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -107,8 +108,8 @@ public class PlayerExpansion extends PlaceholderExpansion implements Relational 
               yield null;
             }
             yield switch (input[2]) {
-              case "u" -> String.valueOf(group.getUnrankedLimit());
-              case "r" -> String.valueOf(group.getRankedLimit());
+              case "u" -> StringUtil.formatLimit(group.getUnrankedLimit());
+              case "r" -> StringUtil.formatLimit(group.getRankedLimit());
               default -> null;
             };
           }

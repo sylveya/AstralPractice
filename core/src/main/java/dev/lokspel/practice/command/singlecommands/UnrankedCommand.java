@@ -38,7 +38,7 @@ public class UnrankedCommand implements CommandExecutor {
       return true;
     }
 
-    if (!player.hasPermission("ap.bypass.unranked.limit") && profile.getUnrankedLeft() <= 0) {
+    if (!player.hasPermission("ap.bypass.unranked.limit") && profile.getUnrankedLeft() == 0) {
       Common.sendMmMessage(
           player,
           PracticeConfig.language().getCommand().getQueues().getUnranked().getNoUnrankedLeft());

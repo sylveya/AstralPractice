@@ -50,7 +50,7 @@ public class RankedCommand implements CommandExecutor {
       }
     }
 
-    if (profile.getRankedLeft() <= 0 && !player.hasPermission("ap.bypass.ranked.limit")) {
+    if (profile.getRankedLeft() == 0 && !player.hasPermission("ap.bypass.ranked.limit")) {
       Common.sendMmMessage(
           player, PracticeConfig.language().getCommand().getQueues().getRanked().getNoRankedLeft());
       return false;
