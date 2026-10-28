@@ -66,6 +66,32 @@ public class ArenaSettingsGui extends Gui {
         .get();
   }
 
+  private static ItemStack locatorBarEnabledItem() {
+    return BackendUtil.getGuiItem(
+            PracticeConfig.guis()
+                .getGuis()
+                .getSetup()
+                .getArena()
+                .getArenaSettings()
+                .getIcons()
+                .getLocatorBar()
+                .getEnabled())
+        .get();
+  }
+
+  private static ItemStack locatorBarDisabledItem() {
+    return BackendUtil.getGuiItem(
+            PracticeConfig.guis()
+                .getGuis()
+                .getSetup()
+                .getArena()
+                .getArenaSettings()
+                .getIcons()
+                .getLocatorBar()
+                .getDisabled())
+        .get();
+  }
+
   private final Arena arena;
 
   public ArenaSettingsGui(Arena arena) {
@@ -131,12 +157,16 @@ public class ArenaSettingsGui extends Gui {
 
     if (arena.isBuild()) {
       inventory.setItem(
-          11, arena.isAllowCustomKitOnMap() ? customKitsEnabledItem() : customKitsDisabledItem());
-      inventory.setItem(13, sideBuildLimitItem());
-      inventory.setItem(15, portalProtectionItem());
+          10, arena.isLocatorBar() ? locatorBarEnabledItem() : locatorBarDisabledItem());
+      inventory.setItem(
+          12, arena.isAllowCustomKitOnMap() ? customKitsEnabledItem() : customKitsDisabledItem());
+      inventory.setItem(14, sideBuildLimitItem());
+      inventory.setItem(16, portalProtectionItem());
     } else {
       inventory.setItem(
-          13, arena.isAllowCustomKitOnMap() ? customKitsEnabledItem() : customKitsDisabledItem());
+          12, arena.isLocatorBar() ? locatorBarEnabledItem() : locatorBarDisabledItem());
+      inventory.setItem(
+          14, arena.isAllowCustomKitOnMap() ? customKitsEnabledItem() : customKitsDisabledItem());
     }
 
     updatePlayers();
@@ -177,16 +207,25 @@ public class ArenaSettingsGui extends Gui {
 
     if (arena.isBuild()) {
       switch (slot) {
-        case 11 -> handleCustomKitsClick();
-        case 13 -> handleSideBuildLimitClick(clickType);
-        case 15 -> handlePortalProtectionClick(clickType);
+        case 10 -> handleLocatorBarClick();
+        case 12 -> handleCustomKitsClick();
+        case 14 -> handleSideBuildLimitClick(clickType);
+        case 16 -> handlePortalProtectionClick(clickType);
         default -> {}
       }
     } else {
-      if (slot == 13) {
+      if (slot == 12) {
+        handleLocatorBarClick();
+      } else if (slot == 14) {
         handleCustomKitsClick();
       }
     }
+  }
+
+  private void handleLocatorBarClick() {
+    arena.setLocatorBar(!arena.isLocatorBar());
+    arena.setData();
+    update();
   }
 
   private void handleCustomKitsClick() {

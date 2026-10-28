@@ -38,6 +38,7 @@ public abstract class EventData {
   protected int startTime;
   protected int minPlayer;
   protected int maxPlayer;
+  protected boolean locatorBar = false;
 
   public EventData(final EventType type) {
     this.path = "events/" + type.getName().toLowerCase() + ".yml";
@@ -69,6 +70,7 @@ public abstract class EventData {
     settings.setStartTime(startTime);
     settings.setMinPlayer(minPlayer);
     settings.setMaxPlayer(maxPlayer);
+    settings.setLocatorBar(locatorBar);
     data.setSettings(settings);
 
     if (cuboidLoc1 != null || cuboidLoc2 != null) {
@@ -135,6 +137,9 @@ public abstract class EventData {
       }
       if (settings.getMaxPlayer() != null) {
         this.maxPlayer = settings.getMaxPlayer();
+      }
+      if (settings.getLocatorBar() != null) {
+        this.locatorBar = settings.getLocatorBar();
       }
     }
 

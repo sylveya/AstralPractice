@@ -85,6 +85,7 @@ public class SettingsGui extends Gui {
               gui.get(1).setItem(14, EventSetupUtil.getStartTimeItem(eventData.getStartTime()));
               gui.get(1).setItem(15, EventSetupUtil.getMinPlayerItem(eventData.getMinPlayer()));
               gui.get(1).setItem(16, EventSetupUtil.getMaxPlayerItem(eventData.getMaxPlayer()));
+              gui.get(1).setItem(22, EventSetupUtil.getLocatorBarItem(eventData.isLocatorBar()));
 
               updatePlayers();
             });
@@ -213,6 +214,11 @@ public class SettingsGui extends Gui {
         } else if (click.isRightClick() && maxPlayer < 100) {
           eventData.setMaxPlayer(maxPlayer + 1);
         }
+        break;
+
+      case 22:
+        eventData.setLocatorBar(!eventData.isLocatorBar());
+        eventData.setData();
         break;
 
       default:

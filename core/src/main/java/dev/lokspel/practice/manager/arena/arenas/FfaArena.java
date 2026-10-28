@@ -84,6 +84,7 @@ public class FfaArena extends DisplayArena {
     data.setHealthBelowName(this.healthBelowName);
     data.setMapBlowable(this.mapBlowable);
     data.setAllowDropItems(this.allowDropItems);
+    data.setLocatorBar(this.locatorBar);
 
     data.setLadders(ArenaUtil.getLadderNames(this));
 
@@ -126,6 +127,10 @@ public class FfaArena extends DisplayArena {
 
     if (data.getAllowDropItems() != null) {
       this.setAllowDropItems(data.getAllowDropItems());
+    }
+
+    if (data.getLocatorBar() != null) {
+      this.setLocatorBar(data.getLocatorBar());
     }
 
     if (data.getLadders() != null) {

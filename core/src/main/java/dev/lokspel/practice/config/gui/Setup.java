@@ -270,6 +270,9 @@ public class Setup {
         @JsonProperty("DURATION")
         private Duration duration = new Duration();
 
+        @JsonProperty("LOCATOR-BAR")
+        private LocatorBar locatorBar = new LocatorBar();
+
         @JsonProperty("START-TIME")
         private ItemConfig startTime =
             ItemConfig.of("FEATHER")
@@ -304,6 +307,27 @@ public class Setup {
                     "",
                     "<green><bold>LEFT-CLICK <green>to reduce the amount.",
                     "<aqua><bold>RIGHT-CLICK <aqua>to increase the amount.");
+
+        @Getter
+        public static class LocatorBar {
+          @JsonProperty("ENABLED")
+          private ItemConfig enabled =
+              ItemConfig.of("COMPASS")
+                  .name("<gray>Locator Bar: <green>Enabled")
+                  .lore(
+                      "",
+                      "<yellow><bold>Click here <gray>to <red>disable <gray>the",
+                      "<dark_green>locator bar <gray>in the event.");
+
+          @JsonProperty("DISABLED")
+          private ItemConfig disabled =
+              ItemConfig.of("RED_STAINED_GLASS_PANE")
+                  .name("<gray>Locator Bar: <red>Disabled")
+                  .lore(
+                      "",
+                      "<yellow><bold>Click here <gray>to <green>enable <gray>the",
+                      "<dark_green>locator bar <gray>in the event.");
+        }
 
         @Getter
         public static class Duration {

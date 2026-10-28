@@ -220,6 +220,32 @@ public class FfaSettingsGui extends Gui {
         .get();
   }
 
+  private static ItemStack locatorBarEnabledItem() {
+    return BackendUtil.getGuiItem(
+            PracticeConfig.guis()
+                .getGuis()
+                .getSetup()
+                .getFfaArena()
+                .getSettings()
+                .getIcons()
+                .getLocatorBar()
+                .getEnabled())
+        .get();
+  }
+
+  private static ItemStack locatorBarDisabledItem() {
+    return BackendUtil.getGuiItem(
+            PracticeConfig.guis()
+                .getGuis()
+                .getSetup()
+                .getFfaArena()
+                .getSettings()
+                .getIcons()
+                .getLocatorBar()
+                .getDisabled())
+        .get();
+  }
+
   private final FfaArena ffaArena;
   private final ArenaMainGui arenaMainGui;
 
@@ -269,6 +295,12 @@ public class FfaSettingsGui extends Gui {
       inventory.setItem(11, tntEnabledItem());
     } else {
       inventory.setItem(11, tntDisabledItem());
+    }
+
+    if (ffaArena.isLocatorBar()) {
+      inventory.setItem(13, locatorBarEnabledItem());
+    } else {
+      inventory.setItem(13, locatorBarDisabledItem());
     }
 
     if (ffaArena.isReKitAfterKill()) {
@@ -322,6 +354,11 @@ public class FfaSettingsGui extends Gui {
           break;
         case 12:
           ffaArena.setReKitAfterKill(!ffaArena.isReKitAfterKill());
+          this.update();
+          break;
+        case 13:
+          ffaArena.setLocatorBar(!ffaArena.isLocatorBar());
+          ffaArena.setData();
           this.update();
           break;
         case 14:

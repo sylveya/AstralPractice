@@ -69,6 +69,7 @@ import dev.lokspel.practice.manager.fight.ffa.FfaManager;
 import dev.lokspel.practice.manager.fight.listener.BuildListener;
 import dev.lokspel.practice.manager.fight.listener.CreeperListener;
 import dev.lokspel.practice.manager.fight.listener.FireworkRocketCooldownListener;
+import dev.lokspel.practice.manager.fight.listener.LocatorBarListener;
 import dev.lokspel.practice.manager.fight.listener.ProjectileCooldownListener;
 import dev.lokspel.practice.manager.fight.match.MatchManager;
 import dev.lokspel.practice.manager.fight.match.util.EloMode;
@@ -299,6 +300,7 @@ public final class AstralPractice extends JavaPlugin {
     CustomKitQueueManager.getInstance();
     FfaManager.getInstance();
     EntityHiderListener.getInstance();
+    LocatorBarListener.getInstance();
   }
 
   @Override

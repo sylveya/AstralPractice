@@ -55,6 +55,9 @@ public class EventFileData {
 
     @JsonProperty("maxPlayer")
     private Integer maxPlayer;
+
+    @JsonProperty("locatorBar")
+    private Boolean locatorBar;
   }
 
   /**
