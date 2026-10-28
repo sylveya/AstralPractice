@@ -80,8 +80,7 @@ public class SpectatorListener implements Listener {
 
     Statistic stat = match.getCurrentStat(player);
     Round round = match.getCurrentRound();
-    return (stat != null && stat.isSet())
-        || (round != null && round.getTempKill(player) != null);
+    return (stat != null && stat.isSet()) || (round != null && round.getTempKill(player) != null);
   }
 
   private void ensureSpectatorFlight(Player player) {
