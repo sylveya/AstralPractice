@@ -137,3 +137,12 @@ Format: `%ap_lb_ffa_global_<type>_<position>_<name|value>%`
 | %ap_lb_ffa_global_kills_1_v%  | Kills count of the #1 FFA player                  |
 | %ap_lb_ffa_global_streak_1_k% | Player name with the highest FFA streak (#1)      |
 | %ap_lb_ffa_global_streak_1_v% | Best streak of the #1 FFA player                  |
+
+## Relational Placeholders
+
+These placeholders require PlaceholderAPI relational placeholder support and a second player.
+
+| PlaceholderAPI         | Description                                                                                                   |
+|------------------------|---------------------------------------------------------------------------------------------------------------|
+| %rel_ap_nametag_color% | MiniMessage color tag for the target player (team color in non-FFA match, lobby color otherwise).             |
+| %rel_ap_match_color%   | MiniMessage color tag relative to viewer: ally color for teammates/self, enemy color for opponents in a match.|

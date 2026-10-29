@@ -1,6 +1,8 @@
 package dev.lokspel.practice.util.placeholderapi;
 
 import dev.lokspel.practice.AstralPractice;
+import dev.lokspel.practice.config.PracticeConfig;
+import dev.lokspel.practice.config.settings.MatchSettings;
 import dev.lokspel.practice.manager.arena.ArenaManager;
 import dev.lokspel.practice.manager.arena.arenas.FfaArena;
 import dev.lokspel.practice.manager.division.Division;
@@ -520,10 +522,50 @@ public class PlayerExpansion extends PlaceholderExpansion implements Relational 
 
   @Override
   public String onPlaceholderRequest(Player one, Player two, String params) {
+    if ("match_color".equalsIgnoreCase(params)) {
+      return resolveMatchColor(one, two);
+    }
     if (!"nametag_color".equalsIgnoreCase(params) || two == null) {
       return null;
     }
     return resolveNametagColor(two);
+  }
+
+  private String resolveMatchColor(Player one, Player two) {
+    if (one == null || two == null) {
+      return "";
+    }
+
+    Match matchOne = MatchManager.getInstance().getLiveMatchByPlayer(one);
+    if (matchOne == null) {
+      return "";
+    }
+
+    Match matchTwo = MatchManager.getInstance().getLiveMatchByPlayer(two);
+    if (matchOne != matchTwo) {
+      return "";
+    }
+
+    MatchSettings.MatchColor colors = PracticeConfig.settings().getMatchSettings().getMatchColor();
+    String ally = colors != null && colors.getAlly() != null ? colors.getAlly() : "<green>";
+    String enemy = colors != null && colors.getEnemy() != null ? colors.getEnemy() : "<red>";
+
+    if (one.equals(two)) {
+      return ally;
+    }
+
+    if (matchOne instanceof Team teamMatch) {
+      TeamEnum teamOne = teamMatch.getTeam(one);
+      TeamEnum teamTwo = teamMatch.getTeam(two);
+      if (teamOne != null
+          && teamTwo != null
+          && teamOne != TeamEnum.FFA
+          && teamTwo != TeamEnum.FFA) {
+        return teamOne == teamTwo ? ally : enemy;
+      }
+    }
+
+    return enemy;
   }
 
   private String resolveNametagColor(OfflinePlayer offlinePlayer) {

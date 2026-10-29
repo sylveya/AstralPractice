@@ -37,6 +37,10 @@ public class MatchSettings {
   @JsonProperty("TEAMS")
   private Teams teams = new Teams();
 
+  @Comment("Colors returned by %rel_ap_match_color% (MiniMessage tags).")
+  @JsonProperty("MATCH-COLOR")
+  private MatchColor matchColor = new MatchColor();
+
   @JsonProperty("MATCH-TYPE-NAMES")
   private MatchTypeNames matchTypeNames = new MatchTypeNames();
 
@@ -205,6 +209,17 @@ public class MatchSettings {
       @JsonProperty("COLOR")
       private String color = "<yellow>";
     }
+  }
+
+  @Getter
+  public static class MatchColor {
+    @Comment("Viewer and target are on the same side of the same match.")
+    @JsonProperty("ALLY")
+    private String ally = "<green>";
+
+    @Comment("Viewer and target are opponents in the same match.")
+    @JsonProperty("ENEMY")
+    private String enemy = "<red>";
   }
 
   @Getter
