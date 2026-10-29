@@ -195,7 +195,7 @@ public class EventManager {
       }
 
       Profile starterProfile = ProfileManager.getInstance().getProfile(starter);
-      if (starterProfile == null || starterProfile.getEventStartLeft() <= 0) {
+      if (starterProfile == null || starterProfile.getEventStartLeft() == 0) {
         Common.sendMmMessage(starter, PracticeConfig.language().getEvent().getCantHostEventToday());
         return;
       }
@@ -260,8 +260,8 @@ public class EventManager {
 
     if (starter != null) {
       Profile starterProfile = ProfileManager.getInstance().getProfile(starter);
-      if (starterProfile != null) {
-        starterProfile.setEventStartLeft(Math.max(0, starterProfile.getEventStartLeft() - 1));
+      if (starterProfile != null && starterProfile.getEventStartLeft() > 0) {
+        starterProfile.setEventStartLeft(starterProfile.getEventStartLeft() - 1);
       }
     }
   }

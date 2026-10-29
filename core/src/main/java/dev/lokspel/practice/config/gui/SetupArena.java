@@ -476,6 +476,9 @@ public class SetupArena {
       @JsonProperty("CUSTOM-KITS")
       private CustomKits customKits = new CustomKits();
 
+      @JsonProperty("LOCATOR-BAR")
+      private LocatorBar locatorBar = new LocatorBar();
+
       @JsonProperty("SIDE-BUILD-LIMIT")
       private ItemConfig sideBuildLimit =
           ItemConfig.of("BRICKS")
@@ -527,6 +530,31 @@ public class SetupArena {
                     "<gray>in this arena.",
                     "",
                     "<yellow><bold>Click here <gray>to <green>allow<gray>.");
+      }
+
+      @Getter
+      public static class LocatorBar {
+        @JsonProperty("ENABLED")
+        private ItemConfig enabled =
+            ItemConfig.of("COMPASS")
+                .name("<gray>Locator Bar: <green>Enabled")
+                .lore(
+                    "",
+                    "<gray>Player locator bar is <green>visible",
+                    "<gray>during matches in this arena.",
+                    "",
+                    "<yellow><bold>Click here <gray>to <red>disable<gray>.");
+
+        @JsonProperty("DISABLED")
+        private ItemConfig disabled =
+            ItemConfig.of("BARRIER")
+                .name("<gray>Locator Bar: <red>Disabled")
+                .lore(
+                    "",
+                    "<gray>Player locator bar is <red>hidden",
+                    "<gray>during matches in this arena.",
+                    "",
+                    "<yellow><bold>Click here <gray>to <green>enable<gray>.");
       }
     }
   }

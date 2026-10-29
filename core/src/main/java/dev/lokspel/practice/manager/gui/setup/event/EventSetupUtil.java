@@ -105,6 +105,28 @@ public enum EventSetupUtil {
         .get();
   }
 
+  public static ItemStack getLocatorBarItem(boolean enabled) {
+    return BackendUtil.getGuiItem(
+            enabled
+                ? PracticeConfig.guis()
+                    .getGuis()
+                    .getSetup()
+                    .getEvent()
+                    .getEventSettings()
+                    .getIcons()
+                    .getLocatorBar()
+                    .getEnabled()
+                : PracticeConfig.guis()
+                    .getGuis()
+                    .getSetup()
+                    .getEvent()
+                    .getEventSettings()
+                    .getIcons()
+                    .getLocatorBar()
+                    .getDisabled())
+        .get();
+  }
+
   public static ItemStack getMaxPlayerItem(int maxPlayer) {
     return BackendUtil.getGuiItem(
             PracticeConfig.guis()

@@ -156,15 +156,23 @@ public class Party implements dev.lokspel.api.interfaces.Party {
     }
 
     if (member.equals(leader)) {
-      disband();
+      Player newLeader =
+          members.stream().filter(m -> !m.equals(member) && m.isOnline()).findFirst().orElse(null);
+      if (newLeader != null) {
+        setNewOwner(newLeader);
+      } else {
+        disband();
+      }
     }
 
     members.remove(member);
-    memberProfile.setParty(false);
-    memberProfile.setPartyChat(false);
+    if (memberProfile != null) {
+      memberProfile.setParty(false);
+      memberProfile.setPartyChat(false);
 
-    if (memberProfile.getStatus().equals(ProfileStatus.LOBBY)) {
-      InventoryManager.getInstance().setLobbyInventory(member, false);
+      if (memberProfile.getStatus().equals(ProfileStatus.LOBBY)) {
+        InventoryManager.getInstance().setLobbyInventory(member, false);
+      }
     }
 
     GuiManager.getInstance().searchGui(GuiType.Party_OtherParties).update();

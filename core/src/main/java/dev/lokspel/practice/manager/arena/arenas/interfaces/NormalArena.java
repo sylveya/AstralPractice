@@ -17,6 +17,7 @@ public abstract class NormalArena extends BasicArena implements DisplayName {
 
   protected boolean portalProtection = false;
   protected int portalProtectionValue;
+  protected boolean locatorBar = false;
 
   // In bed related arenas
   protected BedLocation bedLoc1;

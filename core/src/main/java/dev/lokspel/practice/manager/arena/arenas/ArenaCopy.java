@@ -35,6 +35,11 @@ public class ArenaCopy extends NormalArena {
     return mainArena.getDisplayName();
   }
 
+  @Override
+  public boolean isLocatorBar() {
+    return mainArena.isLocatorBar();
+  }
+
   private static int getCopyNumber(final String name) {
     int number;
     try {

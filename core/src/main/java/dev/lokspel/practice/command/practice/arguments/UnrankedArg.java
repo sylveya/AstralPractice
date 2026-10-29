@@ -6,11 +6,11 @@ import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.manager.profile.group.Group;
 import dev.lokspel.practice.manager.server.ServerManager;
 import dev.lokspel.practice.util.Common;
+import dev.lokspel.practice.util.StringUtil;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.util.StringUtil;
 
 public final class UnrankedArg {
 
@@ -67,7 +67,7 @@ public final class UnrankedArg {
                 .getUnranked()
                 .getResetDailyLimit()
                 .replace("%target%", target.getPlayer().getName())
-                .replace("%dailyUnrankedLimit%", String.valueOf(group.getUnrankedLimit())));
+                .replace("%dailyUnrankedLimit%", StringUtil.formatLimit(group.getUnrankedLimit())));
       } else {
         Common.sendMmMessage(
             player,
@@ -128,7 +128,9 @@ public final class UnrankedArg {
         return;
       }
 
-      target.setUnrankedLeft(target.getUnrankedLeft() + extraUnranked);
+      if (target.getUnrankedLeft() >= 0) {
+        target.setUnrankedLeft(target.getUnrankedLeft() + extraUnranked);
+      }
 
       Common.sendMmMessage(
           player,
@@ -140,7 +142,7 @@ public final class UnrankedArg {
               .getAddExtraUnranked()
               .replace("%extraUnranked%", String.valueOf(extraUnranked))
               .replace("%target%", target.getPlayer().getName())
-              .replace("%newUnranked%", String.valueOf(target.getUnrankedLeft())));
+              .replace("%newUnranked%", StringUtil.formatLimit(target.getUnrankedLeft())));
     } else {
       if (player.hasPermission("ap.practice.unranked.default")
           || player.hasPermission("ap.practice.unranked.add")) {
@@ -185,7 +187,7 @@ public final class UnrankedArg {
                 .getUnranked()
                 .getResetDailyLimit()
                 .replace("%target%", target.getPlayer().getName())
-                .replace("%dailyUnrankedLimit%", String.valueOf(group.getUnrankedLimit())));
+                .replace("%dailyUnrankedLimit%", StringUtil.formatLimit(group.getUnrankedLimit())));
       } else {
         Common.sendConsoleMmMessage(
             PracticeConfig.language()
@@ -223,7 +225,9 @@ public final class UnrankedArg {
         return;
       }
 
-      target.setUnrankedLeft(target.getUnrankedLeft() + extraUnranked);
+      if (target.getUnrankedLeft() >= 0) {
+        target.setUnrankedLeft(target.getUnrankedLeft() + extraUnranked);
+      }
 
       Common.sendConsoleMmMessage(
           PracticeConfig.language()
@@ -234,7 +238,7 @@ public final class UnrankedArg {
               .getAddExtraUnranked()
               .replace("%extraUnranked%", String.valueOf(extraUnranked))
               .replace("%target%", target.getPlayer().getName())
-              .replace("%newUnranked%", String.valueOf(target.getUnrankedLeft())));
+              .replace("%newUnranked%", StringUtil.formatLimit(target.getUnrankedLeft())));
     } else {
       for (String line :
           PracticeConfig.language()
@@ -259,7 +263,7 @@ public final class UnrankedArg {
         arguments.add("add");
       }
 
-      return StringUtil.copyPartialMatches(args[1], arguments, new ArrayList<>());
+      return org.bukkit.util.StringUtil.copyPartialMatches(args[1], arguments, new ArrayList<>());
     } else if (args.length == 3) {
       if (player.hasPermission("ap.practice.unranked.default")
           || player.hasPermission("ap.practice.unranked.add")) {

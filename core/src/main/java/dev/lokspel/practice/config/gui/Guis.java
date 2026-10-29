@@ -1697,6 +1697,12 @@ public class Guis {
 
     @Getter
     public static class Icons {
+      @JsonProperty("PAGE-LEFT")
+      private ItemConfig pageLeft = ItemConfig.of("ARROW").name("<gold>Go to Page %page%");
+
+      @JsonProperty("PAGE-RIGHT")
+      private ItemConfig pageRight = ItemConfig.of("ARROW").name("<gold>Go to Page %page%");
+
       @JsonProperty("TARGET-ITEM")
       private ItemConfig targetItem =
           new ItemConfig()

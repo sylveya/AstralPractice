@@ -187,6 +187,9 @@ public class SetupFfaArena {
       @JsonProperty("LOBBY-AFTER-DEATH")
       private LobbyAfterDeath lobbyAfterDeath = new LobbyAfterDeath();
 
+      @JsonProperty("LOCATOR-BAR")
+      private LocatorBar locatorBar = new LocatorBar();
+
       @Getter
       public static class Build {
         @JsonProperty("ENABLED")
@@ -345,6 +348,27 @@ public class SetupFfaArena {
                     "<yellow>their name tags in this FFA.",
                     "",
                     "<yellow><bold>Click here <gray>to <green>enable <gray>this setting.");
+      }
+
+      @Getter
+      public static class LocatorBar {
+        @JsonProperty("ENABLED")
+        private ItemConfig enabled =
+            ItemConfig.of("COMPASS")
+                .name("<gray>Locator Bar: <green>Enabled")
+                .lore(
+                    "",
+                    "<yellow><bold>Click here <gray>to <red>disable <gray>the",
+                    "<dark_green>locator bar <gray>in the arena.");
+
+        @JsonProperty("DISABLED")
+        private ItemConfig disabled =
+            ItemConfig.of("RED_STAINED_GLASS_PANE")
+                .name("<gray>Locator Bar: <red>Disabled")
+                .lore(
+                    "",
+                    "<yellow><bold>Click here <gray>to <green>enable <gray>the",
+                    "<dark_green>locator bar <gray>in the arena.");
       }
 
       @Getter

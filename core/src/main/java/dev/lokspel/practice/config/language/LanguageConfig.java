@@ -42,6 +42,9 @@ public class LanguageConfig {
   @JsonProperty("GAMES-RESET")
   private String gamesReset = "%unranked% <yellow>and %ranked% <yellow>have been reset.";
 
+  @JsonProperty("LIMIT-UNLIMITED")
+  private String limitUnlimited = "∞";
+
   @JsonProperty("SET-SERVER-LOBBY")
   private String setServerLobby =
       "<red>You should set the server lobby. Until you do, most of the plugin features won't work.";

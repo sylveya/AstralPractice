@@ -176,7 +176,9 @@ public class PlayerApiImpl implements PlayerApi {
       return;
     }
 
-    profile.setUnrankedLeft(profile.getUnrankedLeft() + amount);
+    if (profile.getUnrankedLeft() >= 0) {
+      profile.setUnrankedLeft(profile.getUnrankedLeft() + amount);
+    }
   }
 
   @Override
@@ -186,6 +188,8 @@ public class PlayerApiImpl implements PlayerApi {
       return;
     }
 
-    profile.setRankedLeft(profile.getRankedLeft() + amount);
+    if (profile.getRankedLeft() >= 0) {
+      profile.setRankedLeft(profile.getRankedLeft() + amount);
+    }
   }
 }

@@ -34,6 +34,9 @@ public class CustomKitQueueManager implements Listener {
 
   public static CustomKitQueueManager getInstance() {
     if (instance == null) {
+      if (AstralPractice.getInstance() == null || !AstralPractice.getInstance().isEnabled()) {
+        return null;
+      }
       instance = new CustomKitQueueManager();
     }
     return instance;

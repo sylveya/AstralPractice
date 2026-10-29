@@ -39,6 +39,9 @@ public class ArenaData extends ArenaLayoutData {
   @JsonProperty("allowCustomKitOnMap")
   private Boolean allowCustomKitOnMap;
 
+  @JsonProperty("locatorBar")
+  private Boolean locatorBar;
+
   @JsonProperty("sideBuildLimit")
   private Integer sideBuildLimit;
 

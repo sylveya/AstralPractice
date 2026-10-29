@@ -1,10 +1,13 @@
 package dev.lokspel.practice.manager.spectator;
 
+import com.destroystokyo.paper.event.player.PlayerPickupExperienceEvent;
 import dev.lokspel.practice.AstralPractice;
 import dev.lokspel.practice.manager.fight.match.Match;
 import dev.lokspel.practice.manager.fight.match.MatchManager;
+import dev.lokspel.practice.manager.fight.match.Round;
 import dev.lokspel.practice.manager.fight.match.enums.MatchStatus;
 import dev.lokspel.practice.manager.fight.match.enums.MatchType;
+import dev.lokspel.practice.manager.fight.util.stats.Statistic;
 import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.manager.profile.enums.ProfileStatus;
@@ -75,8 +78,9 @@ public class SpectatorListener implements Listener {
       return false;
     }
 
-    return match.getCurrentStat(player).isSet()
-        || match.getCurrentRound().getTempKill(player) != null;
+    Statistic stat = match.getCurrentStat(player);
+    Round round = match.getCurrentRound();
+    return (stat != null && stat.isSet()) || (round != null && round.getTempKill(player) != null);
   }
 
   private void ensureSpectatorFlight(Player player) {
@@ -239,6 +243,13 @@ public class SpectatorListener implements Listener {
 
   @EventHandler
   public void onArrowPickup(PlayerPickupArrowEvent e) {
+    if (hasSpectatorRestrictions(e.getPlayer())) {
+      e.setCancelled(true);
+    }
+  }
+
+  @EventHandler
+  public void onExpPickup(PlayerPickupExperienceEvent e) {
     if (hasSpectatorRestrictions(e.getPlayer())) {
       e.setCancelled(true);
     }

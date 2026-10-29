@@ -69,6 +69,7 @@ import dev.lokspel.practice.manager.fight.ffa.FfaManager;
 import dev.lokspel.practice.manager.fight.listener.BuildListener;
 import dev.lokspel.practice.manager.fight.listener.CreeperListener;
 import dev.lokspel.practice.manager.fight.listener.FireworkRocketCooldownListener;
+import dev.lokspel.practice.manager.fight.listener.LocatorBarListener;
 import dev.lokspel.practice.manager.fight.listener.ProjectileCooldownListener;
 import dev.lokspel.practice.manager.fight.match.MatchManager;
 import dev.lokspel.practice.manager.fight.match.util.EloMode;
@@ -88,6 +89,8 @@ import dev.lokspel.practice.manager.profile.ProfileManager;
 import dev.lokspel.practice.manager.profile.cosmetics.CosmeticPresets;
 import dev.lokspel.practice.manager.profile.cosmetics.CosmeticsCategoryManager;
 import dev.lokspel.practice.manager.profile.cosmetics.CosmeticsPermissionManager;
+import dev.lokspel.practice.manager.queue.CustomKitQueueManager;
+import dev.lokspel.practice.manager.queue.QueueManager;
 import dev.lokspel.practice.manager.server.ServerManager;
 import dev.lokspel.practice.manager.sidebar.SidebarManager;
 import dev.lokspel.practice.util.Common;
@@ -293,8 +296,11 @@ public final class AstralPractice extends JavaPlugin {
               startUpProgress.replace(StartUpTypes.EVENT_LOADING, true);
             });
 
+    QueueManager.getInstance();
+    CustomKitQueueManager.getInstance();
     FfaManager.getInstance();
     EntityHiderListener.getInstance();
+    LocatorBarListener.getInstance();
   }
 
   @Override

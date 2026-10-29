@@ -78,6 +78,7 @@ public class Arena extends DisplayArena {
     data.setLadderTypes(ArenaUtil.getLadderTypeNames(this));
     data.setLadders(ArenaUtil.getLadderNames(this));
     data.setAllowCustomKitOnMap(this.allowCustomKitOnMap);
+    data.setLocatorBar(this.locatorBar);
 
     if (this.getIcon() != null) {
       data.setIcon(this.getIcon());
@@ -130,6 +131,10 @@ public class Arena extends DisplayArena {
 
     if (data.getAllowCustomKitOnMap() != null) {
       this.setAllowCustomKitOnMap(data.getAllowCustomKitOnMap());
+    }
+
+    if (data.getLocatorBar() != null) {
+      this.setLocatorBar(data.getLocatorBar());
     }
 
     super.getBasicData(data);

@@ -29,6 +29,9 @@ public class QueueManager implements Listener {
 
   public static QueueManager getInstance() {
     if (instance == null) {
+      if (AstralPractice.getInstance() == null || !AstralPractice.getInstance().isEnabled()) {
+        return null;
+      }
       instance = new QueueManager();
     }
     return instance;
@@ -91,6 +94,17 @@ public class QueueManager implements Listener {
       return;
     }
 
+    Profile profile = ProfileManager.getInstance().getProfile(player);
+    if (profile.getUnrankedLeft() == 0 && !player.hasPermission("ap.bypass.unranked.limit")) {
+      Common.sendMmMessage(
+          player,
+          PracticeConfig.language().getCommand().getQueues().getUnranked().getNoUnrankedLeft());
+      if (!keepInventoryOpen) {
+        player.closeInventory();
+      }
+      return;
+    }
+
     toggleQueue(player, ladder, false, keepInventoryOpen);
   }
 
@@ -144,7 +158,7 @@ public class QueueManager implements Listener {
       }
     }
 
-    if (profile.getRankedLeft() <= 0 && !player.hasPermission("ap.bypass.ranked.limit")) {
+    if (profile.getRankedLeft() == 0 && !player.hasPermission("ap.bypass.ranked.limit")) {
       Common.sendMmMessage(
           player, PracticeConfig.language().getCommand().getQueues().getRanked().getNoRankedLeft());
       if (!keepInventoryOpen) {
