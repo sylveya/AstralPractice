@@ -158,6 +158,6 @@ public final class PartyInviteArg {
       return StringUtil.copyPartialMatches(args[1], arguments, new ArrayList<>());
     }
 
-    return List.of();
+    return new ArrayList<>();
   }
 }
