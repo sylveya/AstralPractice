@@ -6,10 +6,9 @@ import dev.lokspel.practice.manager.backend.BackendUtil;
 import dev.lokspel.practice.manager.fight.match.Match;
 import dev.lokspel.practice.manager.fight.match.enums.TeamEnum;
 import dev.lokspel.practice.manager.fight.match.interfaces.Team;
-import dev.lokspel.practice.manager.fight.match.type.playersvsplayers.PlayersVsPlayers;
+import dev.lokspel.practice.manager.fight.util.stats.Statistic;
 import dev.lokspel.practice.manager.gui.Gui;
 import dev.lokspel.practice.manager.gui.GuiItem;
-import dev.lokspel.practice.manager.gui.GuiManager;
 import dev.lokspel.practice.manager.gui.GuiType;
 import dev.lokspel.practice.manager.spectator.SpectatorManager;
 import dev.lokspel.practice.util.InventoryUtil;
@@ -26,16 +25,26 @@ import org.bukkit.inventory.ItemStack;
 
 public class SpectatorTargetsGui extends Gui {
 
+  private static ItemStack fillerItem() {
+    return BackendUtil.getGuiItem(
+            PracticeConfig.guis().getGuis().getSpectatorTargets().getIcons().getFillerItem())
+        .get();
+  }
+
+  private static ItemStack fillerItem2() {
+    return BackendUtil.getGuiItem(
+            PracticeConfig.guis().getGuis().getSpectatorTargets().getIcons().getFillerItem2())
+        .get();
+  }
+
   private static final int COLUMNS_PER_ROW = 9;
-  private static final int ROWS = 6;
-  private static final int CONTENT_ROWS = ROWS - 1;
-  private static final int PAGE_LEFT_SLOT = CONTENT_ROWS * COLUMNS_PER_ROW;
-  private static final int PAGE_RIGHT_SLOT = ROWS * COLUMNS_PER_ROW - 1;
-
-  /** Team members take four columns each; the remaining centre column separates the teams. */
   private static final int TEAM_COLUMNS = 4;
-
-  private static final int DIVIDER_COLUMN = TEAM_COLUMNS;
+  private static final int DIVIDER_COLUMN = 4;
+  private static final int TEAM1_BANNER_SLOT = 1;
+  private static final int TEAM2_BANNER_SLOT = 7;
+  private static final int MAX_PLAYER_ROWS = 4;
+  private static final int TEAM_CAPACITY = MAX_PLAYER_ROWS * TEAM_COLUMNS;
+  private static final int FFA_CAPACITY = MAX_PLAYER_ROWS * COLUMNS_PER_ROW;
 
   private final Match match;
   private final Map<Integer, Map<Integer, Player>> pageSlots = new HashMap<>();
@@ -55,16 +64,22 @@ public class SpectatorTargetsGui extends Gui {
 
   @Override
   public void update() {
-    // Only party team games are split into halves; 1v1 duels keep the plain list.
-    boolean teamMatch = match instanceof PlayersVsPlayers;
+    boolean teamMatch = match instanceof Team;
     List<Player> players = match.getPlayers();
     List<Player> firstTeam = teamMatch ? getTeamPlayers(TeamEnum.TEAM1) : List.of();
     List<Player> secondTeam = teamMatch ? getTeamPlayers(TeamEnum.TEAM2) : List.of();
 
-    int capacity = pageCapacity(teamMatch ? TEAM_COLUMNS : COLUMNS_PER_ROW);
+    int capacity = teamMatch ? TEAM_CAPACITY : FFA_CAPACITY;
     int playersOnLargestPage =
         teamMatch ? Math.max(firstTeam.size(), secondTeam.size()) : players.size();
     int maxPage = PageUtil.getMaxPage(playersOnLargestPage, capacity);
+
+    int columnsPerTeam = teamMatch ? TEAM_COLUMNS : COLUMNS_PER_ROW;
+    int playerRows =
+        Math.clamp(
+            (playersOnLargestPage + columnsPerTeam - 1) / columnsPerTeam, 1, MAX_PLAYER_ROWS);
+    int totalRows = playerRows + 2;
+    int totalSlots = totalRows * COLUMNS_PER_ROW;
 
     Map<Integer, Inventory> existingInventories = new HashMap<>(gui);
     Map<Integer, Inventory> newGui = new HashMap<>();
@@ -72,31 +87,37 @@ public class SpectatorTargetsGui extends Gui {
 
     for (int page = 1; page <= maxPage; page++) {
       Inventory inventory = existingInventories.get(page);
-      if (inventory == null || inventory.getSize() != ROWS * COLUMNS_PER_ROW) {
-        inventory = InventoryUtil.createInventory(getTitle(page), ROWS);
+      if (inventory == null || inventory.getSize() != totalSlots) {
+        inventory = InventoryUtil.createInventory(getTitle(page), totalRows);
       } else {
         inventory.clear();
       }
       newGui.put(page, inventory);
 
+      fillBorders(inventory, totalRows);
+
       Map<Integer, Player> currentSlots = new HashMap<>();
       if (teamMatch) {
-        fillPage(inventory, currentSlots, firstTeam, page, 0, TEAM_COLUMNS);
-        fillPage(inventory, currentSlots, secondTeam, page, DIVIDER_COLUMN + 1, TEAM_COLUMNS);
-        fillDivider(inventory);
+        fillPage(inventory, currentSlots, firstTeam, page, 0, TEAM_COLUMNS, playerRows);
+        fillPage(
+            inventory,
+            currentSlots,
+            secondTeam,
+            page,
+            DIVIDER_COLUMN + 1,
+            TEAM_COLUMNS,
+            playerRows);
+        fillDivider(inventory, totalRows);
+        fillBanners(inventory, firstTeam, secondTeam);
       } else {
-        fillPage(inventory, currentSlots, players, page, 0, COLUMNS_PER_ROW);
+        fillPage(inventory, currentSlots, players, page, 0, COLUMNS_PER_ROW, playerRows);
       }
       newPageSlots.put(page, currentSlots);
 
-      fillNavigation(inventory, page, maxPage);
+      fillNavigation(inventory, page, maxPage, totalRows);
     }
 
     updatePages(newGui, pageSlots, newPageSlots);
-  }
-
-  private static int pageCapacity(int columnsPerRow) {
-    return columnsPerRow * CONTENT_ROWS;
   }
 
   private void fillPage(
@@ -105,14 +126,16 @@ public class SpectatorTargetsGui extends Gui {
       List<Player> players,
       int page,
       int startColumn,
-      int columnsPerRow) {
-    int capacity = pageCapacity(columnsPerRow);
+      int columnsPerRow,
+      int playerRows) {
+    int capacity = columnsPerRow * playerRows;
     int startIndex = (page - 1) * capacity;
     int endIndex = Math.min(startIndex + capacity, players.size());
 
     for (int index = startIndex; index < endIndex; index++) {
       int offset = index - startIndex;
-      int slot = offset / columnsPerRow * COLUMNS_PER_ROW + startColumn + offset % columnsPerRow;
+      int row = 1 + (offset / columnsPerRow);
+      int slot = row * COLUMNS_PER_ROW + startColumn + (offset % columnsPerRow);
 
       Player target = players.get(index);
       slots.put(slot, target);
@@ -120,26 +143,41 @@ public class SpectatorTargetsGui extends Gui {
     }
   }
 
-  private void fillDivider(Inventory inventory) {
-    ItemStack divider = GuiManager.fillerItem();
+  private void fillBorders(Inventory inventory, int totalRows) {
+    ItemStack filler = fillerItem();
+    for (int col = 0; col < COLUMNS_PER_ROW; col++) {
+      inventory.setItem(col, filler);
+    }
+    int bottomRowStart = (totalRows - 1) * COLUMNS_PER_ROW;
+    for (int col = 0; col < COLUMNS_PER_ROW; col++) {
+      inventory.setItem(bottomRowStart + col, filler);
+    }
+  }
 
-    for (int row = 0; row < CONTENT_ROWS; row++) {
+  private void fillDivider(Inventory inventory, int totalRows) {
+    ItemStack divider = fillerItem2();
+    for (int row = 0; row < totalRows; row++) {
       inventory.setItem(row * COLUMNS_PER_ROW + DIVIDER_COLUMN, divider);
     }
   }
 
-  private void fillNavigation(Inventory inventory, int page, int maxPage) {
-    ItemStack filler = GuiManager.fillerItem();
-    for (int slot = PAGE_LEFT_SLOT; slot < inventory.getSize(); slot++) {
-      inventory.setItem(slot, filler);
-    }
+  private void fillBanners(Inventory inventory, List<Player> firstTeam, List<Player> secondTeam) {
+    inventory.setItem(
+        TEAM1_BANNER_SLOT, getBannerItem(TeamEnum.TEAM1, countAlive(firstTeam), firstTeam.size()));
+    inventory.setItem(
+        TEAM2_BANNER_SLOT,
+        getBannerItem(TeamEnum.TEAM2, countAlive(secondTeam), secondTeam.size()));
+  }
+
+  private void fillNavigation(Inventory inventory, int page, int maxPage, int totalRows) {
+    int bottomRowStart = (totalRows - 1) * COLUMNS_PER_ROW;
 
     if (page > 1) {
       ItemStack previous =
           getNavigationItem(
               PracticeConfig.guis().getGuis().getSpectatorTargets().getIcons().getPageLeft(),
               page - 1);
-      inventory.setItem(PAGE_LEFT_SLOT, previous);
+      inventory.setItem(bottomRowStart, previous);
     }
 
     if (page < maxPage) {
@@ -147,7 +185,7 @@ public class SpectatorTargetsGui extends Gui {
           getNavigationItem(
               PracticeConfig.guis().getGuis().getSpectatorTargets().getIcons().getPageRight(),
               page + 1);
-      inventory.setItem(PAGE_RIGHT_SLOT, next);
+      inventory.setItem(bottomRowStart + COLUMNS_PER_ROW - 1, next);
     }
   }
 
@@ -182,13 +220,51 @@ public class SpectatorTargetsGui extends Gui {
 
     GuiItem headItem = new GuiItem(ItemCreateUtil.getPlayerHead(target));
     headItem.setName(configItem.getName());
-    headItem.setLore(configItem.getLore());
+
+    List<String> lore = new ArrayList<>(configItem.getLore());
+    if (!(match instanceof Team)) {
+      lore.removeIf(line -> line.contains("%team%"));
+    }
+    headItem.setLore(lore);
+
+    double health = target.isOnline() && !target.isDead() ? Math.max(0.0, target.getHealth()) : 0.0;
 
     return headItem
         .replace("%player%", target.getName())
         .replace("%team%", getTeam(target).getNameMm())
-        .replace("%health%", String.format("%.1f", target.getHealth()))
+        .replace("%health%", String.format("%.1f", health))
         .get();
+  }
+
+  private ItemStack getBannerItem(TeamEnum team, int alive, int total) {
+    ItemConfig config =
+        team == TeamEnum.TEAM1
+            ? PracticeConfig.guis().getGuis().getSpectatorTargets().getIcons().getTeam1Banner()
+            : PracticeConfig.guis().getGuis().getSpectatorTargets().getIcons().getTeam2Banner();
+
+    return BackendUtil.getGuiItem(config)
+        .replace("%team%", team.getNameMm())
+        .replace("%alive%", String.valueOf(alive))
+        .replace("%total%", String.valueOf(total))
+        .get();
+  }
+
+  private boolean isAlive(Player player) {
+    if (!player.isOnline() || !match.getPlayers().contains(player)) {
+      return false;
+    }
+    Statistic stat = match.getCurrentStat(player);
+    return stat == null || !stat.isSet();
+  }
+
+  private int countAlive(List<Player> teamPlayers) {
+    int alive = 0;
+    for (Player p : teamPlayers) {
+      if (isAlive(p)) {
+        alive++;
+      }
+    }
+    return alive;
   }
 
   private TeamEnum getTeam(Player target) {
@@ -203,20 +279,21 @@ public class SpectatorTargetsGui extends Gui {
     Inventory inventory = e.getView().getTopInventory();
     int slot = e.getRawSlot();
 
-    if (slot >= inventory.getSize()) {
+    if (slot < 0 || slot >= inventory.getSize()) {
       return;
     }
 
     int page = inGuiPlayers.getOrDefault(spectator, 1);
+    int lastRowStart = inventory.getSize() - COLUMNS_PER_ROW;
 
-    if (slot == PAGE_LEFT_SLOT) {
+    if (slot == lastRowStart) {
       if (page > 1) {
         open(spectator, page - 1);
       }
       return;
     }
 
-    if (slot == PAGE_RIGHT_SLOT) {
+    if (slot == inventory.getSize() - 1) {
       if (gui.containsKey(page + 1)) {
         open(spectator, page + 1);
       }

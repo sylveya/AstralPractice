@@ -33,6 +33,12 @@ public class UnrankedCommand implements CommandExecutor {
       return false;
     }
 
+    if (profile.getFollowTarget() != null) {
+      Common.sendMmMessage(
+          player, PracticeConfig.language().getCommand().getFollow().getCantQueue());
+      return false;
+    }
+
     if (args.length == 0) {
       GuiManager.getInstance().searchGui(GuiType.Queue_Unranked).open(player);
       return true;

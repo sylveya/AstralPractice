@@ -110,6 +110,11 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
           };
     }
 
+    if (completion.isEmpty()) {
+      return completion;
+    }
+
+    completion = new ArrayList<>(completion);
     Collections.sort(completion);
     return completion;
   }

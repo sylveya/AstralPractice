@@ -229,6 +229,15 @@ public class Profile {
     settingsGui = null;
     playerCustomKitSelector = null;
     followTarget = null;
+    Player online = getOnlinePlayer();
+    if (online != null) {
+      for (Player other : Bukkit.getOnlinePlayers()) {
+        Profile otherProfile = ProfileManager.getInstance().getProfile(other);
+        if (otherProfile != null && online.equals(otherProfile.getFollowTarget())) {
+          otherProfile.setFollowTarget(null);
+        }
+      }
+    }
     actionBar = null;
   }
 

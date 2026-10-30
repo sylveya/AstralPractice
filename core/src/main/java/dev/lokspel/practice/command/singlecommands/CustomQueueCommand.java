@@ -48,6 +48,12 @@ public class CustomQueueCommand implements CommandExecutor, TabCompleter {
       return true;
     }
 
+    if (profile.getFollowTarget() != null) {
+      Common.sendMmMessage(
+          player, PracticeConfig.language().getCommand().getFollow().getCantQueue());
+      return true;
+    }
+
     if (args.length == 0 || args[0].equalsIgnoreCase("open") || args[0].equalsIgnoreCase("gui")) {
       openQueueGui(player);
       return true;

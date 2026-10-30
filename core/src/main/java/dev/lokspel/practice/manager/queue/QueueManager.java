@@ -95,6 +95,15 @@ public class QueueManager implements Listener {
     }
 
     Profile profile = ProfileManager.getInstance().getProfile(player);
+    if (profile.getFollowTarget() != null) {
+      Common.sendMmMessage(
+          player, PracticeConfig.language().getCommand().getFollow().getCantQueue());
+      if (!keepInventoryOpen) {
+        player.closeInventory();
+      }
+      return;
+    }
+
     if (profile.getUnrankedLeft() == 0 && !player.hasPermission("ap.bypass.unranked.limit")) {
       Common.sendMmMessage(
           player,
@@ -145,6 +154,15 @@ public class QueueManager implements Listener {
     }
 
     Profile profile = ProfileManager.getInstance().getProfile(player);
+
+    if (profile.getFollowTarget() != null) {
+      Common.sendMmMessage(
+          player, PracticeConfig.language().getCommand().getFollow().getCantQueue());
+      if (!keepInventoryOpen) {
+        player.closeInventory();
+      }
+      return;
+    }
 
     if (!player.hasPermission("ap.bypass.ranked.requirements")) {
       Division requirement = DivisionManager.getInstance().getMinimumForRanked();
