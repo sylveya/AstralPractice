@@ -1713,6 +1713,24 @@ public class Guis {
                   "<gray>Health: <white>%health%",
                   "",
                   "<green>» Click to teleport «");
+
+      @JsonProperty("TEAM1-BANNER")
+      private ItemConfig team1Banner =
+          ItemConfig.of("BLUE_BANNER")
+              .name("%team% <white>Team")
+              .lore("<gray>Alive: <white>%alive%/%total%");
+
+      @JsonProperty("TEAM2-BANNER")
+      private ItemConfig team2Banner =
+          ItemConfig.of("RED_BANNER")
+              .name("%team% <white>Team")
+              .lore("<gray>Alive: <white>%alive%/%total%");
+
+      @JsonProperty("FILLER-ITEM")
+      private ItemConfig fillerItem = ItemConfig.of("GRAY_STAINED_GLASS_PANE").name(" ");
+
+      @JsonProperty("FILLER-ITEM2")
+      private ItemConfig fillerItem2 = ItemConfig.of("BLACK_STAINED_GLASS_PANE").name(" ");
     }
   }
 
