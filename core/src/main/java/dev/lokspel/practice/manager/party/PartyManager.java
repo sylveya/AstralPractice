@@ -142,6 +142,7 @@ public class PartyManager implements Listener {
     if (!partyCreateEvent.isCancelled()) {
       parties.add(party);
       profile.setParty(true);
+      profile.setFollowTarget(null);
 
       InventoryManager.getInstance().setLobbyInventory(player, false);
       GuiManager.getInstance().searchGui(GuiType.Party_OtherParties).update();

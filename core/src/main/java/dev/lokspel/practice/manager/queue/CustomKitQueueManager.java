@@ -105,6 +105,11 @@ public class CustomKitQueueManager implements Listener {
       return false;
     }
 
+    if (profile.getFollowTarget() != null) {
+      Common.sendMmMessage(host, PracticeConfig.language().getCommand().getFollow().getCantQueue());
+      return false;
+    }
+
     if (!customLadder.isEnabled()) {
       Common.sendMmMessage(
           host, PracticeConfig.language().getQueues().getCustom().getKitNotReady());
@@ -160,6 +165,12 @@ public class CustomKitQueueManager implements Listener {
     Profile profile = ProfileManager.getInstance().getProfile(joiner);
     if (profile == null || profile.getStatus() != ProfileStatus.LOBBY) {
       Common.sendMmMessage(joiner, PracticeConfig.language().getCantUseCommand());
+      return false;
+    }
+
+    if (profile.getFollowTarget() != null) {
+      Common.sendMmMessage(
+          joiner, PracticeConfig.language().getCommand().getFollow().getCantQueue());
       return false;
     }
 

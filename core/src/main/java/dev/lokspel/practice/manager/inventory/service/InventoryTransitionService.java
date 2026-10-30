@@ -86,6 +86,7 @@ public final class InventoryTransitionService {
     Profile profile = ProfileManager.getInstance().getProfile(player);
     profile.setStatus(ProfileStatus.STAFF_MODE);
     profile.setStaffMode(true);
+    profile.setFollowTarget(null);
 
     boolean canFly =
         player.hasPermission("ap.staffmode.fly")

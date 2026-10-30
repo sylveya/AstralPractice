@@ -74,6 +74,9 @@ public class Command {
   @JsonProperty("STAFF")
   private Staff staff = new Staff();
 
+  @JsonProperty("FOLLOW")
+  private Follow follow = new Follow();
+
   @JsonProperty("STATISTICS")
   private Statistics statistics = new Statistics();
 
@@ -1709,6 +1712,48 @@ public class Command {
 
     @JsonProperty("PLAYER-INACTIVE")
     private String playerInactive = "<red>Player isn't in match or event.";
+  }
+
+  @Getter
+  public static class Follow {
+    @JsonProperty("COMMAND-HELP")
+    private String commandHelp = "<red>/%label% <player>";
+
+    @JsonProperty("NO-PERMISSION")
+    private String noPermission = "<red>You don't have permission.";
+
+    @JsonProperty("CANT-FOLLOW")
+    private String cantFollow = "<red>You can only follow players from the lobby.";
+
+    @JsonProperty("IN-STAFF-MODE")
+    private String inStaffMode = "<red>You can't follow players while in staff mode.";
+
+    @JsonProperty("IN-PARTY")
+    private String inParty = "<red>You can't follow players while in a party.";
+
+    @JsonProperty("TARGET-OFFLINE")
+    private String targetOffline = "<red>%target% is not online.";
+
+    @JsonProperty("CANT-SELF")
+    private String cantSelf = "<red>You can't follow yourself.";
+
+    @JsonProperty("NOT-ALLOWED")
+    private String notAllowed = "<red>%target% doesn't allow spectators.";
+
+    @JsonProperty("STARTED")
+    private String started =
+        "<green>You are now following <yellow>%target%<green>. You will spectate their matches."
+            + " <gray>(/unfollow to stop)";
+
+    @JsonProperty("STOPPED")
+    private String stopped = "<yellow>You stopped following <gold>%target%<yellow>.";
+
+    @JsonProperty("NOT-FOLLOWING")
+    private String notFollowing = "<red>You are not following anyone.";
+
+    @JsonProperty("CANT-QUEUE")
+    private String cantQueue =
+        "<red>You can't queue while following a player. Use /unfollow first.";
   }
 
   @Getter

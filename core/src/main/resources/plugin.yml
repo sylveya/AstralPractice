@@ -24,6 +24,10 @@ commands:
     aliases: staffmode
   spectate:
     aliases: spec
+  follow:
+    description: Follow a player and spectate their matches.
+  unfollow:
+    description: Stop following a player.
   party:
     aliases: p
   matchinv:
@@ -245,6 +249,9 @@ permissions:
     description: Stop all the matches in a arena.
 
   # Basic permission
+  ap.follow:
+    default: true
+    description: Follow a player and spectate their matches.
   ap.spectate:
     default: true
   ap.spectate.vanish:

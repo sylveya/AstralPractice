@@ -192,6 +192,20 @@ public abstract class Match extends BukkitRunnable
     this.status = MatchStatus.START;
     this.startNextRound();
     this.runTaskTimerAsynchronously(AstralPractice.getInstance(), 0, 20L);
+
+    for (Player player : this.players) {
+      for (Player online : Bukkit.getOnlinePlayers()) {
+        Profile profile = ProfileManager.getInstance().getProfile(online);
+        if (profile != null && player.equals(profile.getFollowTarget())) {
+          if ((profile.getStatus().equals(ProfileStatus.LOBBY)
+                  || profile.getStatus().equals(ProfileStatus.SPECTATE))
+              && !profile.isStaffMode()
+              && !profile.isParty()) {
+            this.addSpectator(online, player, true, true);
+          }
+        }
+      }
+    }
     return true;
   }
 

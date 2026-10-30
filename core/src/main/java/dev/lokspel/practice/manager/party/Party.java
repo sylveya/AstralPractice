@@ -122,6 +122,7 @@ public class Party implements dev.lokspel.api.interfaces.Party {
 
     members.add(member);
     memberProfile.setParty(true);
+    memberProfile.setFollowTarget(null);
     InventoryManager.getInstance().setLobbyInventory(member, false);
 
     sendMessage(
