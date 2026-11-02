@@ -1,8 +1,10 @@
 package dev.lokspel.practice.manager.nametag;
 
 import dev.lokspel.practice.AstralPractice;
+import dev.lokspel.practice.config.PracticeConfig;
 import dev.lokspel.practice.manager.profile.Profile;
 import dev.lokspel.practice.manager.profile.ProfileManager;
+import dev.lokspel.practice.util.startup.PermanentConfig;
 import lombok.Getter;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
@@ -45,7 +47,7 @@ public class TabIntegration {
     this.tabListFormatManager = tabList;
     this.available = api != null;
 
-    if (available) {
+    if (available && PermanentConfig.isNametagManagementEnabled()) {
       registerPlayerLoadHandler();
       Bukkit.getOnlinePlayers().forEach(this::syncPlayer);
     }
@@ -60,7 +62,9 @@ public class TabIntegration {
   }
 
   public void hideNametag(TabPlayer tabPlayer) {
-    if (nameTagManager == null || tabPlayer == null) {
+    if (!PermanentConfig.isNametagManagementEnabled()
+        || nameTagManager == null
+        || tabPlayer == null) {
       return;
     }
 
@@ -73,7 +77,9 @@ public class TabIntegration {
   }
 
   public boolean setTabListName(Player player, Component prefix, Component name, Component suffix) {
-    if (tabListFormatManager == null) {
+    if (!PermanentConfig.isNametagManagementEnabled()
+        || !PracticeConfig.settings().getPlayer().getLobbyNametag().isEnabled()
+        || tabListFormatManager == null) {
       return false;
     }
 
@@ -133,6 +139,11 @@ public class TabIntegration {
   }
 
   private void syncPlayer(Player player) {
+    if (!PermanentConfig.isNametagManagementEnabled()
+        || !PracticeConfig.settings().getPlayer().getLobbyNametag().isEnabled()) {
+      return;
+    }
+
     Profile profile = ProfileManager.getInstance().getProfile(player);
     if (profile != null) {
       // This reuses the normal lobby formatting path so TAB and vanilla fallback stay consistent.

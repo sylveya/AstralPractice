@@ -1,5 +1,6 @@
 package dev.lokspel.practice.manager.nametag;
 
+import dev.lokspel.practice.util.startup.PermanentConfig;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 
@@ -19,6 +20,11 @@ public class TeamPacketBlocker {
   }
 
   public void register() {
+    if (!PermanentConfig.isNametagManagementEnabled()) {
+      unregister();
+      return;
+    }
+
     if (Bukkit.getPluginManager().isPluginEnabled("TAB")) {
       try {
         tabIntegration = new TabIntegration();

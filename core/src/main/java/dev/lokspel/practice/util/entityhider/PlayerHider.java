@@ -239,9 +239,10 @@ public class PlayerHider implements Listener {
       String prefix = PracticeConfig.settings().getMatchSettings().getSpectatorTabPrefix();
 
       if (!prefix.isEmpty()) {
+        Component base = tabName != null ? tabName : Component.text(player.getName());
         tabName =
             NameFormatUtil.parseConfiguredComponent(prefix.replace("%player%", player.getName()))
-                .append(tabName);
+                .append(base);
       }
 
       for (Player matchPlayer : match.getPlayers()) {

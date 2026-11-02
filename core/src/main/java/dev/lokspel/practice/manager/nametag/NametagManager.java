@@ -61,12 +61,12 @@ public class NametagManager {
   private BukkitTask belowNameRefreshTask;
 
   public void initialize() {
-    TeamPacketBlocker.getInstance().register();
-
-    if (!PermanentConfig.NAMETAG_MANAGEMENT_ENABLED) {
+    if (!PermanentConfig.isNametagManagementEnabled()) {
       startBelowNameRefreshTask();
       return;
     }
+
+    TeamPacketBlocker.getInstance().register();
 
     for (Player online : Bukkit.getOnlinePlayers()) {
       hideVanillaNametag(online);
@@ -96,7 +96,7 @@ public class NametagManager {
   public void shutdown() {
     TeamPacketBlocker.getInstance().unregister();
 
-    if (!PermanentConfig.NAMETAG_MANAGEMENT_ENABLED) {
+    if (!PermanentConfig.isNametagManagementEnabled()) {
       stopBelowNameRefreshTask();
       for (UUID uuid : belowNameUsers) {
         Player player = Bukkit.getPlayer(uuid);
@@ -154,24 +154,22 @@ public class NametagManager {
     belowNameLines.remove(uuid);
     belowNameUsers.remove(uuid);
 
-    if (PermanentConfig.NAMETAG_MANAGEMENT_ENABLED) {
+    if (PermanentConfig.isNametagManagementEnabled()) {
       updateNametag(online);
-    } else {
-      preserveTabListName(online);
     }
   }
 
   public void setNametag(
       Player player, Component prefix, NamedTextColor namedTextColor, Component suffix) {
     customNametags.put(player.getUniqueId(), new NametagOverride(prefix, namedTextColor, suffix));
-    if (PermanentConfig.NAMETAG_MANAGEMENT_ENABLED) {
+    if (PermanentConfig.isNametagManagementEnabled()) {
       updateNametag(player);
+      preserveTabListName(player);
     }
-    preserveTabListName(player);
   }
 
   public void updateNametag(Player player) {
-    if (!PermanentConfig.NAMETAG_MANAGEMENT_ENABLED || player == null || !player.isOnline()) {
+    if (!PermanentConfig.isNametagManagementEnabled() || player == null || !player.isOnline()) {
       return;
     }
 
@@ -190,7 +188,7 @@ public class NametagManager {
   }
 
   public void sendTeams(Player player) {
-    if (!PermanentConfig.NAMETAG_MANAGEMENT_ENABLED || player == null || !player.isOnline()) {
+    if (!PermanentConfig.isNametagManagementEnabled() || player == null || !player.isOnline()) {
       return;
     }
 
@@ -198,7 +196,7 @@ public class NametagManager {
   }
 
   public void onPlayerJoin(Player player) {
-    if (!PermanentConfig.NAMETAG_MANAGEMENT_ENABLED || player == null) {
+    if (!PermanentConfig.isNametagManagementEnabled() || player == null) {
       return;
     }
 
@@ -214,7 +212,7 @@ public class NametagManager {
       return;
     }
 
-    if (!PermanentConfig.NAMETAG_MANAGEMENT_ENABLED) {
+    if (!PermanentConfig.isNametagManagementEnabled()) {
       customNametags.remove(player.getUniqueId());
       cleanUpForUser(player);
       return;
@@ -253,7 +251,7 @@ public class NametagManager {
   }
 
   public void onPlayerMove(Player player) {
-    if (!PermanentConfig.NAMETAG_MANAGEMENT_ENABLED || player == null || !player.isOnline()) {
+    if (!PermanentConfig.isNametagManagementEnabled() || player == null || !player.isOnline()) {
       return;
     }
 
@@ -264,7 +262,7 @@ public class NametagManager {
   }
 
   public void onVisibilityStateChange(Player player) {
-    if (!PermanentConfig.NAMETAG_MANAGEMENT_ENABLED || player == null || !player.isOnline()) {
+    if (!PermanentConfig.isNametagManagementEnabled() || player == null || !player.isOnline()) {
       return;
     }
 
@@ -276,7 +274,7 @@ public class NametagManager {
   }
 
   public void refreshAllNametags() {
-    if (!PermanentConfig.NAMETAG_MANAGEMENT_ENABLED) {
+    if (!PermanentConfig.isNametagManagementEnabled()) {
       return;
     }
 
@@ -393,7 +391,7 @@ public class NametagManager {
   }
 
   public void setBelowNameLine(Player player, Component line) {
-    if (!PermanentConfig.NAMETAG_MANAGEMENT_ENABLED || player == null || !player.isOnline()) {
+    if (!PermanentConfig.isNametagManagementEnabled() || player == null || !player.isOnline()) {
       return;
     }
 
@@ -479,7 +477,7 @@ public class NametagManager {
 
     belowNameUsers.add(player.getUniqueId());
 
-    if (PermanentConfig.NAMETAG_MANAGEMENT_ENABLED) {
+    if (PermanentConfig.isNametagManagementEnabled()) {
       if (player.isOnline()) {
         setBelowNameLine(player, formatHealth(player, PlayerUtil.getPlayerHealth(player)));
       }
@@ -520,7 +518,7 @@ public class NametagManager {
 
     belowNameUsers.remove(player.getUniqueId());
 
-    if (PermanentConfig.NAMETAG_MANAGEMENT_ENABLED) {
+    if (PermanentConfig.isNametagManagementEnabled()) {
       clearBelowNameLine(player);
       return;
     }
@@ -529,7 +527,7 @@ public class NametagManager {
   }
 
   private void updateBelowNameHealthLines() {
-    if (!PermanentConfig.NAMETAG_MANAGEMENT_ENABLED) {
+    if (!PermanentConfig.isNametagManagementEnabled()) {
       for (UUID uuid : belowNameUsers) {
         Player target = Bukkit.getPlayer(uuid);
         if (target == null || !target.isOnline()) {
@@ -687,6 +685,11 @@ public class NametagManager {
   }
 
   public void preserveTabListName(Player player) {
+    if (!PermanentConfig.isNametagManagementEnabled()
+        || !PracticeConfig.settings().getPlayer().getLobbyNametag().isEnabled()) {
+      return;
+    }
+
     try {
       Profile profile = ProfileManager.getInstance().getProfile(player);
       if (profile == null) {
@@ -717,6 +720,11 @@ public class NametagManager {
   }
 
   public Component getTabListName(Player player) {
+    if (!PermanentConfig.isNametagManagementEnabled()
+        || !PracticeConfig.settings().getPlayer().getLobbyNametag().isEnabled()) {
+      return null;
+    }
+
     Profile profile = ProfileManager.getInstance().getProfile(player);
     if (profile == null) {
       return Component.text(player.getName(), NamedTextColor.GRAY);
@@ -779,7 +787,7 @@ public class NametagManager {
   }
 
   private void hideVanillaNametag(Player player) {
-    if (!PermanentConfig.NAMETAG_MANAGEMENT_ENABLED) {
+    if (!PermanentConfig.isNametagManagementEnabled()) {
       return;
     }
 

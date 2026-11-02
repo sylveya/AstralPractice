@@ -16,10 +16,8 @@ public final class LobbyNametagUtil {
   private LobbyNametagUtil() {}
 
   public static void setLobbyNametag(Player player, Profile profile) {
-    if (!PracticeConfig.settings().getPlayer().getLobbyNametag().isEnabled()) {
-      if (PermanentConfig.NAMETAG_MANAGEMENT_ENABLED) {
-        NametagManager.getInstance().reset(player.getName());
-      }
+    if (!PermanentConfig.isNametagManagementEnabled()
+        || !PracticeConfig.settings().getPlayer().getLobbyNametag().isEnabled()) {
       return;
     }
 
@@ -37,7 +35,7 @@ public final class LobbyNametagUtil {
     }
 
     // Above-head nametag
-    if (PermanentConfig.NAMETAG_MANAGEMENT_ENABLED) {
+    if (PermanentConfig.isNametagManagementEnabled()) {
       NametagManager.getInstance()
           .setNametag(player, prefix, nametag.scoreboardNameColor(), suffix);
     }

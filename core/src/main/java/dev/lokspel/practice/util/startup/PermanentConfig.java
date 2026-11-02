@@ -18,8 +18,13 @@ public final class PermanentConfig {
   public static int EVENT_ROLLBACK_MAX_CHECKS = 100;
   public static final boolean JOIN_TELEPORT_LOBBY =
       PracticeConfig.settings().getPlayer().isJoinTeleportLobby();
-  public static final boolean NAMETAG_MANAGEMENT_ENABLED =
-      PracticeConfig.settings().getPlayer().getNametagManagement().isEnabled();
+
+  public static boolean isNametagManagementEnabled() {
+    return PracticeConfig.settings() != null
+        && PracticeConfig.settings().getPlayer() != null
+        && PracticeConfig.settings().getPlayer().getNametagManagement() != null
+        && PracticeConfig.settings().getPlayer().getNametagManagement().isEnabled();
+  }
 
   public static final boolean DISPLAY_ARROW_HIT =
       PracticeConfig.settings().getMatchSettings().isDisplayArrowHitHealth();
