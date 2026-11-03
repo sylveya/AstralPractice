@@ -285,6 +285,9 @@ public class SetupLadderSettingsIcons {
   @JsonProperty("PULL-PLAYERS-WITH-ROD")
   private PullPlayersWithRod pullPlayersWithRod = new PullPlayersWithRod();
 
+  @JsonProperty("ITEM-PICKUP")
+  private ItemPickup itemPickup = new ItemPickup();
+
   @Getter
   public static class Regeneration {
     @JsonProperty("ENABLED")
@@ -657,5 +660,28 @@ public class SetupLadderSettingsIcons {
                 "<gray>Players cannot be pulled with a fishing rod.",
                 "",
                 "<green><bold>LEFT-CLICK <green>to toggle.");
+  }
+
+  @Getter
+  public static class ItemPickup {
+    @JsonProperty("ENABLED")
+    private ItemConfig enabled =
+        ItemConfig.of("HOPPER")
+            .name("<gray>Item Pickup: <green>Enabled")
+            .lore(
+                "",
+                "<gray>Players can pick up any items during the match.",
+                "",
+                "<yellow><bold>Click here <gray>to <red>disable<gray>.");
+
+    @JsonProperty("DISABLED")
+    private ItemConfig disabled =
+        ItemConfig.of("HOPPER")
+            .name("<gray>Item Pickup: <red>Disabled")
+            .lore(
+                "",
+                "<gray>Players can only pick up player-dropped items.",
+                "",
+                "<yellow><bold>Click here <gray>to <green>enable<gray>.");
   }
 }

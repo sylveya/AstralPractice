@@ -66,6 +66,7 @@ public class LadderFile {
     settings.setTntFuseTime(ladder.getTntFuseTime());
     settings.setTntAutoIgnite(ladder.isTntAutoIgnite());
     settings.setPullPlayersWithRod(ladder.isPullPlayersWithRod());
+    settings.setItemPickup(ladder.isItemPickup());
     settings.setHealthBelowName(ladder.isHealthBelowName());
     settings.setResetBuildAfterRound(ladder.isResetBuildAfterRound());
     settings.setBreakAllBlocks(ladder.isBreakAllBlocks());
@@ -247,6 +248,7 @@ public class LadderFile {
 
     ladder.setTntAutoIgnite(Boolean.TRUE.equals(settings.getTntAutoIgnite()));
     ladder.setPullPlayersWithRod(!Boolean.FALSE.equals(settings.getPullPlayersWithRod()));
+    ladder.setItemPickup(!Boolean.FALSE.equals(settings.getItemPickup()));
 
     if (ladder instanceof RespawnableLadder respawnableLadder) {
       if (settings.getRespawnTime() instanceof Integer respawnTime) {

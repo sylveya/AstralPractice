@@ -514,6 +514,12 @@ public class FfaListener implements Listener {
       return;
     }
 
+    NormalLadder ladder = ffa.getPlayers().get(player);
+    if (ladder != null && !ladder.isItemPickup() && e.getItem().getThrower() == null) {
+      e.setCancelled(true);
+      return;
+    }
+
     e.setCancelled(false);
   }
 

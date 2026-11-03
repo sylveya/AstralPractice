@@ -115,7 +115,8 @@ public class LadderTypeConfig {
         SettingType.ROUND_END_DELAY,
         SettingType.ROUND_STATUS_TITLES,
         SettingType.COUNTDOWN_TITLES,
-        SettingType.PULL_PLAYERS_WITH_ROD);
+        SettingType.PULL_PLAYERS_WITH_ROD,
+        SettingType.ITEM_PICKUP);
   }
 
   /** Adds pearl-related settings (ender pearl and golden apple cooldowns). */

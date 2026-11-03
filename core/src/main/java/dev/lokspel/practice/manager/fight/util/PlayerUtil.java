@@ -13,6 +13,7 @@ import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Fireball;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.EquipmentSlotGroup;
@@ -93,7 +94,9 @@ public class PlayerUtil {
     if (item == null || item.getType().isAir()) {
       return;
     }
-    entities.add(player.getWorld().dropItemNaturally(player.getLocation(), item.clone()));
+    Item drop = player.getWorld().dropItemNaturally(player.getLocation(), item.clone());
+    drop.setThrower(player.getUniqueId());
+    entities.add(drop);
   }
 
   public static void clearInventory(Player player) {

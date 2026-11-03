@@ -633,6 +633,13 @@ public class LadderTypeListener implements Listener {
       return;
     }
 
+    if (match.getLadder() != null
+        && !match.getLadder().isItemPickup()
+        && e.getItem().getThrower() == null) {
+      e.setCancelled(true);
+      return;
+    }
+
     delegateToLadderHandle(e, match);
   }
 

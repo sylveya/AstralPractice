@@ -21,6 +21,7 @@ import dev.lokspel.practice.manager.gui.setup.ladder.laddersettings.settings.ite
 import dev.lokspel.practice.manager.gui.setup.ladder.laddersettings.settings.items.HeartsItem;
 import dev.lokspel.practice.manager.gui.setup.ladder.laddersettings.settings.items.HitdelayItem;
 import dev.lokspel.practice.manager.gui.setup.ladder.laddersettings.settings.items.HungerItem;
+import dev.lokspel.practice.manager.gui.setup.ladder.laddersettings.settings.items.ItemPickupItem;
 import dev.lokspel.practice.manager.gui.setup.ladder.laddersettings.settings.items.KnockbackItem;
 import dev.lokspel.practice.manager.gui.setup.ladder.laddersettings.settings.items.MaxDurationItem;
 import dev.lokspel.practice.manager.gui.setup.ladder.laddersettings.settings.items.MultiRoundStartCountdownItem;
@@ -366,6 +367,10 @@ public class SettingsGui extends Gui {
 
     if (settingTypes.contains(SettingType.PULL_PLAYERS_WITH_ROD)) {
       settingItems.add(new PullPlayersWithRodItem(this, ladder));
+    }
+
+    if (settingTypes.contains(SettingType.ITEM_PICKUP)) {
+      settingItems.add(new ItemPickupItem(this, ladder));
     }
   }
 }

@@ -110,7 +110,8 @@ public enum LadderType {
               SettingType.SPLEEF_SNOWBALL_MODE,
               SettingType.ROUND_END_DELAY,
               SettingType.COUNTDOWN_TITLES,
-              SettingType.ROUND_STATUS_TITLES)),
+              SettingType.ROUND_STATUS_TITLES,
+              SettingType.ITEM_PICKUP)),
 
   SKYWARS(
       LadderTypeConfig.builder(LadderTypes::getSkywars, Material.ENDER_EYE, SkyWars.class)

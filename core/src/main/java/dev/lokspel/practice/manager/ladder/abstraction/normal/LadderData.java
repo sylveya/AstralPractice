@@ -175,6 +175,9 @@ public class LadderData {
     @JsonProperty("pullplayerswithrod")
     private Boolean pullPlayersWithRod;
 
+    @JsonProperty("item-pickup")
+    private Boolean itemPickup;
+
     @JsonProperty("healthbelowname")
     private Boolean healthBelowName;
 
