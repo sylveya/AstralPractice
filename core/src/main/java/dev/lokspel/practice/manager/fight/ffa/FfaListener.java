@@ -256,13 +256,19 @@ public class FfaListener implements Listener {
 
   @EventHandler
   public void onPlayerTeleport(PlayerTeleportEvent e) {
-    Ffa ffa = FfaManager.getInstance().getFfaByPlayer(e.getPlayer());
+    Player player = e.getPlayer();
+    Ffa ffa = FfaManager.getInstance().getFfaByPlayer(player);
     if (ffa == null) {
       return;
     }
 
     if (!ffa.getArena().getCuboid().contains(e.getTo())) {
-      e.setCancelled(true);
+      // Leave the FFA instead of cancelling the teleport.
+      if (ffa.isFfaLeaveBlocked() && ffa.isFfaInCombat(player)) {
+        e.setCancelled(true);
+        return;
+      }
+      ffa.removePlayer(player);
     }
   }
 
