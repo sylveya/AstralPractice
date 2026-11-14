@@ -3,6 +3,7 @@ package dev.lokspel.practice.manager.arena;
 import dev.lokspel.practice.AstralPractice;
 import dev.lokspel.practice.data.DataFiles;
 import dev.lokspel.practice.manager.arena.arenas.interfaces.DisplayArena;
+import dev.lokspel.practice.util.Common;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import lombok.Getter;
@@ -15,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 @Getter
 public class ArenaFile {
 
+  private final DisplayArena arena;
   private final String path;
   private final ArenaData data;
 
@@ -29,6 +31,7 @@ public class ArenaFile {
    * @param data the file's content if it was already read, otherwise {@code null}
    */
   public ArenaFile(DisplayArena arena, @Nullable ArenaData data) {
+    this.arena = arena;
     this.path = path(arena.getName());
     this.data = data != null ? data : DataFiles.readOrCreate(path, ArenaData.class, ArenaData::new);
   }
@@ -39,6 +42,13 @@ public class ArenaFile {
   }
 
   public void save() {
+    // Never rewrite an arena file whose world is not loaded: the in-memory model may reference
+    // unloaded worlds, and writing it would destroy the (still valid) data on disk.
+    if (arena != null && !arena.isWorldLoaded()) {
+      Common.sendConsoleMmMessage(
+          "<yellow>Skipping save of arena file '" + path + "': its world is not loaded.");
+      return;
+    }
     DataFiles.write(path, data);
   }
 

@@ -13,6 +13,7 @@ import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 @Getter
@@ -133,5 +134,47 @@ public abstract class BasicArena {
                 ArenaUtil.loadArenaChunks(this);
               });
     }
+  }
+
+  /**
+   * Whether every world this arena references is currently loaded. An arena with no world
+   * references counts as loaded.
+   */
+  public boolean isWorldLoaded() {
+    if (!isWorldLoaded(corner1)) {
+      return false;
+    }
+    if (!isWorldLoaded(corner2)) {
+      return false;
+    }
+    if (!isWorldLoaded(position1)) {
+      return false;
+    }
+    if (!isWorldLoaded(position2)) {
+      return false;
+    }
+    for (Location location : ffaPositions) {
+      if (!isWorldLoaded(location)) {
+        return false;
+      }
+    }
+    if (cuboid != null) {
+      World world = Bukkit.getWorld(cuboid.getWorldName());
+      if (world == null) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  protected static boolean isWorldLoaded(Location location) {
+    if (location == null) {
+      return true;
+    }
+    World world = location.getWorld();
+    if (world == null) {
+      return false;
+    }
+    return Bukkit.getWorld(world.getName()) != null;
   }
 }

@@ -129,6 +129,21 @@ public abstract class DisplayArena extends NormalArena {
     }
   }
 
+  @Override
+  public boolean isWorldLoaded() {
+    if (!super.isWorldLoaded()) {
+      return false;
+    }
+    if (this instanceof Arena arena) {
+      for (ArenaCopy copy : arena.getCopies()) {
+        if (!copy.isWorldLoaded()) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
   public abstract void setData();
 
   public abstract void getData();

@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
 @Getter
@@ -150,6 +151,32 @@ public abstract class NormalArena extends BasicArena implements DisplayName {
     if (data.getSpectatorPosition() != null) {
       spectatorPosition = data.getSpectatorPosition();
     }
+  }
+
+  @Override
+  public boolean isWorldLoaded() {
+    if (!super.isWorldLoaded()) {
+      return false;
+    }
+    if (!isWorldLoaded(bedLoc1)) {
+      return false;
+    }
+    if (!isWorldLoaded(bedLoc2)) {
+      return false;
+    }
+    if (portalLoc1 != null && !isWorldLoaded(portalLoc1.getCenter())) {
+      return false;
+    }
+    if (portalLoc2 != null && !isWorldLoaded(portalLoc2.getCenter())) {
+      return false;
+    }
+    if (!isWorldLoaded(partyFfaCenter)) {
+      return false;
+    }
+    if (!isWorldLoaded(spectatorPosition)) {
+      return false;
+    }
+    return true;
   }
 
   public List<PortalLocation> getPortalLocations() {
